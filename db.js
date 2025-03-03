@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const oracledb = require('oracledb');
 oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT;
 
@@ -56,6 +57,7 @@ async function populateSchema() {
                 full_name VARCHAR2(100) NOT NULL,
                 email VARCHAR2(255) UNIQUE NOT NULL,
                 password_hash VARCHAR2(255) NOT NULL,
+                test VARCHAR2(255) NOT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 last_login TIMESTAMP
             )`,
