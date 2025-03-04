@@ -42,8 +42,6 @@ app.get('/users', async (req, res) => {
             email: row.EMAIL
         }));
 
-        console.log("📢 Fixed Users:", users); // Debugging log
-
         res.json(users);
     } catch (err) {
         console.error("Error fetching users:", err);
@@ -75,7 +73,104 @@ app.post('/users', async (req, res) => {
     }
 });
 
-// 3Get a Single User by ID
+app.post('/tasks', async (req, res) => {
+    let con;
+    try {
+        const { title, description, status, priority, due_date, user_id } = req.body;
+
+        // Validate required fields
+        if (!title || !status || !priority || !user_id) {
+            return res.status(400).json({ error: "Title, status, priority, and user_id are required" });
+        }
+
+        con = await oracledb.getConnection();
+
+        // Insert task and get generated ID
+        const taskResult = await con.execute(
+            `INSERT INTO TASK (task_id, title, description, status, priority, due_date, created_at) 
+             VALUES (TASK_SEQ.NEXTVAL, :title, :description, :status, :priority, TO_DATE(:due_date, 'YYYY-MM-DD'), CURRENT_TIMESTAMP) 
+             RETURNING task_id INTO :task_id`,
+            { title, description, status, priority, due_date, task_id: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER } }
+        );        
+
+        const taskId = taskResult.outBinds.task_id[0]; // Get the generated task_id
+
+        // Insert into TASKASSIGNEE
+        await con.execute(
+            `INSERT INTO TASKASSIGNEE (taskassignee_id, task_id, user_id) 
+             VALUES (TASKASSIGNEE_SEQ.NEXTVAL, :task_id, :user_id)`,
+            { task_id: taskId, user_id }
+        );
+
+        await con.commit();
+        res.status(201).json({ message: "Task Created & Assigned!", task_id: taskId });
+
+    } catch (err) {
+        console.error("Error creating task:", err);
+        res.status(500).json({ error: "Internal Server Error", details: err.message });
+    } finally {
+        if (con) await con.close();
+    }
+});
+
+app.put('/tasks/:task_id', async (req, res) => {
+    let con;
+    try {
+        const taskId = req.params.task_id;
+        const { title, description, status, priority, due_date } = req.body;
+
+        // Validate required fields
+        if (!title || !status || !priority) {
+            return res.status(400).json({ error: "Title, status, and priority are required" });
+        }
+
+        con = await oracledb.getConnection();
+
+        await con.execute(
+            `UPDATE TASK 
+             SET title = :title, 
+                 description = :description, 
+                 status = :status, 
+                 priority = :priority, 
+                 due_date = :due_date
+             WHERE task_id = :task_id`,
+            { title, description, status, priority, due_date, task_id: taskId }
+        );
+
+        await con.commit();
+        res.json({ message: "Task Updated!" });
+
+    } catch (err) {
+        console.error("Error updating task:", err);
+        res.status(500).json({ error: "Internal Server Error", details: err.message });
+    } finally {
+        if (con) await con.close();
+    }
+});
+
+app.delete('/tasks/:task_id', async (req, res) => {
+    let con;
+    try {
+        const taskId = req.params.task_id;
+
+        con = await oracledb.getConnection();
+
+        await con.execute(`DELETE FROM TASK WHERE task_id = :task_id`, { task_id: taskId });
+
+        await con.commit();
+        res.json({ message: "Task Deleted!" });
+
+    } catch (err) {
+        console.error("Error deleting task:", err);
+        res.status(500).json({ error: "Internal Server Error", details: err.message });
+    } finally {
+        if (con) await con.close();
+    }
+});
+
+
+
+// Get a Single User by ID
 app.get('/users/:id', async (req, res) => {
     let con;
     try {

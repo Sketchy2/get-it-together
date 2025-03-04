@@ -15,7 +15,7 @@ async function dropAllTables() {
         con = await oracledb.getConnection(dbConfig);
         console.log("Connected to the database.");
 
-        // 🔹 Drop all tables
+        // Drop all tables
         const result = await con.execute(`SELECT table_name FROM user_tables`);
         const tables = result.rows.map(row => row.TABLE_NAME);
 
@@ -31,7 +31,7 @@ async function dropAllTables() {
             console.log("All tables dropped successfully!");
         }
 
-        // 🔹 Drop sequences (fixes ORA-00955 error)
+        // Drop sequences
         const seqResult = await con.execute(`SELECT sequence_name FROM user_sequences`);
         const sequences = seqResult.rows.map(row => row.SEQUENCE_NAME);
 
@@ -65,10 +65,13 @@ async function populateSchema() {
         console.log("Connected to the database.");
 
         const queries = [
-            // 1️⃣ Create Sequence for user_id
+            // Create Sequence for user_id
             `CREATE SEQUENCE APP_USER_SEQ START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE`,
+            `CREATE SEQUENCE TASK_SEQ START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE`,
+            `CREATE SEQUENCE TASKASSIGNEE_SEQ START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE`,
 
-            // 2️⃣ Create APP_USER table
+
+            // Create APP_USER table
             `CREATE TABLE APP_USER (
                 user_id NUMBER PRIMARY KEY,
                 full_name VARCHAR2(100) NOT NULL,
@@ -78,7 +81,7 @@ async function populateSchema() {
                 last_login TIMESTAMP
             )`,
 
-            // 3️⃣ Create TASK table
+            // Create TASK table
             `CREATE TABLE TASK (
                 task_id NUMBER PRIMARY KEY,
                 title VARCHAR2(255) NOT NULL,
@@ -89,7 +92,7 @@ async function populateSchema() {
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )`,
 
-            // 4️⃣ Create TASKASSIGNEE table
+            // Create TASKASSIGNEE table
             `CREATE TABLE TASKASSIGNEE (
                 taskassignee_id NUMBER PRIMARY KEY,
                 task_id NUMBER REFERENCES TASK(task_id) ON DELETE CASCADE,
@@ -116,7 +119,7 @@ async function populateSchema() {
 }
 
 
-// 3️⃣ Fetch Tables
+// Fetch Tables
 async function fetchTables() {
     let con;
     try {
@@ -138,7 +141,7 @@ async function fetchTables() {
     }
 }
 
-// 4️⃣ Run the Workflow in Order
+// Run the Workflow in Order
 async function main() {
     console.log("Executing Commands.")
     await dropAllTables();
