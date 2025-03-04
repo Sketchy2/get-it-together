@@ -9,8 +9,10 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "cors": "^2.8.5",
     "dotenv": "^16.4.7",
-    "next": "15.2.1",
+    "express": "^4.21.2",
+    "next": "^15.2.1",
     "oracledb": "^6.8.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
