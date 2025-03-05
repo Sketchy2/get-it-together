@@ -1,12 +1,10 @@
 import { auth } from "@/auth"
-import { redirect } from "next/navigation";
 import SignOut from "@/components/SignOut"
 import Image from "next/image";
 import styles from "@/app/page.module.css"
 
 export default async function Home() {
   const session = await auth();
-  if (!session?.user) redirect("/login");
   const userName = session?.user?.name || "User";
   const userImage = session?.user?.image || "/vercel.svg"; // Provide a valid fallback image
 

@@ -9,12 +9,14 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@auth/typeorm-adapter": "^2.8.0",
     "dotenv": "^16.4.7",
     "next": "15.2.1",
     "next-auth": "^5.0.0-beta.25",
     "oracledb": "^6.8.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "typeorm": "^0.3.21"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
