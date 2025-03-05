@@ -1,8 +1,6 @@
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 const oracledb = require('oracledb');
 oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT;
 
-// Connection credentials
 const dbConfig = {
     user: "ADMIN",
     password: "GetItTogether!Database1",
@@ -13,86 +11,111 @@ async function dropAllTables() {
     let con;
     try {
         con = await oracledb.getConnection(dbConfig);
-        console.log("Connected to the database.");
+        console.log("✅ Connected to the database.");
 
-        // Drop all tables
         const result = await con.execute(`SELECT table_name FROM user_tables`);
         const tables = result.rows.map(row => row.TABLE_NAME);
 
         if (tables.length === 0) {
-            console.log("No tables found to drop.");
+            console.log("✅ No tables found to drop.");
         } else {
-            console.log("Dropping tables:", tables);
+            console.log("🗑️ Dropping tables:", tables);
             for (let table of tables.reverse()) {
                 await con.execute(`DROP TABLE ${table} CASCADE CONSTRAINTS PURGE`);
-                console.log(`Dropped table: ${table}`);
+                console.log(`✅ Dropped table: ${table}`);
             }
             await con.commit();
-            console.log("All tables dropped successfully!");
+            console.log("✅ All tables dropped successfully!");
         }
 
-        // Drop sequences
         const seqResult = await con.execute(`SELECT sequence_name FROM user_sequences`);
         const sequences = seqResult.rows.map(row => row.SEQUENCE_NAME);
 
         if (sequences.length === 0) {
-            console.log("No sequences found to drop.");
+            console.log("✅ No sequences found to drop.");
         } else {
-            console.log("Dropping sequences:", sequences);
+            console.log("🗑️ Dropping sequences:", sequences);
             for (let seq of sequences) {
                 await con.execute(`DROP SEQUENCE ${seq}`);
-                console.log(`Dropped sequence: ${seq}`);
+                console.log(`✅ Dropped sequence: ${seq}`);
             }
             await con.commit();
-            console.log("All sequences dropped successfully!");
+            console.log("✅ All sequences dropped successfully!");
         }
 
     } catch (err) {
-        console.error("Error dropping tables or sequences:", err);
+        console.error("❌ Error dropping tables or sequences:", err);
     } finally {
         if (con) {
             await con.close();
-            console.log("Connection closed.");
+            console.log("✅ Connection closed.");
         }
     }
 }
-
 
 async function populateSchema() {
     let con;
     try {
         con = await oracledb.getConnection(dbConfig);
-        console.log("Connected to the database.");
+        console.log("✅ Connected to the database.");
 
         const queries = [
-            // Create Sequence for user_id
             `CREATE SEQUENCE APP_USER_SEQ START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE`,
+            `CREATE SEQUENCE ACCOUNT_SEQ START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE`,
+            `CREATE SEQUENCE SESSION_SEQ START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE`,
+            `CREATE SEQUENCE VERIFICATIONTOKEN_SEQ START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE`,
             `CREATE SEQUENCE TASK_SEQ START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE`,
             `CREATE SEQUENCE TASKASSIGNEE_SEQ START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE`,
 
-
-            // Create APP_USER table
             `CREATE TABLE APP_USER (
                 user_id NUMBER PRIMARY KEY,
-                full_name VARCHAR2(100) NOT NULL,
-                email VARCHAR2(255) UNIQUE NOT NULL,
-                password_hash VARCHAR2(255) NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                last_login TIMESTAMP
+                name VARCHAR2(100),
+                email VARCHAR2(255) UNIQUE,
+                email_verified TIMESTAMP,
+                image VARCHAR2(500),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )`,
 
-            // Create TASK table
+            `CREATE TABLE ACCOUNT (
+                account_id NUMBER PRIMARY KEY,
+                user_id NUMBER REFERENCES APP_USER(user_id) ON DELETE CASCADE,
+                type VARCHAR2(50) NOT NULL,
+                provider VARCHAR2(255) NOT NULL,
+                provider_account_id VARCHAR2(255) NOT NULL UNIQUE,
+                refresh_token VARCHAR2(255),
+                access_token VARCHAR2(255),
+                expires_at NUMBER,
+                token_type VARCHAR2(50),
+                scope VARCHAR2(255),
+                id_token VARCHAR2(500),
+                session_state VARCHAR2(255)
+            )`,
+
+            `CREATE TABLE USER_SESSION (
+                session_id NUMBER PRIMARY KEY,
+                user_id NUMBER REFERENCES APP_USER(user_id) ON DELETE CASCADE,
+                session_token VARCHAR2(255) UNIQUE NOT NULL,
+                expires TIMESTAMP NOT NULL
+            )`,
+            
+
+            `CREATE TABLE VERIFICATIONTOKEN (
+                identifier VARCHAR2(255) NOT NULL,
+                token VARCHAR2(255) UNIQUE NOT NULL,
+                expires TIMESTAMP NOT NULL,
+                PRIMARY KEY (identifier, token)
+            )`,
+
             `CREATE TABLE TASK (
                 task_id NUMBER PRIMARY KEY,
                 title VARCHAR2(255) NOT NULL,
-                description CLOB,
+                description VARCHAR2(500),
                 status VARCHAR2(50) CHECK (status IN ('To-Do', 'In Progress', 'Completed')),
                 priority NUMBER CHECK (priority BETWEEN 1 AND 5),
                 due_date DATE,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )`,
 
-            // Create TASKASSIGNEE table
             `CREATE TABLE TASKASSIGNEE (
                 taskassignee_id NUMBER PRIMARY KEY,
                 task_id NUMBER REFERENCES TASK(task_id) ON DELETE CASCADE,
@@ -100,50 +123,47 @@ async function populateSchema() {
             )`
         ];
 
-        for (let query of queries) {
+        for (const query of queries) {
             await con.execute(query);
-            console.log(`Executed: ${query.split("(")[0]}`); // Logs each command
+            console.log(`✅ Executed: ${query.split(" ")[1]}...`);
         }
 
         await con.commit();
-        console.log("Schema populated successfully!");
+        console.log("✅ Schema populated successfully!");
 
     } catch (err) {
-        console.error("Error creating tables:", err);
+        console.error("❌ Error creating tables:", err);
     } finally {
         if (con) {
             await con.close();
-            console.log("Connection closed.");
+            console.log("✅ Connection closed.");
         }
     }
 }
 
-
-// Fetch Tables
 async function fetchTables() {
     let con;
     try {
         con = await oracledb.getConnection(dbConfig);
-        console.log("Connected to the database.");
+        console.log("✅ Connected to the database.");
 
         const result = await con.execute(`SELECT table_name FROM user_tables`);
 
-        console.log("Tables in the database:");
+        console.log("📋 Tables in the database:");
         result.rows.forEach(row => console.log(row.TABLE_NAME));
 
     } catch (err) {
-        console.error("Error fetching tables:", err);
+        console.error("❌ Error fetching tables:", err);
     } finally {
         if (con) {
             await con.close();
-            console.log("Connection closed.");
+            console.log("✅ Connection closed.");
         }
     }
 }
 
-// Run the Workflow in Order
 async function main() {
-    console.log("Executing Commands.")
+    console.log("🚀 Executing Commands...");
     await dropAllTables();
     await populateSchema();
     await fetchTables();
