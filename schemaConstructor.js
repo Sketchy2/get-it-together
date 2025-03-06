@@ -109,7 +109,7 @@ async function populateSchema() {
             `CREATE TABLE TASK (
                 task_id NUMBER PRIMARY KEY,
                 title VARCHAR2(255) NOT NULL,
-                description VARCHAR2(500),
+                description CLOB,
                 status VARCHAR2(50) CHECK (status IN ('To-Do', 'In Progress', 'Completed')),
                 priority NUMBER CHECK (priority BETWEEN 1 AND 5),
                 due_date DATE,

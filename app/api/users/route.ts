@@ -15,8 +15,12 @@ const dbConfig = {
 export async function GET() {
     let con;
     try {
+        console.log("🔍 Fetching users from DB...");
         con = await oracledb.getConnection(dbConfig);
-        const result = await con.execute(`SELECT user_id, full_name, email FROM APP_USER`);
+        console.log("✅ Connected to DB");
+
+        const result = await con.execute(`SELECT user_id, name AS full_name, email FROM APP_USER`);
+        console.log("✅ Query executed successfully:", result.rows);
 
         const users = result.rows.map((row: User) => ({
             user_id: row.USER_ID,
@@ -24,32 +28,20 @@ export async function GET() {
             email: row.EMAIL
         }));
 
+        console.log("✅ Users fetched:", users);
         return NextResponse.json(users);
-    } catch (error) {
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            console.error("❌ API Error:", error.message);
+            return NextResponse.json({ error: "Internal Server Error", details: error.message }, { status: 500 });
+        } else {
+            console.error("❌ API Error: Unknown error", error);
+            return NextResponse.json({ error: "Internal Server Error", details: "An unknown error occurred" }, { status: 500 });
+        }
     } finally {
-        if (con) await con.close();
-    }
-}
-
-// POST create a new user
-export async function POST(req: Request) {
-    let con;
-    try {
-        const { full_name, email, password_hash } = await req.json();
-        con = await oracledb.getConnection(dbConfig);
-        
-        await con.execute(
-            `INSERT INTO APP_USER (user_id, full_name, email, password_hash, created_at) 
-             VALUES (APP_USER_SEQ.NEXTVAL, :full_name, :email, :password_hash, CURRENT_TIMESTAMP)`,
-            { full_name, email, password_hash }
-        );
-
-        await con.commit();
-        return NextResponse.json({ message: "User Created!" }, { status: 201 });
-    } catch (error) {
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
-    } finally {
-        if (con) await con.close();
+        if (con) {
+            console.log("🔌 Closing database connection...");
+            await con.close();
+        }
     }
 }
