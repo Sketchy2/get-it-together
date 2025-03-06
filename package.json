@@ -2,6 +2,7 @@
   "name": "get-it-together",
   "version": "0.1.0",
   "private": true,
+    "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -21,10 +22,12 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@types/node": "^20",
+    "@types/oracledb": "^6.5.3",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.2.1",
-    "typescript": "^5"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.2"
   }
 }
