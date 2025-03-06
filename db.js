@@ -1,13 +1,17 @@
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const oracledb = require('oracledb');
+import dotenv from "dotenv";
+import oracledb from 'oracledb';  
+
+
 oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT;
+dotenv.config();
 
 // Connection credentials
 const dbConfig = {
-    user: "ADMIN",
-    password: "GetItTogether!Database1",
-    connectString: "(description=(retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.ap-melbourne-1.oraclecloud.com))(connect_data=(service_name=g70cfee5a573e65_gitdb_high.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))"
+    user: process.env.DB_USER,
+    password: process.env.DB_PASS,
+    connectString: process.env.DB_CONNECTSRTING
 };
+
 
 // 1️⃣ Drop All Tables
 async function dropAllTables() {
@@ -57,7 +61,6 @@ async function populateSchema() {
                 full_name VARCHAR2(100) NOT NULL,
                 email VARCHAR2(255) UNIQUE NOT NULL,
                 password_hash VARCHAR2(255) NOT NULL,
-                test VARCHAR2(255) NOT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 last_login TIMESTAMP
             )`,
