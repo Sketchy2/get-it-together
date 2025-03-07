@@ -11,7 +11,7 @@ export default auth(async (req) => {
   
       // Redirect to login page if not authenticated
     if (!isLoggedIn && privateRoutes.includes(req.nextUrl.pathname) ) {
-      return NextResponse.redirect(new URL('/login', req.url))
+      return NextResponse.redirect(new URL('/', req.url))
     }
    
 

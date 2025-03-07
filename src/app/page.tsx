@@ -7,8 +7,7 @@ export default function Login() {
      <p>Task Management System for Students</p> 
 
       <GoogleSignIn />
-      <p>or</p> 
-      <EmailSignIn />
+
 
 
     </div>
