@@ -1,23 +1,20 @@
 import NextAuth from "next-auth"
+import OracleAdapter  from "@/utils/OracleDBAdapter"
 import Google from "next-auth/providers/google"
-import OracleAdapter from "@/libs/adapter-oracle/OracleDBAdapter"
-import OracleDB from "oracledb";
+import oracledb from 'oracledb';  
 
-const connectionDetails = {
-  user: process.env.DB_USER,
-  password: process.env.DB_PASS,
-  connectString: process.env.DB_CONNECTSTRING, // Fixed typo here: DB_CONNECTSRTING -> DB_CONNECTSTRING
-};
+oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT;
 
-async function connect(): Promise<OracleDB.Connection> {
-  return await OracleDB.getConnection(connectionDetails);
-}
-
-
+const client = oracledb.getConnection({
+      user: process.env.DB_USER,
+      password: process.env.DB_PASS,
+      connectString: process.env.DB_CONNECTSRTING
+  });
+ 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [Google],
   pages: {
     signIn: "/login",
   },
-  adapter: OracleAdapter(await connect())
+  adapter: OracleAdapter(await client),
 })

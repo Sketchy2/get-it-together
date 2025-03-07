@@ -6,17 +6,7 @@ import type {
   AdapterAccount,
 } from "@auth/core/adapters";
 
-import OracleDB from "oracledb";
-
-export function mapExpiresAt(account: any): any {
-  const expires_at: number = parseInt(account.expires_at);
-  return {
-    ...account,
-    expires_at,
-  };
-}
-
-
+import OracleDB, { BindParameters } from "oracledb";
 
 // Code is adapted from pg's implementation of adapter: https://github.com/nextauthjs/next-auth/blob/main/packages/adapter-pg/src/index.ts
 export default function OracleAdapter(client: OracleDB.Connection): Adapter {
@@ -25,7 +15,7 @@ export default function OracleAdapter(client: OracleDB.Connection): Adapter {
     async createUser(user: AdapterUser): Promise<AdapterUser> {
       const { name, email, emailVerified, image } = user;
       const sql = `
-        INSERT INTO users (name, email, "emailVerified", image)
+        INSERT INTO APP_USER (name, email, "emailVerified", image)
         VALUES (:name, :email, :emailVerified, :image)
         RETURNING id, name, email, "emailVerified", image`;
 
@@ -52,7 +42,7 @@ export default function OracleAdapter(client: OracleDB.Connection): Adapter {
       }
     },
     async getUser(id: string): Promise<null | AdapterUser> {
-      const sql = `SELECT * FROM users WHERE id = :id`;
+      const sql = `SELECT * FROM APP_USER WHERE id = :id`;
       const result = await client.execute(sql, { id });
       return result.rows && result.rows.length > 0
         ? (result.rows[0] as AdapterUser)
@@ -63,7 +53,7 @@ export default function OracleAdapter(client: OracleDB.Connection): Adapter {
       provider,
     }): Promise<AdapterUser | null> {
       const sql = `
-          SELECT u.* FROM users u
+          SELECT u.* FROM APP_USER u
           JOIN accounts a ON u.id = a."userId"
           WHERE a.provider = :provider AND a."providerAccountId" = :providerAccountId`;
       const result = await client.execute(sql, {
@@ -75,30 +65,51 @@ export default function OracleAdapter(client: OracleDB.Connection): Adapter {
         : null;
     },
     async linkAccount(account: AdapterAccount) {
+      // Destructuring the account object to extract properties
+      const {
+        userId,
+        provider,
+        type,
+        providerAccountId,
+        access_token,
+        expires_at,
+        refresh_token,
+        id_token,
+        scope,
+        session_state,
+        token_type,
+      } = account;
+
+      // SQL query with named bind parameters (e.g., :userId)
       const sql = `
-          INSERT INTO accounts
-          ("userId", provider, type, "providerAccountId", access_token, expires_at, refresh_token, id_token, scope, session_state, token_type)
+          INSERT INTO accounts ("userId", provider, type, "providerAccountId", access_token, expires_at, refresh_token, id_token, scope, session_state, token_type)
           VALUES (:userId, :provider, :type, :providerAccountId, :access_token, :expires_at, :refresh_token, :id_token, :scope, :session_state, :token_type)
-          RETURNING id, "userId", provider, type, "providerAccountId", access_token, expires_at, refresh_token, id_token, scope, session_state, token_type`;
+          RETURNING id, "userId", provider, type, "providerAccountId", access_token, expires_at, refresh_token, id_token, scope, session_state, token_type
+      `;
 
+      // Parameters for the query, matching the named bind parameters in the SQL query
       const params = {
-        userId: account.userId,
-        provider: account.provider,
-        type: account.type,
-        providerAccountId: account.providerAccountId,
-        access_token: account.access_token,
-        expires_at: account.expires_at,
-        refresh_token: account.refresh_token,
-        id_token: account.id_token,
-        scope: account.scope,
-        session_state: account.session_state,
-        token_type: account.token_type,
-      };
+        userId,
+        provider,
+        type,
+        providerAccountId,
+        access_token,
+        expires_at,
+        refresh_token,
+        id_token,
+        scope,
+        session_state,
+        token_type,
+      } as BindParameters;
 
-      const result = await client.execute(sql, params);
-      if (result && result.rows) return mapExpiresAt(result.rows[0]);
-    },
-    // DB Session management
+      try {
+        const result = await client.execute(sql, params, { autoCommit: true });
+
+        if (result && result.rows) return result.rows[0];
+      } catch (error) {
+        console.error("Error executing query:", error);
+      }
+    }, // DB Session management
     async createSession({
       sessionToken,
       userId,
@@ -141,7 +152,7 @@ export default function OracleAdapter(client: OracleDB.Connection): Adapter {
         const session = result1.rows[0] as AdapterSession;
 
         const result2 = await client.execute(
-          `SELECT * FROM users WHERE id = :userId`,
+          `SELECT * FROM APP_USER WHERE id = :userId`,
           { userId: session.userId }
         );
         if (!result2.rows || result2.rows.length === 0) {
@@ -225,7 +236,7 @@ export default function OracleAdapter(client: OracleDB.Connection): Adapter {
         : null;
     },
     async getUserByEmail(email: string): Promise<AdapterUser | null> {
-      const sql = `SELECT * FROM users WHERE email = :email`;
+      const sql = `SELECT * FROM APP_USER WHERE email = :email`;
       const result = await client.execute(sql, { email });
       return result.rows && result.rows.length > 0
         ? (result.rows[0] as AdapterUser)
@@ -239,7 +250,7 @@ export default function OracleAdapter(client: OracleDB.Connection): Adapter {
     },
 
     async deleteUser(userId: string) {
-      await client.execute(`DELETE FROM users WHERE id = :userId`, { userId });
+      await client.execute(`DELETE FROM APP_USER WHERE id = :userId`, { userId });
       await client.execute(`DELETE FROM sessions WHERE "userId" = :userId`, {
         userId,
       });
