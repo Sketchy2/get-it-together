@@ -15,9 +15,9 @@ export default function OracleAdapter(client: OracleDB.Connection): Adapter {
     async createUser(user: AdapterUser): Promise<AdapterUser> {
       const { name, email, emailVerified, image } = user;
       const sql = `
-        INSERT INTO APP_USER (name, email, "emailVerified", image)
-        VALUES (:name, :email, :emailVerified, :image)
-        RETURNING id, name, email, "emailVerified", image`;
+        INSERT INTO APP_USER (name, email, "EMAIL_VERIFIED", image)
+        VALUES (:name, :email, :EMAIL_VERIFIED, :image)
+        RETURNING USER_ID, name, email, "EMAIL_VERIFIED", image`;
 
       const bindVars = {
         name,
@@ -42,7 +42,7 @@ export default function OracleAdapter(client: OracleDB.Connection): Adapter {
       }
     },
     async getUser(id: string): Promise<null | AdapterUser> {
-      const sql = `SELECT * FROM APP_USER WHERE id = :id`;
+      const sql = `SELECT * FROM APP_USER WHERE USER_ID = :id`;
       const result = await client.execute(sql, { id });
       return result.rows && result.rows.length > 0
         ? (result.rows[0] as AdapterUser)
@@ -54,8 +54,8 @@ export default function OracleAdapter(client: OracleDB.Connection): Adapter {
     }): Promise<AdapterUser | null> {
       const sql = `
           SELECT u.* FROM APP_USER u
-          JOIN accounts a ON u.id = a."userId"
-          WHERE a.provider = :provider AND a."providerAccountId" = :providerAccountId`;
+          JOIN accounts a ON u.USER_ID = a."userId"
+          WHERE a.provider = :provider AND a."PROVIDER_ACCOUNT_ID" = :providerAccountId`;
       const result = await client.execute(sql, {
         provider,
         providerAccountId,
@@ -82,9 +82,9 @@ export default function OracleAdapter(client: OracleDB.Connection): Adapter {
 
       // SQL query with named bind parameters (e.g., :userId)
       const sql = `
-          INSERT INTO accounts ("userId", provider, type, "providerAccountId", access_token, expires_at, refresh_token, id_token, scope, session_state, token_type)
+          INSERT INTO ACCOUNT ("USER_ID", provider, type, "PROVIDER_ACCOUNT_ID", access_token, expires_at, refresh_token, id_token, scope, session_state, token_type)
           VALUES (:userId, :provider, :type, :providerAccountId, :access_token, :expires_at, :refresh_token, :id_token, :scope, :session_state, :token_type)
-          RETURNING id, "userId", provider, type, "providerAccountId", access_token, expires_at, refresh_token, id_token, scope, session_state, token_type
+          RETURNING USER_ID, "USER_ID", provider, type, "PROVIDER_ACCOUNT_ID", access_token, expires_at, refresh_token, id_token, scope, session_state, token_type
       `;
 
       // Parameters for the query, matching the named bind parameters in the SQL query
@@ -103,9 +103,9 @@ export default function OracleAdapter(client: OracleDB.Connection): Adapter {
       } as BindParameters;
 
       try {
-        const result = await client.execute(sql, params, { autoCommit: true });
+        await client.execute(sql, params, { autoCommit: true });
 
-        if (result && result.rows) return result.rows[0];
+        // if (result && result.rows) return result.rows[0];
       } catch (error) {
         console.error("Error executing query:", error);
       }
@@ -119,9 +119,9 @@ export default function OracleAdapter(client: OracleDB.Connection): Adapter {
         throw Error("userId is undefined in createSession");
       }
       const sql = `
-          INSERT INTO sessions ("userId", expires, "sessionToken")
+          INSERT INTO USER_SESSION ("USER_ID", expires, "SESSION_TOKEN")
           VALUES (:userId, :expires, :sessionToken)
-          RETURNING id, "sessionToken", "userId", expires`;
+          RETURNING USER_ID, "SESSION_TOKEN", "USER_ID", expires`;
       const result = await client.execute(sql, {
         userId,
         expires,
@@ -143,7 +143,7 @@ export default function OracleAdapter(client: OracleDB.Connection): Adapter {
       }
 
       const result1 = await client.execute(
-        `SELECT * FROM sessions WHERE "sessionToken" = :sessionToken`,
+        `SELECT * FROM USER_SESSION WHERE "SESSION_TOKEN" = :sessionToken`,
         { sessionToken }
       );
       if (!result1.rows || result1.rows.length === 0) {
@@ -152,7 +152,7 @@ export default function OracleAdapter(client: OracleDB.Connection): Adapter {
         const session = result1.rows[0] as AdapterSession;
 
         const result2 = await client.execute(
-          `SELECT * FROM APP_USER WHERE id = :userId`,
+          `SELECT * FROM APP_USER WHERE USER_ID = :userId`,
           { userId: session.userId }
         );
         if (!result2.rows || result2.rows.length === 0) {
@@ -169,7 +169,7 @@ export default function OracleAdapter(client: OracleDB.Connection): Adapter {
     ): Promise<AdapterSession | null | undefined> {
       const { sessionToken } = session;
       const result1 = await client.execute(
-        `SELECT * FROM sessions WHERE "sessionToken" = :sessionToken`,
+        `SELECT * FROM USER_SESSION WHERE "SESSION_TOKEN" = :sessionToken`,
         { sessionToken }
       );
       if (!result1.rows || result1.rows.length === 0) {
@@ -182,7 +182,7 @@ export default function OracleAdapter(client: OracleDB.Connection): Adapter {
         ...session,
       };
       const sql = `
-          UPDATE sessions SET expires = :expires WHERE "sessionToken" = :sessionToken
+          UPDATE USER_SESSION SET expires = :expires WHERE "SESSION_TOKEN" = :sessionToken
         `;
       const result = await client.execute(sql, {
         sessionToken: newSession.sessionToken,
@@ -194,7 +194,7 @@ export default function OracleAdapter(client: OracleDB.Connection): Adapter {
     },
 
     async deleteSession(sessionToken: string) {
-      const sql = `DELETE FROM sessions WHERE "sessionToken" = :sessionToken`;
+      const sql = `DELETE FROM USER_SESSION WHERE "SESSION_TOKEN" = :sessionToken`;
       await client.execute(sql, { sessionToken });
     },
 
@@ -224,7 +224,7 @@ export default function OracleAdapter(client: OracleDB.Connection): Adapter {
       identifier: string;
       token: string;
     }): Promise<VerificationToken | null> {
-      const sql = `DELETE FROM verification_token
+      const sql = `DELETE FROM VERIFICATIONTOKEN
                   WHERE identifier = :identifier AND token = :token
                   RETURNING identifier, expires, token`;
       const result = await client.execute(sql, {
@@ -245,16 +245,16 @@ export default function OracleAdapter(client: OracleDB.Connection): Adapter {
 
     async unlinkAccount(partialAccount: AdapterAccount) {
       const { provider, providerAccountId } = partialAccount;
-      const sql = `DELETE FROM accounts WHERE "providerAccountId" = :providerAccountId AND provider = :provider`;
+      const sql = `DELETE FROM accounts WHERE "PROVIDER_ACCOUNT_ID" = :providerAccountId AND provider = :provider`;
       await client.execute(sql, { providerAccountId, provider });
     },
 
     async deleteUser(userId: string) {
-      await client.execute(`DELETE FROM APP_USER WHERE id = :userId`, { userId });
-      await client.execute(`DELETE FROM sessions WHERE "userId" = :userId`, {
+      await client.execute(`DELETE FROM APP_USER WHERE USER_ID = :userId`, { userId });
+      await client.execute(`DELETE FROM USER_SESSION WHERE "USER_ID" = :userId`, {
         userId,
       });
-      await client.execute(`DELETE FROM accounts WHERE "userId" = :userId`, {
+      await client.execute(`DELETE FROM accounts WHERE "USER_ID" = :userId`, {
         userId,
       });
     },
