@@ -10,9 +10,15 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@azure/app-configuration": "^1.8.0",
+    "@azure/identity": "^4.7.0",
+    "@azure/keyvault-secrets": "^4.9.0",
     "dotenv": "^16.4.7",
     "next": "15.2.1",
     "next-auth": "^5.0.0-beta.25",
+    "oci-common": "^2.104.0",
+    "oci-objectstorage": "^2.104.0",
+    "oci-secrets": "^2.104.0",
     "oracledb": "^6.8.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

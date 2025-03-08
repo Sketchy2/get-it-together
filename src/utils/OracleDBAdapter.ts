@@ -9,10 +9,12 @@ import type {
 import OracleDB, { BindParameters } from "oracledb";
 
 // Code is adapted from pg's implementation of adapter: https://github.com/nextauthjs/next-auth/blob/main/packages/adapter-pg/src/index.ts
-export default function OracleAdapter(client: OracleDB.Connection): Adapter {
+export default function OracleAdapter(clientPromise: Promise<OracleDB.Connection>): Adapter {
+  
   return {
     // user methods
     async createUser(user: AdapterUser): Promise<AdapterUser> {
+      const client = await clientPromise;
       const { name, email, emailVerified, image } = user;
       const sql = `
         INSERT INTO APP_USER (name, email, "EMAIL_VERIFIED", image)
@@ -42,6 +44,7 @@ export default function OracleAdapter(client: OracleDB.Connection): Adapter {
       }
     },
     async getUser(id: string): Promise<null | AdapterUser> {
+      const client = await clientPromise;
       const sql = `SELECT * FROM APP_USER WHERE USER_ID = :id`;
       const result = await client.execute(sql, { id });
       return result.rows && result.rows.length > 0
@@ -52,6 +55,7 @@ export default function OracleAdapter(client: OracleDB.Connection): Adapter {
       providerAccountId,
       provider,
     }): Promise<AdapterUser | null> {
+      const client = await clientPromise;
       const sql = `
           SELECT u.* FROM APP_USER u
           JOIN accounts a ON u.USER_ID = a."userId"
@@ -65,6 +69,7 @@ export default function OracleAdapter(client: OracleDB.Connection): Adapter {
         : null;
     },
     async linkAccount(account: AdapterAccount) {
+      const client = await clientPromise;
       // Destructuring the account object to extract properties
       const {
         userId,
@@ -115,6 +120,7 @@ export default function OracleAdapter(client: OracleDB.Connection): Adapter {
       userId,
       expires,
     }): Promise<AdapterSession> {
+      const client = await clientPromise;
       if (userId === undefined) {
         throw Error("userId is undefined in createSession");
       }
@@ -138,6 +144,7 @@ export default function OracleAdapter(client: OracleDB.Connection): Adapter {
       session: AdapterSession;
       user: AdapterUser;
     } | null> {
+      const client = await clientPromise;
       if (sessionToken === undefined) {
         return null;
       }
@@ -167,6 +174,7 @@ export default function OracleAdapter(client: OracleDB.Connection): Adapter {
     async updateSession(
       session: Partial<AdapterSession> & Pick<AdapterSession, "sessionToken">
     ): Promise<AdapterSession | null | undefined> {
+      const client = await clientPromise;
       const { sessionToken } = session;
       const result1 = await client.execute(
         `SELECT * FROM USER_SESSION WHERE "SESSION_TOKEN" = :sessionToken`,
@@ -194,6 +202,7 @@ export default function OracleAdapter(client: OracleDB.Connection): Adapter {
     },
 
     async deleteSession(sessionToken: string) {
+      const client = await clientPromise;
       const sql = `DELETE FROM USER_SESSION WHERE "SESSION_TOKEN" = :sessionToken`;
       await client.execute(sql, { sessionToken });
     },
@@ -202,6 +211,7 @@ export default function OracleAdapter(client: OracleDB.Connection): Adapter {
     async createVerificationToken(
       verificationToken: VerificationToken
     ): Promise<VerificationToken> {
+      const client = await clientPromise;
       const { identifier, expires, token } = verificationToken;
 
       const sql = `
@@ -224,6 +234,7 @@ export default function OracleAdapter(client: OracleDB.Connection): Adapter {
       identifier: string;
       token: string;
     }): Promise<VerificationToken | null> {
+      const client = await clientPromise;
       const sql = `DELETE FROM VERIFICATIONTOKEN
                   WHERE identifier = :identifier AND token = :token
                   RETURNING identifier, expires, token`;
@@ -236,6 +247,7 @@ export default function OracleAdapter(client: OracleDB.Connection): Adapter {
         : null;
     },
     async getUserByEmail(email: string): Promise<AdapterUser | null> {
+      const client = await clientPromise;
       const sql = `SELECT * FROM APP_USER WHERE email = :email`;
       const result = await client.execute(sql, { email });
       return result.rows && result.rows.length > 0
@@ -244,12 +256,14 @@ export default function OracleAdapter(client: OracleDB.Connection): Adapter {
     },
 
     async unlinkAccount(partialAccount: AdapterAccount) {
+      const client = await clientPromise;
       const { provider, providerAccountId } = partialAccount;
       const sql = `DELETE FROM accounts WHERE "PROVIDER_ACCOUNT_ID" = :providerAccountId AND provider = :provider`;
       await client.execute(sql, { providerAccountId, provider });
     },
 
     async deleteUser(userId: string) {
+      const client = await clientPromise;
       await client.execute(`DELETE FROM APP_USER WHERE USER_ID = :userId`, { userId });
       await client.execute(`DELETE FROM USER_SESSION WHERE "USER_ID" = :userId`, {
         userId,
