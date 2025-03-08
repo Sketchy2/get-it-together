@@ -1,15 +1,14 @@
-import { signIn } from "../auth.ts"
+import { signIn } from "@/auth"
  
-export function SignIn() {
+export default function EmailSignIn() {
   return (
     <form
       action={async (formData) => {
         "use server"
-        await signIn("mailgun", formData)
-      }}
+        await signIn("resend", formData)      }}
     >
       <input type="text" name="email" placeholder="Email" />
-      <button type="submit">Signin with Mailgun</button>
+      <button type="submit">Signin with email</button>
     </form>
   )
 }

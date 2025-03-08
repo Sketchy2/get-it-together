@@ -1,4 +1,3 @@
-"use server"
 import oracledb, { Connection } from 'oracledb';  
 
 const dbConfig = {
