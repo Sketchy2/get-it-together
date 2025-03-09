@@ -1,4 +1,5 @@
 import { signIn } from "@/auth"
+import styles from './GoogleSignIn.module.css'
  
 export default function SignIn() {
   return (
@@ -8,7 +9,8 @@ export default function SignIn() {
         await signIn("google",{redirectTo:"/home"})
       }}
     >
-      <button type="submit">Signin with Google</button>
+      <button className={styles.customBtn}
+      type="submit">Sign in with Google</button>
     </form>
   )
 } 

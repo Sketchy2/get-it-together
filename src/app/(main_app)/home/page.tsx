@@ -1,5 +1,5 @@
 import { auth } from "@/auth"
-import SignOut from "@/components/SignOut"
+import SignOut from "@/components/auth/SignOut"
 import Image from "next/image";
 import styles from "@/app/page.module.css"
 
@@ -21,6 +21,7 @@ export default async function Home() {
           className="rounded-full"
         />
         <SignOut />
+
         </div>
       </div>
 
