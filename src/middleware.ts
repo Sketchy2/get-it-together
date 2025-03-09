@@ -10,8 +10,13 @@ export async function middleware(req:NextRequest) {
   console.log("auth stat ", token ? "Logged In" : "Not Logged In");
 
   // Redirect to login page if not authenticated and trying to access private routes
-  if (!token && privateRoutes.includes(req.nextUrl.pathname)) {
+  if (!token && (privateRoutes.includes(req.nextUrl.pathname) || req.nextUrl.pathname == "/" )) {
     return NextResponse.redirect(new URL('/login', req.url));
+  }
+
+  // if already logged in and in loginpage, redirect to home page
+  if (token && req.nextUrl.pathname == "/login") {
+    return NextResponse.redirect(new URL('/home', req.url));
   }
 
   // If authenticated, proceed to the requested page

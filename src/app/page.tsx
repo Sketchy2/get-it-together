@@ -1,13 +1,10 @@
-import GoogleSignIn from "@/components/auth/GoogleSignIn"
-
-export default function Login() {
+export default function Landing() {
   return (
-    <><div>
-      <h1>Get it Together</h1>
-      <p>Task Management System for Students</p>
-    </div>
-      <GoogleSignIn />
-    
+    <>
+      <div className="">
+      <h1>Loading  Application ...</h1>
+      </div>
+
     </>
 
 

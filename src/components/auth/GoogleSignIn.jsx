@@ -11,7 +11,7 @@ export default function SignIn() {
         await signIn("google", { redirectTo: "/home" });
       }}
     >
-      <button className="gsi-material-button">
+      <button className="gsi-material-button ">
         <div className="gsi-material-button-state"></div>
         <div className="gsi-material-button-content-wrapper">
           <Image
