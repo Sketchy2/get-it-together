@@ -1,5 +1,4 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { initDB } from "../../src/utils/db";
 import { AppDataSource } from "../../src/database/ormconfig";
 import { User } from "../../src/entities/User";
 
@@ -9,12 +8,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    await initDB();
+    await AppDataSource.initialize();
+
     const userRepo = AppDataSource.getRepository(User);
+    
     const users = await userRepo.find();
+    
     res.status(200).json(users);
   } catch (error) {
     console.error("❌ Error fetching users:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    
+    // Print stack trace for more details
+    console.error(error.stack);
+    
+    res.status(500).json({ error: error.message || "Internal Server Error" });
   }
 }

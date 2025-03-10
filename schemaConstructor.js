@@ -99,7 +99,7 @@ async function populateSchema() {
             )`,
             
 
-            `CREATE TABLE VERIFICATIONTOKEN (
+            `CREATE TABLE VERIFICATION_TOKEN (
                 identifier VARCHAR2(255) NOT NULL,
                 token VARCHAR2(255) UNIQUE NOT NULL,
                 expires TIMESTAMP NOT NULL,

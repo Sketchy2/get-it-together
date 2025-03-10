@@ -2,12 +2,12 @@ import { Entity, PrimaryColumn, Column } from "typeorm";
 
 @Entity("VERIFICATION_TOKEN")
 export class VerificationToken {
-  @PrimaryColumn({ length: 255 })
+  @PrimaryColumn({ name: "IDENTIFIER", length: 255 })
   identifier: string;
 
-  @PrimaryColumn({ length: 255, unique: true })
+  @PrimaryColumn({ name: "TOKEN", length: 255, unique: true })
   token: string;
 
-  @Column({ type: "timestamp" })
+  @Column({ name: "EXPIRES", type: "timestamp" })
   expires: Date;
 }

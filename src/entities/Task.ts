@@ -3,25 +3,25 @@ import { TaskAssignee } from "./TaskAssignee";
 
 @Entity("TASK")
 export class Task {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ name: "TASK_ID" })
   task_id: number;
 
-  @Column({ length: 255 })
+  @Column({ name: "TITLE", length: 255 })
   title: string;
 
-  @Column({ type: "clob", nullable: true })
+  @Column({ name: "DESCRIPTION", type: "clob", nullable: true })
   description: string;
 
-  @Column({ length: 50 })
+  @Column({ name: "STATUS", length: 50 })
   status: "To-Do" | "In Progress" | "Completed";
 
-  @Column({ type: "int", nullable: true })
+  @Column({ name: "PRIORITY", type: "int", nullable: true })
   priority: number;
 
-  @Column({ type: "date", nullable: true })
-  due_date: Date;
+  @Column({ name: "DUE_DATE", type: "date", nullable: true })
+  due_date: Date | null;
 
-  @CreateDateColumn({ type: "timestamp" })
+  @CreateDateColumn({ name: "CREATED_AT", type: "timestamp" })
   created_at: Date;
 
   @OneToMany(() => TaskAssignee, (taskAssignee) => taskAssignee.task)

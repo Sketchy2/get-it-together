@@ -6,25 +6,25 @@ import { TaskAssignee } from "./TaskAssignee";
 
 @Entity("APP_USER")
 export class User {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ name: "USER_ID" })
   user_id: number;
 
-  @Column({ length: 100 })
+  @Column({ name: "NAME", length: 100 })
   name: string;
 
-  @Column({ length: 255, unique: true })
+  @Column({ name: "EMAIL", length: 255, unique: true })
   email: string;
 
-  @Column({ type: "timestamp", nullable: true })
+  @Column({ name: "EMAIL_VERIFIED", type: "timestamp", nullable: true })
   email_verified: Date;
 
-  @Column({ length: 500, nullable: true })
+  @Column({ name: "IMAGE", length: 500, nullable: true })
   image: string;
 
-  @CreateDateColumn({ type: "timestamp" })
+  @CreateDateColumn({ name: "CREATED_AT", type: "timestamp" })
   created_at: Date;
 
-  @OneToMany(() => Account, (account) => account.user)
+  @OneToMany(() => Account, (account) => account.user_id)
   accounts: Relation<Account[]>;
 
   @OneToMany(() => Session, (session) => session.user)
