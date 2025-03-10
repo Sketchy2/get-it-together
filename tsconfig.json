@@ -18,8 +18,8 @@
     "strictPropertyInitialization": false,
     "baseUrl": "./src",
     "paths": {
-      "@entities/*": ["src/entities/*"],
-      "@database/*": ["src/database/*"]
+      "@database/*": ["database/*"],
+      "@entities/*": ["entities/*"]
     },
     "plugins": [
       {
