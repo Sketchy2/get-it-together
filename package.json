@@ -24,6 +24,7 @@
     "oracledb": "^6.8.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "reflect-metadata": "^0.2.2",
     "typeorm": "^0.3.21"
   },
   "devDependencies": {
@@ -36,6 +37,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.2.1",
     "ts-node": "^10.9.2",
-    "typescript": "^5.8.2"
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5"
   }
 }
