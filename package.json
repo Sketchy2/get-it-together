@@ -13,8 +13,10 @@
     "@azure/app-configuration": "^1.8.0",
     "@azure/identity": "^4.7.0",
     "@azure/keyvault-secrets": "^4.9.0",
+    "cors": "^2.8.5",
     "dotenv": "^16.4.7",
-    "next": "15.2.1",
+    "express": "^4.21.2",
+    "next": "^15.2.1",
     "next-auth": "^5.0.0-beta.25",
     "oci-common": "^2.104.0",
     "oci-objectstorage": "^2.104.0",
@@ -22,6 +24,7 @@
     "oracledb": "^6.8.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "reflect-metadata": "^0.2.2",
     "typeorm": "^0.3.21"
   },
   "devDependencies": {
@@ -33,6 +36,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.2.1",
     "ts-node": "^10.9.2",
-    "typescript": "^5.8.2"
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5"
   }
 }

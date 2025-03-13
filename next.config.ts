@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+const webpack = require('webpack');
 
 const nextConfig: NextConfig = {
   images: {
@@ -11,6 +12,30 @@ const nextConfig: NextConfig = {
   },
 
   webpack: (config, { isServer }) => {
+    config.plugins.push(
+      new webpack.IgnorePlugin({
+        resourceRegExp: /^react-native-sqlite-storage$/,
+      }),
+      new webpack.IgnorePlugin({
+        resourceRegExp: /^@sap\/hana-client\/extension\/Stream$/,
+      }),
+      new webpack.IgnorePlugin({
+        resourceRegExp: /^mysql$/,
+      })
+    );
+
+    // Optionally ignore specific warnings from TypeORM
+    config.ignoreWarnings = [
+      {
+        // Ignore warnings in ConnectionOptionsReader
+        module: /typeorm\/connection\/ConnectionOptionsReader\.js/,
+      },
+      {
+        // Ignore warnings in DirectoryExportedClassesLoader
+        module: /typeorm\/util\/DirectoryExportedClassesLoader\.js/,
+      },
+    ];
+
     if (!isServer) {
       // Externalize Azure and OCI packages for client-side builds
       config.externals = {
