@@ -1,10 +1,10 @@
 import { DataSource } from "typeorm";
-import { User } from "../entities/User";
-import { Session } from "../entities/Session";
-import { Account } from "../entities/Account";
-import { TaskAssignee } from "../entities/TaskAssignee";
-import { Task } from "../entities/Task";
-import { VerificationToken } from "../entities/VerificationToken";
+import { User } from "@/entities/User";
+import { Session } from "@/entities/Session";
+import { Account } from "@/entities/Account";
+import { TaskAssignee } from "@/entities/TaskAssignee";
+import { Task } from "@/entities/Task";
+import { VerificationToken } from "@/entities/VerificationToken";
 
 
 export const AppDataSource = new DataSource({
