@@ -9,9 +9,9 @@ import { VerificationToken } from "../entities/VerificationToken";
 
 export const AppDataSource = new DataSource({
   type: "oracle",
-  username: "ADMIN",
-  password: "GetItTogether!Database1",
-  connectString: "(description=(retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.ap-melbourne-1.oraclecloud.com))(connect_data=(service_name=g70cfee5a573e65_gitdb_high.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))",
+  username: process.env.DB_USER,
+  password: process.env.DB_PASS,
+  connectString: process.env.DB_CONNECT_STRING,
   synchronize: false,
   logging: ["query", "error"],
   entities: [User, Session, Account, TaskAssignee, Task, VerificationToken]

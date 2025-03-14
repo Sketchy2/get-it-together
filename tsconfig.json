@@ -17,10 +17,6 @@
     "emitDecoratorMetadata": true,
     "strictPropertyInitialization": false,
     "baseUrl": "./src",
-    "paths": {
-      "@database/*": ["database/*"],
-      "@entities/*": ["entities/*"]
-    },
     "plugins": [
       {
         "name": "next"
