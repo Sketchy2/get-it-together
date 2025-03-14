@@ -1,5 +1,5 @@
 import GoogleSignIn from "@/components/GoogleSignIn"
-
+import EmailSignIn from "@/components/EmailSignIn"
 export default function Login() {
   return (
     <div >
