@@ -1,1 +1,1 @@
-export const privateRoutes = ["/"] 
+export const privateRoutes = ["/home"] 
