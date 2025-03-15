@@ -4,5 +4,8 @@ import type { NextAuthConfig } from "next-auth"
  
 // Notice this is only an object, not a full Auth.js instance
 export default {
-  providers: [Google,Resend],
+  providers: [Google, Resend],
+  session: {
+    strategy: "jwt", // Use JWT-based sessions
+  },
 } satisfies NextAuthConfig

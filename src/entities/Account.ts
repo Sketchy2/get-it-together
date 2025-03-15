@@ -25,23 +25,23 @@ export class Account {
   providerAccountId: string;
 
   @Column({ name: "REFRESH_TOKEN", length: 255, nullable: true })
-  refreshToken: string;
+  refresh_token: string;
 
   @Column({ name: "ACCESS_TOKEN", length: 255, nullable: true })
-  accessToken: string;
+  access_token: string;
 
   @Column({ name: "EXPIRES_AT", type: "int", nullable: true })
-  expiresAt: number;
+  expires_at: number;
 
   @Column({ name: "TOKEN_TYPE", length: 50, nullable: true })
-  tokenType: string;
+  token_type: string;
 
   @Column({ name: "SCOPE", length: 255, nullable: true })
   scope: string;
 
   @Column({ name: "ID_TOKEN", length: 500, nullable: true })
-  idToken: string;
+  id_token: string;
 
   @Column({ name: "SESSION_STATE", length: 255, nullable: true })
-  sessionState: string;
+  session_state: string;
 }

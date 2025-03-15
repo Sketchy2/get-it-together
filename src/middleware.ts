@@ -2,6 +2,7 @@ import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from 'next/server';
 import { privateRoutes } from "./routes";
 
+
 export async function middleware(req:NextRequest) {
   // Fetch the JWT token from the request
   const token = await getToken({ req, secret: process.env.AUTH_SECRET });

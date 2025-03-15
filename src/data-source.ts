@@ -1,11 +1,9 @@
 import { DataSource } from "typeorm";
-import { User } from "@/entities/User";
-import { Session } from "@/entities/Session";
-import { Account } from "@/entities/Account";
-import { TaskAssignee } from "@/entities/TaskAssignee";
-import { Task } from "@/entities/Task";
-import { VerificationToken } from "@/entities/VerificationToken";
 import { SnakeNamingStrategy } from "typeorm-naming-strategies";
+import dotenv from "dotenv";
+
+dotenv.config();
+
 
 
 export const AppDataSource = new DataSource({
@@ -13,12 +11,10 @@ export const AppDataSource = new DataSource({
   username: process.env.DB_USER,
   password: process.env.DB_PASS,
   connectString: process.env.DB_CONNECT_STRING,
-  synchronize: false , // TODO: TURN INTO FALSE WHEN PROD
+  synchronize: true  , // TODO: TURN INTO FALSE WHEN PROD
   logging: ["query", "error"],
-  migrations: [
-    "src/migration/**/*.ts", 
-  ],
-  entities: [User, Session, Account, TaskAssignee, Task, VerificationToken],
+  migrations: ["migration/*.ts"],
+  entities: ["entities/entities.ts"], // Ensure correct pathing
   namingStrategy: new SnakeNamingStrategy(),
 
 });

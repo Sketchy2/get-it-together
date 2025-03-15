@@ -1,6 +1,6 @@
 // app/api/task/route.ts
 import { NextResponse } from "next/server";
-import { AppDataSource } from "@/database/ormconfig";
+import { AppDataSource } from "@/data-source";
 import { Task } from "@/entities/Task";
 
 export async function GET() {

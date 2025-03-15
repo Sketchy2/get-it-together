@@ -7,7 +7,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "typeorm": "typeorm-ts-node-esm --dataSource src/data-source.ts",
+    "typeorm:migrate": "yarn typeorm migration:run",
+    "typeorm:generate": "yarn typeorm migration:generate src/database/migration/Migration --timestamp",
+    "typeorm:revert": "yarn typeorm migration:revert",
+    "typeorm:drop": "yarn typeorm schema:drop"
+
   },
   "dependencies": {
     "@auth/typeorm-adapter": "^2.8.0",

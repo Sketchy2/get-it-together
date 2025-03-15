@@ -1,12 +1,11 @@
 import NextAuth from "next-auth";
 import authConfig from "./auth.config"
 import { TypeORMAdapter } from "@auth/typeorm-adapter";
-import { User } from "@/entities/User";
-import { Session } from "@/entities/Session";
-import { Account } from "@/entities/Account";
-import { TaskAssignee } from "@/entities/TaskAssignee";
-import { Task } from "@/entities/Task";
-import { VerificationToken } from "@/entities/VerificationToken";
+// import { User } from "@/entities/User";
+// import { Session } from "@/entities/Session";
+// import { Account } from "@/entities/Account";
+// import { VerificationToken } from "@/entities/VerificationToken";
+import * as entities from "./entities/entities"
 import { SnakeNamingStrategy } from "typeorm-naming-strategies";
 import { DataSourceOptions } from "typeorm"
 
@@ -21,20 +20,20 @@ const connection: DataSourceOptions = {
   username: process.env.DB_USER,
   password: process.env.DB_PASS,
   connectString: process.env.DB_CONNECT_STRING,
-  synchronize: false , // TODO: TURN INTO FALSE WHEN PROD
+  synchronize: true  , // TODO: TURN INTO FALSE WHEN PROD
   logging: ["query", "error"],
-  entities: [User, Session, Account, TaskAssignee, Task, VerificationToken],
+  migrations: ["migration/*.ts"],
   namingStrategy: new SnakeNamingStrategy(),
 }
  
 
-const entities = {
-  UserEntity: User,
-  SessionEntity: Session,
-  AccountEntity: Account,
-  VerificationTokenEntity:
-  VerificationToken,
-}
+// const entities = {
+//   UserEntity: User,
+//   SessionEntity: Session,
+//   AccountEntity: Account,
+//   VerificationTokenEntity:
+//   VerificationToken,
+// }
 
 // have to use jwt due to https://authjs.dev/guides/edge-compatibility
 export const { handlers, signIn, signOut, auth } = NextAuth({
