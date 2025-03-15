@@ -5,6 +5,7 @@ import { Account } from "@/entities/Account";
 import { TaskAssignee } from "@/entities/TaskAssignee";
 import { Task } from "@/entities/Task";
 import { VerificationToken } from "@/entities/VerificationToken";
+import { SnakeNamingStrategy } from "typeorm-naming-strategies";
 
 
 export const AppDataSource = new DataSource({
@@ -12,9 +13,14 @@ export const AppDataSource = new DataSource({
   username: process.env.DB_USER,
   password: process.env.DB_PASS,
   connectString: process.env.DB_CONNECT_STRING,
-  synchronize: false,
+  synchronize: false , // TODO: TURN INTO FALSE WHEN PROD
   logging: ["query", "error"],
-  entities: [User, Session, Account, TaskAssignee, Task, VerificationToken]
+  migrations: [
+    "src/migration/**/*.ts", 
+  ],
+  entities: [User, Session, Account, TaskAssignee, Task, VerificationToken],
+  namingStrategy: new SnakeNamingStrategy(),
+
 });
 
 

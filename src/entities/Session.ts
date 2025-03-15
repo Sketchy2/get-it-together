@@ -5,15 +5,18 @@ import { User } from "./User";
 @Entity("USER_SESSION")
 export class Session {
   @PrimaryGeneratedColumn({ name: "SESSION_ID" })
-  session_id: number;
+  id: string;
+
+  @Column({ type: "uuid" })
+  userId!: string
 
   @ManyToOne(() => User, { onDelete: "CASCADE" })
   @JoinColumn({ name: "USER_ID" })
   user: Relation<User>;
 
   @Column({ name: "SESSION_TOKEN", length: 255, unique: true })
-  session_token: string;
+  sessionToken: string;
 
   @Column({ name: "EXPIRES", type: "timestamp" })
-  expires: Date;
+  expires: string;
 }

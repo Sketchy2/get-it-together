@@ -5,11 +5,15 @@ import { User } from "./User";
 @Entity("ACCOUNT")
 export class Account {
   @PrimaryGeneratedColumn({ name: "ACCOUNT_ID" })
-  account_id: number;
+  id: string;
+
+
+  @Column({ type: "uuid" })
+  userId!: string
 
   @ManyToOne(() => User, (user) => user.accounts, { onDelete: "CASCADE" })
-  @JoinColumn({ name: "USER_ID" })
-  user_id: Relation<User>;
+  @JoinColumn({ name: "USER" })
+  user: Relation<User>;
 
   @Column({ name: "TYPE", length: 50 })
   type: string;
@@ -18,26 +22,26 @@ export class Account {
   provider: string;
 
   @Column({ name: "PROVIDER_ACCOUNT_ID", length: 255, unique: true })
-  provider_account_id: string;
+  providerAccountId: string;
 
   @Column({ name: "REFRESH_TOKEN", length: 255, nullable: true })
-  refresh_token: string;
+  refreshToken: string;
 
   @Column({ name: "ACCESS_TOKEN", length: 255, nullable: true })
-  access_token: string;
+  accessToken: string;
 
   @Column({ name: "EXPIRES_AT", type: "int", nullable: true })
-  expires_at: number;
+  expiresAt: number;
 
   @Column({ name: "TOKEN_TYPE", length: 50, nullable: true })
-  token_type: string;
+  tokenType: string;
 
   @Column({ name: "SCOPE", length: 255, nullable: true })
   scope: string;
 
   @Column({ name: "ID_TOKEN", length: 500, nullable: true })
-  id_token: string;
+  idToken: string;
 
   @Column({ name: "SESSION_STATE", length: 255, nullable: true })
-  session_state: string;
+  sessionState: string;
 }

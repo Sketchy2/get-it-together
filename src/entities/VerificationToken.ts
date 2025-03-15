@@ -1,13 +1,30 @@
-import { Entity, PrimaryColumn, Column } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column,ValueTransformer } from "typeorm";
+
+
+const transformer: Record<"date" | "bigint", ValueTransformer> = {
+  date: {
+    from: (date: string | null) => date && new Date(parseInt(date, 10)),
+    to: (date?: Date) => date?.valueOf().toString(),
+  },
+  bigint: {
+    from: (bigInt: string | null) => bigInt && parseInt(bigInt, 10),
+    to: (bigInt?: number) => bigInt?.toString(),
+  },
+}
+
 
 @Entity("VERIFICATION_TOKEN")
 export class VerificationToken {
-  @PrimaryColumn({ name: "IDENTIFIER", length: 255 })
-  identifier: string;
 
-  @PrimaryColumn({ name: "TOKEN", length: 255, unique: true })
-  token: string;
-
-  @Column({ name: "EXPIRES", type: "timestamp" })
-  expires: Date;
+  @PrimaryGeneratedColumn("uuid")
+  id!: string
+ 
+  @Column()
+  token!: string
+ 
+  @Column()
+  identifier!: string
+ 
+  @Column({ transformer: transformer.date })
+  expires!: string
 }

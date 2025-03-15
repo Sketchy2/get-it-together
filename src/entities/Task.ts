@@ -4,7 +4,7 @@ import { TaskAssignee } from "./TaskAssignee";
 @Entity("TASK")
 export class Task {
   @PrimaryGeneratedColumn({ name: "TASK_ID" })
-  task_id: number;
+  id: number;
 
   @Column({ name: "TITLE", length: 255 })
   title: string;
@@ -19,10 +19,10 @@ export class Task {
   priority: number;
 
   @Column({ name: "DUE_DATE", type: "date", nullable: true })
-  due_date: Date | null;
+  dueDate: Date | null;
 
   @CreateDateColumn({ name: "CREATED_AT", type: "timestamp" })
-  created_at: Date;
+  createdAt: Date;
 
   @OneToMany(() => TaskAssignee, (taskAssignee) => taskAssignee.task)
   assignees: TaskAssignee[];

@@ -6,7 +6,7 @@ import { User } from "./User";
 @Entity("TASKASSIGNEE")
 export class TaskAssignee {
   @PrimaryGeneratedColumn({ name: "TASKASSIGNEE_ID" })
-  taskassignee_id: number;
+  id: number;
 
   @ManyToOne(() => Task, (task) => task.assignees, { onDelete: "CASCADE" })
   @JoinColumn({ name: "TASK_ID" })
