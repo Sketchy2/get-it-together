@@ -3,12 +3,12 @@ import { signIn } from "@/auth"
 export default function EmailSignIn() {
   return (
     <form
-      action={async (formData) => {
+      action={async () => {
         "use server"
-        await signIn("resend", formData)      }}
+        await signIn()
+      }}
     >
-      <input type="text" name="email" placeholder="Email" />
-      <button type="submit">Signin with email</button>
+      <button type="submit">Sign In with email</button>
     </form>
   )
 }

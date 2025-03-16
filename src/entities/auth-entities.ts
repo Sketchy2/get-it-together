@@ -10,16 +10,24 @@ import {
   // Custom Transformers for Oracle
   const transformer: Record<"date" | "bigint", ValueTransformer> = {
     date: {
-      from: (date: string | null) => (date ? new Date(date) : null), // Convert string → Date
-      to: (date?: Date) => (date ? date.toISOString() : null),       // Convert Date → string (ISO format)
-    },
-    bigint: {
-      from: (bigInt: number | null) => bigInt,
-      to: (bigInt?: number) => bigInt ?? null,
-    },
+        from: (date: string | null) => date && new Date(parseInt(date, 10)),
+        to: (date?: Date) => date?.valueOf().toString(),
+      },
+      bigint: {
+        from: (bigInt: string | null) => (bigInt ? parseInt(bigInt, 10) : null),
+        to: (bigInt?: number) => (bigInt ? bigInt.toString() : null),
+      },
   };
   
+//   const transformer: Record<"bigint", ValueTransformer> = {
+//     bigint: {
+//       from: (bigInt: string | null) => (bigInt ? parseInt(bigInt, 10) : null),
+//       to: (bigInt?: number) => (bigInt ? bigInt.toString() : null),
+//     },
+
+// };
   
+
   @Entity({ name: "users" })
   export class User {
     @PrimaryGeneratedColumn("uuid")
@@ -31,15 +39,13 @@ import {
     @Column({ type: "varchar2", length: 255, nullable: true, unique: true })
     email!: string | null
   
-    @Column({ type: "varchar2", length: 255, nullable: true, transformer: transformer.date })
-    emailVerified!: string | null;
+    @Column({ type: "date", nullable: true })
+    emailVerified!: Date | null;
     
   
     @Column({ type: "varchar2", length: 500, nullable: true })
     image!: string | null
   
-    @Column({ type: "varchar2", length: 50, nullable: true })
-    role!: string | null
   
     @OneToMany(() => Session, (session) => session.user)
     sessions!: Session[]
@@ -126,7 +132,7 @@ import {
     @Column({ type: "varchar2", length: 255 })
     identifier!: string
   
-    @Column({ type: "date", transformer: transformer.date })
-    expires!: Date
+    @Column({ type: "timestamp" })
+    expires!: string    
   }
   

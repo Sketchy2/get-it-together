@@ -13,7 +13,6 @@
     "typeorm:generate": "yarn typeorm migration:generate src/database/migration/Migration --timestamp",
     "typeorm:revert": "yarn typeorm migration:revert",
     "typeorm:drop": "yarn typeorm schema:drop"
-
   },
   "dependencies": {
     "@auth/typeorm-adapter": "^2.8.0",
@@ -25,6 +24,7 @@
     "express": "^4.21.2",
     "next": "^15.2.1",
     "next-auth": "^5.0.0-beta.25",
+    "nodemailer": "^6.10.0",
     "oci-common": "^2.104.0",
     "oci-objectstorage": "^2.104.0",
     "oci-secrets": "^2.104.0",
