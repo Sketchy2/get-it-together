@@ -19,7 +19,10 @@ export async function middleware(req:NextRequest) {
   if (token && req.nextUrl.pathname == "/login") {
     return NextResponse.redirect(new URL('/home', req.url));
   }
-
+  // if already logged in and in root, redirect to home page
+  if (token && req.nextUrl.pathname == "/") {
+    return NextResponse.redirect(new URL('/home', req.url));
+  }
   // If authenticated, proceed to the requested page
   return NextResponse.next();
 }
