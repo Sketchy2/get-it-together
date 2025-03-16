@@ -1,5 +1,7 @@
 import { signIn } from "@/auth"
- 
+import "./EmailSignIn.css"
+
+
 export default function EmailSignIn() {
   return (
     <form
@@ -7,8 +9,8 @@ export default function EmailSignIn() {
         "use server"
         await signIn("nodemailer", formData)      }}
     >
-      <input type="text" name="email" placeholder="Email" />
-      <button type="submit">Signin with email</button>
+      <input className="rect" type="text" name="email" placeholder="Enter Email Address" />
+      <button className="rect signInButton" type="submit">Signin with email</button>
     </form>
   )
 }
