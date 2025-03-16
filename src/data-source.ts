@@ -14,7 +14,7 @@ export const AppDataSource = new DataSource({
   synchronize: true  , // TODO: TURN INTO FALSE WHEN PROD
   logging: ["query", "error"],
   migrations: ["migration/*.ts"],
-  entities: ["entities/entities.ts"], // Ensure correct pathing
+  entities: ["entities/*.ts"], // Ensure correct pathing
   namingStrategy: new SnakeNamingStrategy(),
 
 });

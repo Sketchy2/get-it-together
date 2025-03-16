@@ -1,22 +1,24 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from "typeorm";
-import type { Relation } from "typeorm";
-import { User } from "./User";
+// import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm";
+// // import type { Relation } from "typeorm";
+// import { UserEntity } from "./User";
 
-@Entity("USER_SESSION")
-export class Session {
-  @PrimaryGeneratedColumn({ name: "SESSION_ID" })
-  id: string;
 
-  @Column({ type: "uuid" })
-  userId!: string
 
-  @ManyToOne(() => User, { onDelete: "CASCADE" })
-  @JoinColumn({ name: "USER_ID" })
-  user: Relation<User>;
+// @Entity("USER_SESSION")
+// export class Session {
+//   @PrimaryGeneratedColumn({ name: "SESSION_ID" })
+//   id: string;
 
-  @Column({ name: "SESSION_TOKEN", length: 255, unique: true })
-  sessionToken: string;
+//   @Column({ type: "uuid" })
+//   userId!: string
 
-  @Column({ name: "EXPIRES", type: "timestamp" })
-  expires: string;
-}
+//   @ManyToOne(() => User, { onDelete: "CASCADE" })
+//   @JoinColumn({ name: "USER_ID" })
+//   user: Relation<User>;
+
+//   @Column({ name: "SESSION_TOKEN", length: 255, unique: true })
+//   sessionToken: string;
+
+//   @Column({ name: "EXPIRES", type: "timestamp" })
+//   expires: string;
+// }

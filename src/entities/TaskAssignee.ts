@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from "typeorm";
 import type { Relation } from "typeorm";
 import { Task } from "./Task";
-import { User } from "./User";
+import { User } from "./auth-entities";
 
 @Entity("TASKASSIGNEE")
 export class TaskAssignee {

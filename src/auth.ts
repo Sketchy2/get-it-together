@@ -1,13 +1,10 @@
 import NextAuth from "next-auth";
 import authConfig from "./auth.config"
 import { TypeORMAdapter } from "@auth/typeorm-adapter";
-// import { User } from "@/entities/User";
-// import { Session } from "@/entities/Session";
-// import { Account } from "@/entities/Account";
-// import { VerificationToken } from "@/entities/VerificationToken";
-import * as entities from "./entities/entities"
+import * as defaultEntities from "@/entities/auth-entities"
 import { SnakeNamingStrategy } from "typeorm-naming-strategies";
 import { DataSourceOptions } from "typeorm"
+import { UserEntity } from "@auth/typeorm-adapter/entities";
 
 const db_connect = process.env.AUTH_TYPEORM_CONNECTION;
 if (!db_connect) {
@@ -26,14 +23,13 @@ const connection: DataSourceOptions = {
   namingStrategy: new SnakeNamingStrategy(),
 }
  
+const entities = {
+  UserEntity: defaultEntities.User,
+  SessionEntity: defaultEntities.Session,
+  VerificationTokenEntity: defaultEntities.VerificationToken,
+  AccountEntity: defaultEntities.Account,
 
-// const entities = {
-//   UserEntity: User,
-//   SessionEntity: Session,
-//   AccountEntity: Account,
-//   VerificationTokenEntity:
-//   VerificationToken,
-// }
+}
 
 // have to use jwt due to https://authjs.dev/guides/edge-compatibility
 export const { handlers, signIn, signOut, auth } = NextAuth({
