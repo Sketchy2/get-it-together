@@ -89,6 +89,38 @@ export async function PUT(req: NextRequest) {
   }
 }
 
+export async function DELETE(req: NextRequest) {
+  try {
+    const url = new URL(req.url);
+    const taskId = url.searchParams.get("id");
+
+    if (!taskId) {
+      return NextResponse.json(
+        { error: "Task ID is required" },
+        { status: 400 }
+      );
+    }
+
+    if (!AppDataSource.isInitialized) {
+      await AppDataSource.initialize();
+    }
+
+    const taskRepo = AppDataSource.getRepository(Task);
+    const task = await taskRepo.findOneBy({ task_id: Number(taskId) });
+
+    if (!task) {
+      return NextResponse.json({ error: "Task not found" }, { status: 404 });
+    }
+
+    await taskRepo.remove(task);
+
+    return NextResponse.json({ message: "Task deleted successfully" }, { status: 200 });
+  } catch (error) {
+    return handleError(error);
+  }
+}
+
+
 // Helper function for error handling
 function handleError(error: unknown) {
   if (error instanceof Error) {

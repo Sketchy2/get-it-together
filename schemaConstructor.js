@@ -1,4 +1,4 @@
-const oracledb = require('oracledb');
+import oracledb from "oracledb";
 oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT;
 
 const dbConfig = {
@@ -120,7 +120,17 @@ async function populateSchema() {
                 taskassignee_id NUMBER PRIMARY KEY,
                 task_id NUMBER REFERENCES TASK(task_id) ON DELETE CASCADE,
                 user_id NUMBER REFERENCES APP_USER(user_id) ON DELETE CASCADE
-            )`
+            )`,
+
+            // Add the trigger for TASK_ID
+            `CREATE OR REPLACE TRIGGER TASK_BI
+            BEFORE INSERT ON TASK
+            FOR EACH ROW
+            BEGIN
+              IF :NEW.TASK_ID IS NULL THEN
+                SELECT TASK_SEQ.NEXTVAL INTO :NEW.TASK_ID FROM DUAL;
+              END IF;
+            END;`
         ];
 
         for (const query of queries) {
