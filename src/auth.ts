@@ -4,7 +4,10 @@ import { TypeORMAdapter } from "@auth/typeorm-adapter";
 import * as defaultEntities from "@/entities/auth-entities"
 import { SnakeNamingStrategy } from "typeorm-naming-strategies";
 import { DataSourceOptions } from "typeorm"
-import { UserEntity } from "@auth/typeorm-adapter/entities";
+import { Account, Session, User, VerificationToken } from "./entities/auth-entities";
+import { TaskAssignee } from "./entities/TaskAssignee";
+import { Task } from "./entities/Task";
+
 
 const db_connect = process.env.AUTH_TYPEORM_CONNECTION;
 if (!db_connect) {
@@ -20,6 +23,7 @@ const connection: DataSourceOptions = {
   synchronize: true  , // TODO: TURN INTO FALSE WHEN PROD
   logging: ["query", "error"],
   migrations: ["migration/*.ts"],
+  entities: [User, Session, Account, TaskAssignee, Task, VerificationToken],
   namingStrategy: new SnakeNamingStrategy(),
 }
  
