@@ -41,6 +41,69 @@ export async function POST(req: NextRequest) {
       description,
       status,
       priority,
+      due_date: due_date ? new Date(due_date) : null,
+    });
+
+    const savedTask = await taskRepo.save(newTask);
+    return NextResponse.json(savedTask, { status: 201 });
+  } catch (error) {
+    return handleError(error);
+  }
+}
+
+export async function PUT(req: NextRequest) {
+  try {
+    const url = new URL(req.url);
+    const taskId = url.searchParams.get("id");
+
+    if (!taskId) {
+      return NextResponse.json(
+        { error: "Task ID is required" },
+        { status: 400 }
+      );
+    }
+
+    const { title, description, status, priority, due_date } = await req.json();
+
+    if (!AppDataSource.isInitialized) {
+      await AppDataSource.initialize();
+    }
+
+    const taskRepo = AppDataSource.getRepository(Task);
+    const task = await taskRepo.findOneBy({ task_id: Number(taskId) });
+
+    if (!task) {
+      return NextResponse.json({ error: "Task not found" }, { status: 404 });
+    }
+
+    task.title = title ?? task.title;
+    task.description = description ?? task.description;
+    task.status = status ?? task.status;
+    task.priority = priority ?? task.priority;
+    task.due_date = due_date ? new Date(due_date) : task.due_date;
+
+    const updatedTask = await taskRepo.save(task);
+    return NextResponse.json(updatedTask, { status: 200 });
+  } catch (error) {
+    return handleError(error);
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const url = new URL(req.url);
+    const taskId = url.searchParams.get("id");
+
+    if (!taskId) {
+      return NextResponse.json(
+        { error: "Task ID is required" },
+        { status: 400 }
+      );
+    const newTask = taskRepo.create({
+      title,
+      description,
+      status,
+      priority,
       dueDate: dueDate ? new Date(dueDate) : null,
     });
 
