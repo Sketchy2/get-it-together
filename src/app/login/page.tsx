@@ -1,4 +1,5 @@
 import GoogleSignIn from "@/components/auth/GoogleSignIn"
+import EmailSignIn from "@/components/auth/EmailSignIn"
 import "./login.css"
 
 export default function Login() {
@@ -12,7 +13,7 @@ export default function Login() {
         
       <GoogleSignIn />
       <p>or</p>
-      <p>Sign in with Email</p>
+      <EmailSignIn />
 
 
         </div>

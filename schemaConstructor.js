@@ -1,4 +1,4 @@
-import oracledb from "oracledb";
+import oracledb from 'oracledb'
 oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT;
 
 const dbConfig = {
@@ -66,71 +66,115 @@ async function populateSchema() {
             `CREATE SEQUENCE VERIFICATIONTOKEN_SEQ START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE`,
             `CREATE SEQUENCE TASK_SEQ START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE`,
             `CREATE SEQUENCE TASKASSIGNEE_SEQ START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE`,
-
+        
             `CREATE TABLE APP_USER (
-                user_id NUMBER PRIMARY KEY,
-                name VARCHAR2(100),
-                email VARCHAR2(255) UNIQUE,
-                email_verified TIMESTAMP,
-                image VARCHAR2(500),
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                USER_ID NUMBER PRIMARY KEY,
+                NAME VARCHAR2(100) NOT NULL,
+                EMAIL VARCHAR2(255) UNIQUE NOT NULL,
+                EMAIL_VERIFIED VARCHAR2(255),
+                IMAGE VARCHAR2(500),
+                CREATED_AT TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )`,
-
+        
+            `CREATE TRIGGER APP_USER_TRG 
+            BEFORE INSERT ON APP_USER 
+            FOR EACH ROW 
+            BEGIN 
+                IF :NEW.USER_ID IS NULL THEN 
+                    SELECT APP_USER_SEQ.NEXTVAL INTO :NEW.USER_ID FROM DUAL; 
+                END IF; 
+            END;`,
+        
             `CREATE TABLE ACCOUNT (
-                account_id NUMBER PRIMARY KEY,
-                user_id NUMBER REFERENCES APP_USER(user_id) ON DELETE CASCADE,
-                type VARCHAR2(50) NOT NULL,
-                provider VARCHAR2(255) NOT NULL,
-                provider_account_id VARCHAR2(255) NOT NULL UNIQUE,
-                refresh_token VARCHAR2(255),
-                access_token VARCHAR2(255),
-                expires_at NUMBER,
-                token_type VARCHAR2(50),
-                scope VARCHAR2(255),
-                id_token VARCHAR2(500),
-                session_state VARCHAR2(255)
+                ACCOUNT_ID NUMBER PRIMARY KEY,
+                USER_ID NUMBER NOT NULL,
+                TYPE VARCHAR2(50) NOT NULL,
+                PROVIDER VARCHAR2(255) NOT NULL,
+                PROVIDER_ACCOUNT_ID VARCHAR2(255) UNIQUE NOT NULL,
+                REFRESH_TOKEN VARCHAR2(255),
+                ACCESS_TOKEN VARCHAR2(255),
+                EXPIRES_AT NUMBER,
+                TOKEN_TYPE VARCHAR2(50),
+                SCOPE VARCHAR2(255),
+                ID_TOKEN VARCHAR2(500),
+                SESSION_STATE VARCHAR2(255),
+                CONSTRAINT FK_ACCOUNT_USER FOREIGN KEY (USER_ID) REFERENCES APP_USER(USER_ID) ON DELETE CASCADE
             )`,
-
+        
+            `CREATE TRIGGER ACCOUNT_TRG 
+            BEFORE INSERT ON ACCOUNT 
+            FOR EACH ROW 
+            BEGIN 
+                IF :NEW.ACCOUNT_ID IS NULL THEN 
+                    SELECT ACCOUNT_SEQ.NEXTVAL INTO :NEW.ACCOUNT_ID FROM DUAL; 
+                END IF; 
+            END;`,
+        
             `CREATE TABLE USER_SESSION (
-                session_id NUMBER PRIMARY KEY,
-                user_id NUMBER REFERENCES APP_USER(user_id) ON DELETE CASCADE,
-                session_token VARCHAR2(255) UNIQUE NOT NULL,
-                expires TIMESTAMP NOT NULL
+                SESSION_ID NUMBER PRIMARY KEY,
+                USER_ID NUMBER NOT NULL,
+                SESSION_TOKEN VARCHAR2(255) UNIQUE NOT NULL,
+                EXPIRES TIMESTAMP NOT NULL,
+                CONSTRAINT FK_SESSION_USER FOREIGN KEY (USER_ID) REFERENCES APP_USER(USER_ID) ON DELETE CASCADE
             )`,
-            
-
-            `CREATE TABLE VERIFICATION_TOKEN (
-                identifier VARCHAR2(255) NOT NULL,
-                token VARCHAR2(255) UNIQUE NOT NULL,
-                expires TIMESTAMP NOT NULL,
-                PRIMARY KEY (identifier, token)
-            )`,
-
+        
+            `CREATE TRIGGER SESSION_TRG 
+            BEFORE INSERT ON USER_SESSION 
+            FOR EACH ROW 
+            BEGIN 
+                IF :NEW.SESSION_ID IS NULL THEN 
+                    SELECT SESSION_SEQ.NEXTVAL INTO :NEW.SESSION_ID FROM DUAL; 
+                END IF; 
+            END;`,
+        
             `CREATE TABLE TASK (
-                task_id NUMBER PRIMARY KEY,
-                title VARCHAR2(255) NOT NULL,
-                description CLOB,
-                status VARCHAR2(50) CHECK (status IN ('To-Do', 'In Progress', 'Completed')),
-                priority NUMBER CHECK (priority BETWEEN 1 AND 5),
-                due_date DATE,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                TASK_ID NUMBER PRIMARY KEY,
+                TITLE VARCHAR2(255) NOT NULL,
+                DESCRIPTION CLOB,
+                STATUS VARCHAR2(50) NOT NULL,
+                PRIORITY NUMBER,
+                DUE_DATE DATE,
+                CREATED_AT TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )`,
-
+        
+            `CREATE TRIGGER TASK_TRG 
+            BEFORE INSERT ON TASK 
+            FOR EACH ROW 
+            BEGIN 
+                IF :NEW.TASK_ID IS NULL THEN 
+                    SELECT TASK_SEQ.NEXTVAL INTO :NEW.TASK_ID FROM DUAL; 
+                END IF; 
+            END;`,
+        
+            `CREATE TABLE VERIFICATION_TOKEN (
+                ID RAW(16) DEFAULT SYS_GUID() PRIMARY KEY,
+                TOKEN VARCHAR2(255) NOT NULL,
+                IDENTIFIER VARCHAR2(255) NOT NULL,
+                EXPIRES TIMESTAMP NOT NULL
+            )`,
+        
             `CREATE TABLE TASKASSIGNEE (
-                taskassignee_id NUMBER PRIMARY KEY,
-                task_id NUMBER REFERENCES TASK(task_id) ON DELETE CASCADE,
-                user_id NUMBER REFERENCES APP_USER(user_id) ON DELETE CASCADE
+                TASKASSIGNEE_ID NUMBER PRIMARY KEY,
+                TASK_ID NUMBER NOT NULL,
+                USER_ID NUMBER NOT NULL,
+                CONSTRAINT FK_TASKASSIGNEE_TASK FOREIGN KEY (TASK_ID) REFERENCES TASK(TASK_ID) ON DELETE CASCADE,
+                CONSTRAINT FK_TASKASSIGNEE_USER FOREIGN KEY (USER_ID) REFERENCES APP_USER(USER_ID) ON DELETE CASCADE
             )`,
-
-            // Add the trigger for TASK_ID
-            `CREATE OR REPLACE TRIGGER TASK_BI
-            BEFORE INSERT ON TASK
-            FOR EACH ROW
-            BEGIN
-              IF :NEW.TASK_ID IS NULL THEN
-                SELECT TASK_SEQ.NEXTVAL INTO :NEW.TASK_ID FROM DUAL;
-              END IF;
-            END;`
+        
+            `CREATE TRIGGER TASKASSIGNEE_TRG 
+            BEFORE INSERT ON TASKASSIGNEE 
+            FOR EACH ROW 
+            BEGIN 
+                IF :NEW.TASKASSIGNEE_ID IS NULL THEN 
+                    SELECT TASKASSIGNEE_SEQ.NEXTVAL INTO :NEW.TASKASSIGNEE_ID FROM DUAL; 
+                END IF; 
+            END;`,
+        
+            `CREATE INDEX IDX_ACCOUNT_USER ON ACCOUNT (USER_ID)`,
+            `CREATE INDEX IDX_SESSION_USER ON USER_SESSION (USER_ID)`,
+            `CREATE INDEX IDX_VERIFICATION_TOKEN_IDENTIFIER ON VERIFICATION_TOKEN (IDENTIFIER)`,
+            `CREATE INDEX IDX_TASKASSIGNEE_TASK ON TASKASSIGNEE (TASK_ID)`,
+            `CREATE INDEX IDX_TASKASSIGNEE_USER ON TASKASSIGNEE (USER_ID)`
         ];
 
         for (const query of queries) {

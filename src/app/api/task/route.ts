@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { AppDataSource } from "@database/ormconfig";
-import { Task } from "@entities/Task";
+import { AppDataSource } from "@/data-source";
+import { Task } from "@/entities/Task";
 
 export async function GET() {
   try {
@@ -22,7 +22,7 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
-    const { title, description, status, priority, due_date } = await req.json();
+    const { title, description, status, priority, dueDate } = await req.json();
 
     if (!title || !status) {
       return NextResponse.json(
@@ -99,6 +99,69 @@ export async function DELETE(req: NextRequest) {
         { error: "Task ID is required" },
         { status: 400 }
       );
+    const newTask = taskRepo.create({
+      title,
+      description,
+      status,
+      priority,
+      dueDate: dueDate ? new Date(dueDate) : null,
+    });
+
+    const savedTask = await taskRepo.save(newTask);
+    return NextResponse.json(savedTask, { status: 201 });
+  } catch (error) {
+    return handleError(error);
+  }
+}
+
+export async function PUT(req: NextRequest) {
+  try {
+    const url = new URL(req.url);
+    const taskId = url.searchParams.get("id");
+
+    if (!taskId) {
+      return NextResponse.json(
+        { error: "Task ID is required" },
+        { status: 400 }
+      );
+    }
+
+    const { title, description, status, priority, dueDate } = await req.json();
+
+    if (!AppDataSource.isInitialized) {
+      await AppDataSource.initialize();
+    }
+
+    const taskRepo = AppDataSource.getRepository(Task);
+    const task = await taskRepo.findOneBy({ id: Number(taskId) });
+
+    if (!task) {
+      return NextResponse.json({ error: "Task not found" }, { status: 404 });
+    }
+
+    task.title = title ?? task.title;
+    task.description = description ?? task.description;
+    task.status = status ?? task.status;
+    task.priority = priority ?? task.priority;
+    task.dueDate = dueDate ? new Date(dueDate) : task.dueDate;
+
+    const updatedTask = await taskRepo.save(task);
+    return NextResponse.json(updatedTask, { status: 200 });
+  } catch (error) {
+    return handleError(error);
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const url = new URL(req.url);
+    const taskId = url.searchParams.get("id");
+
+    if (!taskId) {
+      return NextResponse.json(
+        { error: "Task ID is required" },
+        { status: 400 }
+      );
     }
 
     if (!AppDataSource.isInitialized) {
@@ -106,7 +169,7 @@ export async function DELETE(req: NextRequest) {
     }
 
     const taskRepo = AppDataSource.getRepository(Task);
-    const task = await taskRepo.findOneBy({ task_id: Number(taskId) });
+    const task = await taskRepo.findOneBy({ id: Number(taskId) });
 
     if (!task) {
       return NextResponse.json({ error: "Task not found" }, { status: 404 });
