@@ -1,0 +1,381 @@
+.assignmentDetails {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 450px;
+    max-width: 100%;
+    background-color: #2A2A2A;
+    box-shadow: -8px 0 24px rgba(0, 0, 0, 0.4);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    z-index: 1000;
+    overflow: hidden;
+    border-radius: 12px 0 0 12px;
+    animation: slideIn 0.3s ease-out;
+  }
+  
+  @keyframes slideIn {
+    from {
+      transform: translateX(100%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+  
+  .detailsHeader {
+    position: relative;
+    padding: 32px 24px;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  .headerContent {
+    margin-right: 80px;
+  }
+  
+  .detailsTitle {
+    margin: 0 0 12px 0;
+    font-size: 2.2rem;
+    font-weight: bold;
+    letter-spacing: -0.5px;
+  }
+  
+  .detailsMetaRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .detailsMeta {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.85);
+    font-weight: 500;
+  }
+  
+  .statusIndicator {
+    background-color: rgba(0, 0, 0, 0.3);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    font-weight: 600;
+  }
+  
+  .closeButton {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: rgba(0, 0, 0, 0.2);
+    border: none;
+    color: white;
+    cursor: pointer;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+  }
+  
+  .closeButton:hover {
+    background-color: rgba(0, 0, 0, 0.4);
+  }
+  
+  .progressCircleContainer {
+    position: absolute;
+    top: 24px;
+    right: 64px;
+  }
+  
+  .progressCircle {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  
+  .progressCircle::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: conic-gradient(
+      rgba(255, 255, 255, 0.8) calc(var(--progress) * 1%), 
+      transparent calc(var(--progress) * 1%)
+    );
+    mask: radial-gradient(transparent 55%, black 55%);
+    -webkit-mask: radial-gradient(transparent 55%, black 55%);
+  }
+  
+  .progressCircleInner {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .progressValue {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: white;
+  }
+  
+  .detailsContent {
+    flex: 1;
+    padding: 24px;
+    overflow-y: auto;
+  }
+  
+  .detailsSection {
+    margin-bottom: 36px;
+  }
+  
+  .sectionHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  
+  .sectionTitle {
+    font-size: 1.3rem;
+    margin: 0 0 12px 0;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.95);
+  }
+  
+  .sectionActions {
+    display: flex;
+    gap: 12px;
+  }
+  
+  .actionButton {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 6px;
+    transition: background-color 0.2s;
+  }
+  
+  .actionButton:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+  
+  .descriptionText {
+    color: rgba(255, 255, 255, 0.85);
+    line-height: 1.6;
+    font-size: 1rem;
+    padding: 4px 0;
+  }
+  
+  .todoList {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    padding: 16px;
+  }
+  
+  .todoItem {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 16px;
+    background-color: #4A4682;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    transition: all 0.2s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .todoItem:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  .todoItem.completed {
+    background-color: rgba(74, 70, 130, 0.6);
+  }
+  
+  .todoItemHeader {
+    display: flex;
+    align-items: center;
+  }
+  
+  .expandButton {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 0;
+    margin-right: 8px;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+  }
+  
+  .expandButton:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .checkboxButton {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 0;
+    margin-right: 12px;
+    opacity: 0.85;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+  }
+  
+  .checkboxButton:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .checkboxButton.completed {
+    color: #6CFF5C;
+    opacity: 1;
+  }
+  
+  .todoText {
+    flex: 1;
+    font-size: 1rem;
+  }
+  
+  .todoText.completed {
+    text-decoration: line-through;
+    opacity: 0.7;
+  }
+  
+  .todoItemActions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-left: 36px;
+  }
+  
+  .progressBars {
+    display: flex;
+    gap: 3px;
+  }
+  
+  .miniProgressBar {
+    width: 6px;
+    height: 16px;
+    background-color: #FFD700;
+    border-radius: 3px;
+  }
+  
+  .avatarContainer {
+    display: flex;
+    align-items: center;
+  }
+  
+  .avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background-color: #6A6A9F;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+  
+  .addTodoButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: white;
+    padding: 12px;
+    border-radius: 10px;
+    width: 100%;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-weight: 500;
+  }
+  
+  .addTodoButton:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+  }
+  
+  .pollTabs {
+    display: flex;
+    gap: 12px;
+  }
+  
+  .pollTab {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 8px 16px;
+    border-radius: 20px;
+    opacity: 0.7;
+    font-weight: 500;
+    transition: all 0.2s ease;
+  }
+  
+  .pollTab:hover {
+    opacity: 0.9;
+  }
+  
+  .pollTab.active {
+    background-color: rgba(255, 255, 255, 0.15);
+    opacity: 1;
+  }
+  
+  .pollContent {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    padding: 20px;
+    min-height: 100px;
+  }
+  
+  /* Add responsive styles for mobile */
+  @media (max-width: 768px) {
+    .assignmentDetails {
+      width: 100%;
+      border-radius: 0;
+    }
+    
+    .detailsTitle {
+      font-size: 1.8rem;
+    }
+    
+    .progressCircle {
+      right: 50px;
+      width: 50px;
+      height: 50px;
+    }
+  }

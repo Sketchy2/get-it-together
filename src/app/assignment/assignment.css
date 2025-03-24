@@ -1,0 +1,408 @@
+/* Enhanced assignments.css */
+.assignmentsContainer {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    color: white;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    flex: 0 0 auto;
+    padding: 0 8px;
+  }
+  
+  .title {
+    font-size: 2.2rem;
+    font-weight: bold;
+    letter-spacing: -0.5px;
+  }
+  
+  .actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+  
+  .iconButton {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+  }
+  
+  .iconButton:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+  }
+  
+  .viewToggleContainer {
+    margin-left: 8px;
+  }
+  
+  .viewToggle {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 4px;
+    display: flex;
+  }
+  
+  .viewButton {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+  }
+  
+  .activeView {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+  
+  .rowsContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    overflow-y: auto;
+    flex: 1;
+    padding-bottom: 70px;
+  }
+  
+  /* List View Styling */
+  .listContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    overflow-y: auto;
+    flex: 1;
+    height: calc(100vh - 130px);
+    padding-bottom: 70px;
+  }
+  
+  .listSection {
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #3A3A3A;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  .listSectionHeader {
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .listSectionTitle {
+    font-size: 1.3rem;
+    margin: 0;
+    color: white;
+    font-weight: 600;
+  }
+  
+  .listItems {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .listItem {
+    display: flex;
+    align-items: center;
+    padding: 16px 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    background-color: transparent !important;
+  }
+  
+  .listItem:hover {
+    filter: brightness(1.08);
+    transform: translateY(-1px);
+  }
+  
+  .listItemIcon {
+    margin-right: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+  }
+  
+  .listItemContent {
+    flex: 1;
+  }
+  
+  .listItemTitle {
+    margin: 0 0 6px 0;
+    font-size: 1.1rem;
+    color: white;
+    font-weight: 600;
+  }
+  
+  .listItemMeta {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.85);
+  }
+  
+  .listItemProgress {
+    margin-left: 20px;
+  }
+  
+  .progressRing {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  
+  .progressRing::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: conic-gradient(
+      rgba(255, 255, 255, 0.8) calc(var(--progress) * 1%), 
+      transparent calc(var(--progress) * 1%)
+    );
+    mask: radial-gradient(transparent 55%, black 55%);
+    -webkit-mask: radial-gradient(transparent 55%, black 55%);
+  }
+  
+  .progressValue {
+    color: white;
+    font-size: 0.9rem;
+    font-weight: bold;
+  }
+  
+  .listItemDetails {
+    padding: 16px 20px 20px 60px;
+    background-color: rgba(0, 0, 0, 0.15) !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    height: auto;
+    overflow: visible;
+    display: none;
+  }
+  
+  .expanded + .listItemDetails {
+    display: block;
+    animation: fadeIn 0.3s ease-out;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .listItemDescription {
+    margin-bottom: 20px;
+    color: rgba(255, 255, 255, 0.85);
+    line-height: 1.6;
+  }
+  
+  .todoItems {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 20px;
+  }
+  
+  .todoItemHeader {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding: 6px;
+  }
+  
+  .todoItem {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    background-color: #4A4682;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    transition: all 0.2s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .todoItem:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  .todoItemCheckbox {
+    margin-right: 15px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .todoItemText {
+    flex: 1;
+    color: white;
+  }
+  
+  .todoItemProgressBars {
+    display: flex;
+    gap: 3px;
+    margin: 0 15px;
+  }
+  
+  .miniProgressBar {
+    width: 6px;
+    height: 16px;
+    background-color: #FFD700;
+    border-radius: 3px;
+  }
+  
+  .todoItemAvatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background-color: #6A6A9F;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+  
+  .addTodoButton {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: white;
+    padding: 12px 16px;
+    border-radius: 8px;
+    width: 100%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 500;
+  }
+  
+  .addTodoButton:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+  }
+  
+  .detailsFooter {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+  }
+  
+  .viewFullButton {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+  }
+  
+  .viewFullButton:hover {
+    background-color: rgba(255, 255, 255, 0.25);
+    transform: translateY(-2px);
+  }
+  
+  .addButton {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background-color: #4D5696;
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    z-index: 10;
+    transition: all 0.2s ease;
+  }
+  
+  .addButton:hover {
+    background-color: #5A64A8;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+  }
+  
+  /* Smooth transitions */
+  .listItem, .progressRing::before {
+    transition: all 0.3s ease;
+  }
+  
+  /* Card hover effects */
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+  }
+  
+  /* Improve scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .listItem {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    .listItemProgress {
+      margin-left: 0;
+      margin-top: 12px;
+    }
+    
+    .rowContainer {
+      width: 100%;
+    }
+  }
