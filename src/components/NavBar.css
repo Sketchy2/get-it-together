@@ -1,0 +1,6 @@
+.circleBase {
+    border-radius: 50%;
+    width:100px;
+    /* behavior: url(PIE.htc); remove if you don't care about IE8 */
+    background-color: aqua;
+}
