@@ -16,6 +16,8 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "icons": "^1.0.0",
+    "lucide-react": "^0.482.0",
     "next": "^15.2.1",
     "next-auth": "^5.0.0-beta.25",
     "oci-common": "^2.104.0",
@@ -24,6 +26,7 @@
     "oracledb": "^6.8.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-icons": "^5.5.0",
     "reflect-metadata": "^0.2.2",
     "typeorm": "^0.3.21"
   },
