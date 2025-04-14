@@ -1,42 +1,44 @@
 import NextAuth from "next-auth";
-import authConfig from "./auth.config"
+import authConfig from "./auth.config";
 import { TypeORMAdapter } from "@auth/typeorm-adapter";
-import * as defaultEntities from "@/entities/auth-entities"
-import { SnakeNamingStrategy } from "typeorm-naming-strategies";
-import { DataSourceOptions } from "typeorm"
-import { Account, Session, User, VerificationToken } from "./entities/auth-entities";
+import * as defaultEntities from "@/entities/auth-entities";
+import { User, Account, Session, VerificationToken } from "./entities/auth-entities";
+import { Task } from "./entities/Tasks";
 import { TaskAssignee } from "./entities/TaskAssignee";
-import { Task } from "./entities/Task";
+import { DataSource } from "typeorm";
+import { URL } from "url";
+import dotenv from "dotenv";
+dotenv.config();
 
-
-const db_connect = process.env.AUTH_TYPEORM_CONNECTION;
-if (!db_connect) {
-  throw new Error('Database connection string is not defined, check env & env.local are defined');
-  
+if (!process.env.DATABASE_URL) {
+  throw new Error("❌ DATABASE_URL is not defined in .env");
 }
 
-const connection: DataSourceOptions = {
-  type: "oracle",
-  username: process.env.DB_USER,
-  password: process.env.DB_PASS,
-  connectString: process.env.DB_CONNECT_STRING,
-  synchronize: true  , // TODO: TURN INTO FALSE WHEN PROD
+const dbUrl = new URL(process.env.DATABASE_URL);
+const routingId = dbUrl.searchParams.get("options");
+dbUrl.searchParams.delete("options");
+
+export const AppDataSource = new DataSource({
+  type: "cockroachdb",
+  url: dbUrl.toString(),
+  ssl: true,
+  timeTravelQueries: false,
+  extra: {
+    options: routingId
+  },
+  synchronize: true,
   logging: ["query", "error"],
-  migrations: ["migration/*.ts"],
-  entities: [User, Session, Account, TaskAssignee, Task, VerificationToken],
-  namingStrategy: new SnakeNamingStrategy(),
-}
- 
+  entities: [User, Account, Session, VerificationToken, Task, TaskAssignee],
+});
+
 const entities = {
   UserEntity: defaultEntities.User,
+  AccountEntity: defaultEntities.Account,
   SessionEntity: defaultEntities.Session,
   VerificationTokenEntity: defaultEntities.VerificationToken,
-  AccountEntity: defaultEntities.Account,
+};
 
-}
-
-// have to use jwt due to https://authjs.dev/guides/edge-compatibility
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  adapter: TypeORMAdapter(connection,{entities}), // Database adapter
-  ...authConfig
+  adapter: TypeORMAdapter(AppDataSource.options, { entities }),
+  ...authConfig,
 });

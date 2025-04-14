@@ -29,6 +29,7 @@
     "oci-objectstorage": "^2.104.0",
     "oci-secrets": "^2.104.0",
     "oracledb": "^6.8.0",
+    "pg": "^8.14.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "reflect-metadata": "^0.2.2",
@@ -39,7 +40,6 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@types/node": "^20",
-    "@types/oracledb": "^6.5.3",
     "@types/oracledb": "^6.5.3",
     "@types/react": "^19",
     "@types/react-dom": "^19",
