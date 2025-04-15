@@ -17,13 +17,13 @@ div {
 .pie {
   overflow: visible;
   margin: 0em;
-  width: 13em; /* set width to desired pie diameter */
+  width: 12em; /* set width to desired pie diameter */
   aspect-ratio: 1; /* make element square */
   font: 2em sans-serif;
   
   position: absolute;
-  left: -210px;
-  top: -210px;
+  left: -200px;
+  top: -200px;
 }
 
 .slice {
@@ -57,9 +57,6 @@ div {
 
   &:hover {
     --hov: 1; /* flip hover flag */
-    .tooltiptext {
-      visibility: visible;
-    }
   }
 }
 
@@ -71,15 +68,20 @@ div {
 
 /* Tooltip text */
 .tooltip .tooltiptext {
-  visibility: visible;
+  visibility: hidden;
   width: 120px;
   background-color: black;
   color: #fff;
   text-align: center;
   padding: 5px 0;
   border-radius: 6px;
-
+ 
   /* Position the tooltip text - see examples below! */
   position: absolute;
   z-index: 1;
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.tooltip:hover .tooltiptext {
+  visibility: visible;
 }

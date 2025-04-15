@@ -1,5 +1,7 @@
 "use client";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
+import ToolTip from "@/components/ToolTip"
+
 import { IoDocumentTextOutline } from "react-icons/io5";
 import { FaRegCheckSquare } from "react-icons/fa";
 import { FaRegCalendarAlt } from "react-icons/fa";
@@ -14,6 +16,7 @@ type MenuItem = {
 };
 
 export default function NavBar() {
+  
   const menuItems: MenuItem[] = [
     { name: "Assign", colour: "#f94144",icon:IoDocumentTextOutline},
     { name: "Tsks", colour: "#f3722c",icon:FaRegCheckSquare},
@@ -23,21 +26,32 @@ export default function NavBar() {
   const customStyle = (
     vars: Record<string, string | number>
   ): React.CSSProperties => vars as React.CSSProperties;
+
+  const ref = useRef<HTMLDivElement>(null);
+  const [menuOpen,setMenuOpen] = useState(false)
+  const [hovered, setHovered] = useState(-1); //tracks which menuitem if any are hovered
+
   // using this code as reference https://stackoverflow.com/questions/14184494/segments-in-a-circle-using-css/14185845#14185845
   return (
     <>
-      <button className="toggle">menu</button>
-      <div className="pie" style={customStyle({ "--n": 16 })}>
+      <button className="toggle" onClick={()=>setMenuOpen(!menuOpen)}>menu</button>
+      <div className="pie" style={customStyle({ "--n": 16 ,"visibility":menuOpen?"visible":"hidden"})}>
         {menuItems.map((item: MenuItem, idx: number) => (
           <div
             className="slice"
             style={customStyle({ "--i": idx, "--c": item.colour })}
+            onMouseEnter={() => setHovered(idx)}
+            onMouseLeave={() => setHovered(-1)}
+        
           >
-            {<item.icon />}
+            <item.icon />
+            
+            {hovered==idx && <ToolTip content={item.name} targetRef={ref} />}
+            
+            
           </div>
         ))}
       </div>
-      <span className="tooltiptext">Settings!!!</span>
     </>
   );
 }
