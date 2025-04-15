@@ -1,21 +1,45 @@
-"use client"
-import React, { useState } from 'react'
-import "./NavBar.css"
+"use client";
+import React, { useState } from "react";
+import { IoDocumentTextOutline } from "react-icons/io5";
+import { FaRegCheckSquare } from "react-icons/fa";
+import { FaRegCalendarAlt } from "react-icons/fa";
+import { IoSettingsOutline } from "react-icons/io5";
+import "./NavBar.css";
+import { IconType } from "react-icons";
 
-export default function NavBar(){
-    const menuItems = ["Assign", "Tsks", "Schedule", "Settings"]
+type MenuItem = {
+  name: string;
+  colour: string;
+  icon:IconType;
+};
 
-  return(
+export default function NavBar() {
+  const menuItems: MenuItem[] = [
+    { name: "Assign", colour: "#f94144",icon:IoDocumentTextOutline},
+    { name: "Tsks", colour: "#f3722c",icon:FaRegCheckSquare},
+    { name: "Schedule", colour: "#f8961e",icon:FaRegCalendarAlt },
+    { name: "Settings", colour: "#f9c74f",icon:IoSettingsOutline },
+  ];
+  const customStyle = (
+    vars: Record<string, string | number>
+  ): React.CSSProperties => vars as React.CSSProperties;
+  // using this code as reference https://stackoverflow.com/questions/14184494/segments-in-a-circle-using-css/14185845#14185845
+  return (
     <>
-<div className="palette">
-  <div className="color1"></div>
-  <div className="color2"></div>
-  <div className="color3"></div>
-  <div className="color4"></div>
-  <div className="color5"></div>
-</div>
-</>
-  )
+      <button className="toggle">menu</button>
+      <div className="pie" style={customStyle({ "--n": 16 })}>
+        {menuItems.map((item: MenuItem, idx: number) => (
+          <div
+            className="slice"
+            style={customStyle({ "--i": idx, "--c": item.colour })}
+          >
+            {<item.icon />}
+          </div>
+        ))}
+      </div>
+      <span className="tooltiptext">Settings!!!</span>
+    </>
+  );
 }
 
 // export default function NavBar() {
@@ -31,7 +55,6 @@ export default function NavBar(){
 //   const transformInnerContent = (idx: number): string => {
 //     return `rotate(${-(90 - (centralAngle * idx / 2) + 90)}deg) skew(${-(90 - centralAngle)}deg)`
 //   }
-
 
 //   return (
 
