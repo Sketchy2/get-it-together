@@ -3,31 +3,33 @@ import { createPortal } from "react-dom";
 
 type TooltipPortalProps = {
   content: string;
-  targetRef: React.RefObject<HTMLElement>|null;
+  targetRef: HTMLElement | undefined | null;
 };
 
-export default function TooltipPortal ({ content, targetRef }:TooltipPortalProps) {
+export default function TooltipPortal({
+  content,
+  targetRef,
+}: TooltipPortalProps) {
   const [coords, setCoords] = useState({ top: 0, left: 0 });
-  const tooltipRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (targetRef && targetRef.current) {
-      const rect = targetRef.current.getBoundingClientRect();
+    if (targetRef) {
+      const rect = targetRef.getBoundingClientRect();
+      const tooltipWidth = 120;
+
       setCoords({
-        top: rect.top + window.scrollY - 40, // show above
-        left: rect.left + window.scrollX + rect.width / 2,
+        top: rect.top + window.scrollY + rect.height,
+        left: rect.right + window.scrollX + tooltipWidth / 2,
       });
     }
   }, [targetRef]);
 
   return createPortal(
     <div
-      ref={tooltipRef}
       style={{
         position: "absolute",
         top: coords.top,
         left: coords.left,
-        transform: "translateX(100%)",
         backgroundColor: "black",
         color: "white",
         padding: "6px 10px",
@@ -35,9 +37,10 @@ export default function TooltipPortal ({ content, targetRef }:TooltipPortalProps
         whiteSpace: "nowrap",
         zIndex: 9999,
       }}
+      className="tooltiptext"
     >
       {content}
     </div>,
     document.body
   );
-};
+}

@@ -82,13 +82,11 @@ div {
 .tooltip .tooltiptext {
   visibility: hidden;
   width: 120px;
-  background-color: black;
+  background-color: rgb(27, 24, 24);
   color: #fff;
   text-align: center;
   padding: 5px 0;
   border-radius: 6px;
- 
-  /* Position the tooltip text - see examples below! */
   position: absolute;
   z-index: 1;
 }

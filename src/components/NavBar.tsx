@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import ToolTip from "@/components/ToolTip"
+import ToolTip from "@/components/ToolTip";
 import { MdOutlineMenu } from "react-icons/md";
 import { IoHome } from "react-icons/io5";
 import { IoDocumentTextOutline } from "react-icons/io5";
@@ -15,26 +15,39 @@ import Link from "next/link";
 type MenuItem = {
   name: string;
   colour: string;
-  icon:IconType;
-  href:string;
+  icon: IconType;
+  href: string;
 };
 
 export default function NavBar() {
-  
   const menuItems: MenuItem[] = [
-    { name: "Assign", colour: "#B55629",icon:IoDocumentTextOutline,href:"/assignment"},
-    { name: "Tsks", colour: "#3E4578",icon:FaRegCheckSquare,href:"/task"},
-    { name: "Schedule", colour: "#647A67",icon:FaRegCalendarAlt,href:"/schedule"},
-    { name: "Settings", colour: "#DD992B",icon:IoSettingsOutline,href:"/setting"},
+    {
+      name: "Assign",
+      colour: "#B55629",
+      icon: IoDocumentTextOutline,
+      href: "/assignment",
+    },
+    { name: "Tsks", colour: "#3E4578", icon: FaRegCheckSquare, href: "/task" },
+    {
+      name: "Schedule",
+      colour: "#647A67",
+      icon: FaRegCalendarAlt,
+      href: "/schedule",
+    },
+    {
+      name: "Settings",
+      colour: "#DD992B",
+      icon: IoSettingsOutline,
+      href: "/setting",
+    },
   ];
   const customStyle = (
     vars: Record<string, string | number>
   ): React.CSSProperties => vars as React.CSSProperties;
 
   const menuRef = useRef<Map<number, HTMLElement | null> | null>(null);
-    const [menuOpen,setMenuOpen] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false);
   const [hovered, setHovered] = useState(-1); //tracks which menuitem if any are hovered
-
 
   function getMap() {
     if (!menuRef.current) {
@@ -45,63 +58,53 @@ export default function NavBar() {
   const pathname = usePathname();
 
   useEffect(() => {
-    setMenuOpen(false); // Close the navigation panel
-  }, [ pathname ]);
-// TODO: ALLOW USERS TO LEAVE
-  // useEffect(() => {
-  //   function handleClickOutside(event:MouseEvent) {
-  //     // refs will exist after the elements are rendered.
-  //     // this condition prevents the refs were still undefined.
-  //     if (!listRef.current || !buttonRef.current) {
-  //       return;
-  //     }
-  //     // check if user clicked on the button
-  //     if (buttonRef.current.contains(event.target)) {
-  //       return;
-  //     }
-  //     // check if user clicked on the list
-  //     if (listRef.current.contains(event.target)) {
-  //       return;
-  //     }
-  //     onClickOutside();
-  //   }
-  //   // some other code
-  // })
-
+    setMenuOpen(false); // Close the navigation panel when route changes
+  }, [pathname]);
 
   // using this code as reference https://stackoverflow.com/questions/14184494/segments-in-a-circle-using-css/14185845#14185845
   return (
     <>
-      <button className="toggle" onClick={()=>setMenuOpen(!menuOpen)}><MdOutlineMenu size={28}/></button>
-      <div className="pie" style={customStyle({ "--n": 16 ,"visibility":menuOpen?"visible":"hidden"})}>
+      <button className="toggle" onClick={() => setMenuOpen(!menuOpen)}>
+        <MdOutlineMenu size={28} />
+      </button>
+      <div
+        className="pie"
+        style={customStyle({
+          "--n": 16,
+          visibility: menuOpen ? "visible" : "hidden",
+        })}
+      >
         {menuItems.map((item: MenuItem, idx: number) => (
           <Link
-          key={idx}
-          href={{pathname:item.href}}
-          ref={(node)=>{
-            const refs = getMap();
-            refs.set(idx,node)
-
-            return ()=>{
-              refs.delete(idx)
-            }
-          }}
+            key={idx}
+            href={{ pathname: item.href }}
             className="slice"
             style={customStyle({ "--i": idx, "--c": item.colour })}
             onMouseEnter={() => setHovered(idx)}
             onMouseLeave={() => setHovered(-1)}
-        
           >
-            <item.icon />
-            
-            
-            {hovered==idx && <ToolTip content={item.name} targetRef={getMap().get(idx)} />}
-            
-            
+            <div
+              ref={(node) => {
+                const refs = getMap();
+                refs.set(idx, node);
+
+                return () => {
+                  refs.delete(idx);
+                };
+              }}
+            >
+              <item.icon />
+            </div>
+
+            {hovered == idx && (
+              <ToolTip content={item.name} targetRef={getMap().get(idx)} />
+            )}
           </Link>
         ))}
       </div>
-      {menuOpen && <div className="overlay" onClick={()=>setMenuOpen(false)}></div>}
+      {menuOpen && (
+        <div className="overlay" onClick={() => setMenuOpen(false)}></div>
+      )}
     </>
   );
 }
