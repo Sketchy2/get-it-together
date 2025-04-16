@@ -30,7 +30,8 @@ export default function Layout({
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <NavBar />
-        {children}
+        <main>{children}</main>
+        
       </body>
     </html>
   );

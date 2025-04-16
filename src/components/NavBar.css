@@ -3,6 +3,7 @@ div {
 }
 .toggle {
   position: absolute;
+  background-color: #D9D9D9;
   left: -75px;
   top: -75px;
   border-radius: 50%;
@@ -12,6 +13,11 @@ div {
   clip-path: inset(50% 0 0 50%);
   padding-left: 4em; /* space from circle edge to text */
   padding-top: 4em; /* space from circle edge to text */
+
+    &:hover{
+      filter: brightness(70%);
+
+    }
 
 }
 
@@ -33,7 +39,7 @@ div {
   
   position: absolute;
   left: -200px;
-  top: -210px;
+  top: -200px;
 }
 
 .slice {
@@ -48,8 +54,8 @@ div {
   place-content: center end; /* text at 3 o'clock pre rotation */
   padding: 0.5em; /* space from circle edge to text */
   border-radius: 50%; /* turn square into disc */
-  transform: /* need rotation before translation */ rotate(calc(var(--ca)))
-    /* non-zero only in hover case */ translate(calc(var(--hov) * 1em));
+  transform: /* need rotation before translation */ rotate(calc(var(--ca)));
+    /* non-zero only in hover case translate(calc(var(--hov) * 1em)); */
 
   background: var(--c);
   /* so hover is only triggered inside slice area */
@@ -69,6 +75,7 @@ div {
 
   &:hover {
     --hov: 1; /* flip hover flag */
+    filter: brightness(70%);
   }
 }
 

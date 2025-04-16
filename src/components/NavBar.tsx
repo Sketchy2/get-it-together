@@ -11,6 +11,7 @@ import { IoSettingsOutline } from "react-icons/io5";
 import "./NavBar.css";
 import { IconType } from "react-icons";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 type MenuItem = {
   name: string;
@@ -22,12 +23,12 @@ type MenuItem = {
 export default function NavBar() {
   const menuItems: MenuItem[] = [
     {
-      name: "Assign",
+      name: "Assignment",
       colour: "#B55629",
       icon: IoDocumentTextOutline,
       href: "/assignment",
     },
-    { name: "Tsks", colour: "#3E4578", icon: FaRegCheckSquare, href: "/task" },
+    { name: "Tasks", colour: "#3E4578", icon: FaRegCheckSquare, href: "/task" },
     {
       name: "Schedule",
       colour: "#647A67",
@@ -41,10 +42,12 @@ export default function NavBar() {
       href: "/setting",
     },
   ];
+
   const customStyle = (
     vars: Record<string, string | number>
   ): React.CSSProperties => vars as React.CSSProperties;
 
+  const router = useRouter();
   const menuRef = useRef<Map<number, HTMLElement | null> | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [hovered, setHovered] = useState(-1); //tracks which menuitem if any are hovered
@@ -64,8 +67,17 @@ export default function NavBar() {
   // using this code as reference https://stackoverflow.com/questions/14184494/segments-in-a-circle-using-css/14185845#14185845
   return (
     <>
-      <button className="toggle" onClick={() => setMenuOpen(!menuOpen)}>
-        <MdOutlineMenu size={28} />
+      <button
+        className="toggle"
+        onClick={
+          menuOpen ? () => router.push("/home") : () => setMenuOpen(!menuOpen)
+        }
+      >
+        {menuOpen ? (
+          <IoHome color="black" size={28} />
+        ) : (
+          <MdOutlineMenu color="black" size={28} />
+        )}
       </button>
       <div
         className="pie"
