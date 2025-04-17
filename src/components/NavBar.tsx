@@ -126,7 +126,12 @@ export default function NavBar() {
 
       </div>
       {menuOpen && (
-        <div className="overlay" onClick={() => setMenuOpen(false)}></div>
+        <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+
+         className="overlay" onClick={() => setMenuOpen(false)}/>
       )}
     </>
   );
