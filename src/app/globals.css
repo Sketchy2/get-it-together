@@ -35,9 +35,12 @@ body {
   font-family: Arial, Helvetica, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  margin: 50px;
 
 
+}
+
+main{
+  margin: 10vh;
 }
 
 a {
