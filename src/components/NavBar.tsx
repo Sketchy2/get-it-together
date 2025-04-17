@@ -12,6 +12,7 @@ import "./NavBar.css";
 import { IconType } from "react-icons";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { motion,AnimatePresence } from "motion/react"
 
 type MenuItem = {
   name: string;
@@ -48,7 +49,7 @@ export default function NavBar() {
   ): React.CSSProperties => vars as React.CSSProperties;
 
   const router = useRouter();
-  const menuRef = useRef<Map<number, HTMLElement | null> | null>(null);
+  const menuRef = useRef<Map<number,HTMLDivElement|null>>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [hovered, setHovered] = useState(-1); //tracks which menuitem if any are hovered
 
@@ -70,7 +71,7 @@ export default function NavBar() {
       <button
         className="toggle"
         onClick={
-          menuOpen ? () => router.push("/home") : () => setMenuOpen(!menuOpen)
+          menuOpen ? () => {router.push("/home");setMenuOpen(!menuOpen)} : () => setMenuOpen(!menuOpen)
         }
       >
         {menuOpen ? (
@@ -86,33 +87,43 @@ export default function NavBar() {
           visibility: menuOpen ? "visible" : "hidden",
         })}
       >
-        {menuItems.map((item: MenuItem, idx: number) => (
-          <Link
-            key={idx}
-            href={{ pathname: item.href }}
-            className="slice"
-            style={customStyle({ "--i": idx, "--c": item.colour })}
-            onMouseEnter={() => setHovered(idx)}
-            onMouseLeave={() => setHovered(-1)}
-          >
-            <div
-              ref={(node) => {
-                const refs = getMap();
+<AnimatePresence>
+  {menuOpen &&
+    menuItems.map((item: MenuItem, idx: number) => (
+      <Link //https://stackoverflow.com/questions/75815089/how-can-i-use-nextjs-link-component-with-framer-motion-in-typescript
+        key={idx}
+        href={{ pathname: item.href }}
+        className="slice"
+        style={customStyle({ "--i": idx, "--c": item.colour })}
+        onMouseEnter={() => setHovered(idx)}
+        onMouseLeave={() => setHovered(-1)}
+      >
+        <motion.div
+          initial={{ opacity: 0, scale: 0.3, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.3, y: 20 }}
+          transition={{ duration: 0.3, delay: idx * 0.05 }}
+        >
+          <div
+            ref={(node) => {
+              const refs = getMap();
+              if (node) {
                 refs.set(idx, node);
+              } else {
+                refs.delete(idx);
+              }            }}
+          >
+            <item.icon />
+          </div>
+        </motion.div>
+        {hovered === idx && (
+          <ToolTip content={item.name} targetRef={getMap().get(idx)} />
+        )}
+      </Link>
+    ))}
+</AnimatePresence>
 
-                return () => {
-                  refs.delete(idx);
-                };
-              }}
-            >
-              <item.icon />
-            </div>
 
-            {hovered == idx && (
-              <ToolTip content={item.name} targetRef={getMap().get(idx)} />
-            )}
-          </Link>
-        ))}
       </div>
       {menuOpen && (
         <div className="overlay" onClick={() => setMenuOpen(false)}></div>
