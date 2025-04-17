@@ -27,15 +27,8 @@ export default function TooltipPortal({
   return createPortal(
     <div
       style={{
-        position: "absolute",
         top: coords.top,
-        left: coords.left,
-        backgroundColor: "black",
-        color: "white",
-        padding: "6px 10px",
-        borderRadius: "6px",
-        whiteSpace: "nowrap",
-        zIndex: 9999,
+        left: coords.left
       }}
       className="tooltiptext"
     >
