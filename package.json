@@ -30,6 +30,7 @@
     "oci-objectstorage": "^2.104.0",
     "oci-secrets": "^2.104.0",
     "oracledb": "^6.8.0",
+    "pg": "^8.14.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-icons": "^5.5.0",

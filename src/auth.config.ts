@@ -9,6 +9,6 @@ export default {
     from: process.env.EMAIL_FROM,
   }),],
   session: {
-    strategy: "jwt", // Use JWT-based sessions
+    strategy: "jwt",
   },
 } satisfies NextAuthConfig
