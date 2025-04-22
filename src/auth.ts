@@ -2,9 +2,14 @@ import NextAuth from "next-auth";
 import authConfig from "./auth.config";
 import { TypeORMAdapter } from "@auth/typeorm-adapter";
 import * as defaultEntities from "@/entities/auth-entities";
+
 import { User, Account, Session, VerificationToken } from "./entities/auth-entities";
 import { Task } from "./entities/Tasks";
 import { TaskAssignee } from "./entities/TaskAssignee";
+import { Group } from "./entities/Groups";
+import { GroupMember } from "./entities/Groups";
+import { Assignment } from "./entities/Assignments";
+
 import { DataSource } from "typeorm";
 import { URL } from "url";
 import dotenv from "dotenv";
@@ -28,7 +33,7 @@ export const AppDataSource = new DataSource({
   },
   synchronize: true,
   logging: ["query", "error"],
-  entities: [User, Account, Session, VerificationToken, Task, TaskAssignee],
+  entities: [User, Account, Session, VerificationToken, Task, TaskAssignee, Group, GroupMember, Assignment],
 });
 
 const entities = {
