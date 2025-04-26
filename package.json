@@ -2,13 +2,20 @@
   "name": "get-it-together",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "typeorm": "typeorm-ts-node-esm --dataSource src/data-source.ts",
+    "typeorm:migrate": "yarn typeorm migration:run",
+    "typeorm:generate": "yarn typeorm migration:generate src/database/migration/Migration --timestamp",
+    "typeorm:revert": "yarn typeorm migration:revert",
+    "typeorm:drop": "yarn typeorm schema:drop"
   },
   "dependencies": {
+    "@auth/typeorm-adapter": "^2.8.0",
     "@azure/app-configuration": "^1.8.0",
     "@azure/identity": "^4.7.0",
     "@azure/keyvault-secrets": "^4.9.0",
@@ -16,12 +23,19 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "next": "^15.2.1",
+    "next-auth": "^5.0.0-beta.25",
+    "nodemailer": "^6.10.0",
     "oci-common": "^2.104.0",
     "oci-objectstorage": "^2.104.0",
     "oci-secrets": "^2.104.0",
     "oracledb": "^6.8.0",
+    "pg": "^8.14.1",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "reflect-metadata": "^0.2.2",
+    "resend": "^4.1.2",
+    "typeorm": "^0.3.21",
+    "typeorm-naming-strategies": "^4.1.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
@@ -31,6 +45,8 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.2.1",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
     "typescript": "^5"
   }
 }

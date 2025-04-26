@@ -1,0 +1,51 @@
+/* Rectangle 13 */
+
+.rect{
+    user-select: none;
+    appearance: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    -webkit-appearance: none;
+    background-color: #d9d9d9;
+    background-image: none;
+    -webkit-border-radius: 24px;
+    border-radius: 20px;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    color: #1f1f1f;
+    font-family: 'Roboto', arial, sans-serif;
+    font-size: 16px; 
+    height: 50px; 
+    letter-spacing: 0.3px;
+    outline: none;
+    overflow: hidden;
+    padding: 0 16px; 
+    position: relative;
+    text-align: center;
+    vertical-align: middle;
+    white-space: nowrap;
+    width: auto;
+    max-width: 450px;
+    min-width: fit-content;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.signInButton{
+    margin-top: 10px;
+    background-color: #b55629;
+    border-radius: 24px;
+    border-color: #5a5d5b;
+    font-weight: bolder;
+    color: aliceblue;
+    cursor: pointer;
+
+
+}
+
+.signInButton:hover{
+    background-color: #823d1d;
+
+}
