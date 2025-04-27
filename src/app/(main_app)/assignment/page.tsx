@@ -21,6 +21,8 @@ import {
   Clock,
 } from "lucide-react"
 import ProgressCircle from "@/components/assignment/ProgressCircle"
+import { None } from "motion/dist/react"
+import ViewToggle from "@/components/ViewToggle"
 
 // Define clear interfaces for data models
 interface Member {
@@ -125,6 +127,13 @@ export default function Assignments() {
   const [sortBy, setSortBy] = useState<SortOption>("dueDate")
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc")
 
+  const switchViewMode = () => {
+    if (viewMode == "kanban")
+    {setViewMode("list");}
+    else
+    {setViewMode("kanban");}
+
+  };
   /**
    * Sample data generator function
    * 
@@ -600,6 +609,7 @@ export default function Assignments() {
             <button className="iconButton" onClick={() => setSortMenuOpen(!sortMenuOpen)}>
               <ArrowUpRightIcon size={20} />
             </button>
+            {/* Sort menu */}
             {sortMenuOpen && (
               <div className="sortMenu">
                 <button
@@ -622,22 +632,9 @@ export default function Assignments() {
               </div>
             )}
           </div>
-          <div className="viewToggleContainer">
-            <div className="viewToggle">
-              <button
-                className={`viewButton ${viewMode === "kanban" ? "activeView" : ""}`}
-                onClick={() => setViewMode("kanban")}
-              >
-                Kanban
-              </button>
-              <button
-                className={`viewButton ${viewMode === "list" ? "activeView" : ""}`}
-                onClick={() => setViewMode("list")}
-              >
-                List
-              </button>
-            </div>
-          </div>
+
+          <ViewToggle viewMode={viewMode} onclick={switchViewMode} />
+
         </div>
       </header>
 
@@ -682,7 +679,8 @@ export default function Assignments() {
                 <h2 className="listSectionTitle">{row.title}</h2>
               </div>
               <div className="listItems">
-                {row.assignments.map((assignment) => {
+                {row.assignments.map((assignment) => 
+                {
                   const viewModel = createAssignmentViewModel(assignment)
                   return (
                     <div key={assignment.id}>

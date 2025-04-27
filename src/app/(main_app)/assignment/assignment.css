@@ -45,30 +45,7 @@
   background-color: #3e3e3e;
 }
 
-.viewToggleContainer {
-  margin-left: 8px;
-}
 
-.viewToggle {
-  display: flex;
-  background-color: #2a2a2a;
-  border-radius: 8px;
-  padding: 4px;
-}
-
-.viewButton {
-  background: none;
-  border: none;
-  color: white;
-  padding: 6px 12px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.viewButton.activeView {
-  background-color: #3e4578;
-}
 
 .rowsContainer {
   display: flex;
