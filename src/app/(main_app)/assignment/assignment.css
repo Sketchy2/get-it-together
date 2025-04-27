@@ -279,7 +279,7 @@
   margin: 0 15px;
 }
 
-.miniProgressBar {
+/* .miniProgressBar {
   width: 4px;
   height: 16px;
   background-color: rgba(255, 255, 255, 0.3);
@@ -288,7 +288,7 @@
   height: 16px;
   background-color: #ffd700;
   border-radius: 3px;
-}
+} */
 
 .todoItemAvatar {
   width: 24px;
@@ -435,55 +435,7 @@
   background-color: #4a5490;
 }
 
-/* Add styles for the sort menu */
-.sortDropdown {
-  position: relative;
-}
 
-.sortMenu {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  margin-top: 8px;
-  background-color: #333333;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  z-index: 10;
-  min-width: 180px;
-  overflow: hidden;
-  animation: fadeIn 0.2s ease;
-}
-
-.sortOption {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px;
-  background: none;
-  border: none;
-  color: white;
-  text-align: left;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  width: 100%;
-}
-
-.sortOption:last-child {
-  border-bottom: none;
-}
-
-.sortOption:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-}
-
-.sortOption.active {
-  background-color: rgba(77, 86, 150, 0.2);
-}
-
-.sortOption span {
-  flex: 1;
-}
 
 /* Smooth transitions */
 .listItem,

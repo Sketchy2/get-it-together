@@ -28,6 +28,8 @@ import {
 import { useRouter } from "next/navigation"
 import { useState, useRef, useEffect } from "react"
 import ProgressCircle from "./ProgressCircle"
+import { SortDirection, SortOption } from "@/types/sort"
+import SortMenu from "../SortMenu"
 
 interface TodoItem {
   id: string
@@ -84,14 +86,21 @@ const AssignmentDetails: React.FC<AssignmentDetailsProps> = ({
   onExpand,
   assignment,
 }) => {
+  const sortOptions:SortOption[] = [
+    { key: "dueDate", label: "Due Date", icon: <Calendar size={16} /> },
+    { key: "createdAt", label: "Created Date", icon: <Clock size={16} /> },
+    { key: "weight", label: "Weight", icon: <Weight size={16} /> },
+    { key: "priority", label: "Priority", icon: <Flag size={16} /> },
+  ] as const;
+  
   const router = useRouter()
   const [isEditing, setIsEditing] = useState(false)
   const [editedDescription, setEditedDescription] = useState(description)
   const [showFiles, setShowFiles] = useState(false)
   const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false)
   const [isSortMenuOpen, setIsSortMenuOpen] = useState(false)
-  const [sortBy, setSortBy] = useState<"dueDate" | "weight" | "priority">("dueDate")
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc")
+  const [sortBy, setSortBy] = useState<SortOption>(sortOptions[0])
+  const [sortDirection, setSortDirection] = useState<SortDirection>("asc")
   const [filters, setFilters] = useState({
     status: [] as string[],
     priority: [] as string[],
@@ -186,8 +195,8 @@ const AssignmentDetails: React.FC<AssignmentDetailsProps> = ({
     })
   }
 
-  const handleSortChange = (sortType: "dueDate" | "weight" | "priority") => {
-    if (sortBy === sortType) {
+  const handleSortChange = (sortType: SortOption) => {
+    if (sortBy.key === sortType.key) {
       // Toggle direction if same sort type
       setSortDirection(sortDirection === "asc" ? "desc" : "asc")
     } else {
@@ -239,7 +248,7 @@ const AssignmentDetails: React.FC<AssignmentDetailsProps> = ({
 
     // Apply sorting
     return filteredTodos.sort((a, b) => {
-      if (sortBy === "dueDate") {
+      if (sortBy.key === "dueDate") { // TODO: fix duedate +  createdAt
         if (!a.dueDate) return sortDirection === "asc" ? 1 : -1
         if (!b.dueDate) return sortDirection === "asc" ? -1 : 1
 
@@ -247,11 +256,11 @@ const AssignmentDetails: React.FC<AssignmentDetailsProps> = ({
         const dateB = new Date(b.dueDate).getTime()
 
         return sortDirection === "asc" ? dateA - dateB : dateB - dateA
-      } else if (sortBy === "weight") {
+      } else if (sortBy.key === "weight") {
         const weightA = a.weight || 1
         const weightB = b.weight || 1
         return sortDirection === "asc" ? weightA - weightB : weightB - weightA
-      } else if (sortBy === "priority") {
+      } else if (sortBy.key === "priority") {
         // Modified priority sorting to ensure high priority is at the top
         const priorityValues = { high: 3, medium: 2, low: 1 }
         const valueA = priorityValues[a.priority || "medium"] || 0
@@ -494,7 +503,16 @@ const AssignmentDetails: React.FC<AssignmentDetailsProps> = ({
                   </div>
                 )}
               </div>
-              <div className="sortContainer" ref={sortMenuRef}>
+                        <SortMenu
+                          sortMenuOpen={isSortMenuOpen}
+                          setSortMenuOpen={toggleSortMenu}
+                          sortBy={sortBy}
+                          sortDirection={sortDirection}
+                          handleSortChange={handleSortChange}
+                          options = {sortOptions}
+                        />
+
+              {/* <div className="sortContainer" ref={sortMenuRef}>
                 <button className="actionButton" onClick={toggleSortMenu}>
                   <ArrowUpDown size={18} />
                 </button>
@@ -538,7 +556,9 @@ const AssignmentDetails: React.FC<AssignmentDetailsProps> = ({
                     </button>
                   </div>
                 )}
-              </div>
+              </div> */}
+
+
             </div>
           </div>
 
