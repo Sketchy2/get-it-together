@@ -1,0 +1,608 @@
+/* Enhanced assignments.css */
+.assignmentsContainer {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background-color: #1e1e1e;
+  color: white;
+}
+
+.assignmentHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.title {
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.iconButton {
+  background-color: #2a2a2a;
+  border: none;
+  color: white;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.iconButton:hover {
+  background-color: #3e3e3e;
+}
+
+.viewToggleContainer {
+  margin-left: 8px;
+}
+
+.viewToggle {
+  display: flex;
+  background-color: #2a2a2a;
+  border-radius: 8px;
+  padding: 4px;
+}
+
+.viewButton {
+  background: none;
+  border: none;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.viewButton.activeView {
+  background-color: #3e4578;
+}
+
+.rowsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  overflow-y: auto;
+  flex: 1;
+  padding-bottom: 70px;
+}
+
+.addCard {
+  min-width: 230px;
+  height: 180px;
+  background-color: #2a2a2a;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.addCard:hover {
+  background-color: #3e3e3e;
+}
+
+/* List View Styling */
+.listContainer {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  max-height: calc(100vh - 120px);
+}
+
+.listSection {
+  background-color: #2a2a2a;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.listSectionHeader {
+  padding: 12px 16px;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  display: flex;
+  align-items: center;
+}
+
+.listSectionTitle {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: white;
+}
+
+.listItems {
+  max-height: 70vh;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.listItem {
+  background-color: #dd992b;
+  border-radius: 8px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.2s;
+  background-color: transparent !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.listItem:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.08);
+}
+
+.listItem.expanded {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.listItemIcon {
+  margin-right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+
+.listItemContent {
+  flex: 1;
+}
+
+.listItemTitle {
+  margin: 0 0 4px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: white;
+}
+
+.listItemMeta {
+  font-size: 0.8rem;
+  opacity: 0.9;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.listItemProgress {
+  width: 40px;
+  height: 40px;
+  margin-left: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.progress-circle {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+.progress-circle svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.progress-circle-bg {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.2);
+  stroke-width: 2.8;
+}
+
+.progress-circle-fill {
+  fill: none;
+  stroke: white;
+  stroke-width: 2.8;
+  stroke-linecap: round;
+  transition: stroke-dasharray 0.5s ease;
+}
+
+.progress-text {
+  fill: white;
+  font-size: 0.6rem;
+  font-weight: bold;
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+
+.listItemDetails {
+  padding: 16px;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+  padding: 16px 20px 20px 60px;
+  background-color: rgba(0, 0, 0, 0.15) !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  height: auto;
+  overflow: visible;
+  display: none;
+}
+
+.expanded + .listItemDetails {
+  display: block;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.listItemDescription {
+  margin-bottom: 16px;
+  margin-bottom: 20px;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.6;
+}
+
+.todoItems {
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  padding: 12px;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.todoItemHeader {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 6px;
+}
+
+.todoItem {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  background-color: #4a4682;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.todoItem:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.todoItemCheckbox {
+  margin-right: 8px;
+  margin-right: 15px;
+  display: flex;
+  align-items: center;
+}
+
+.todoItemText {
+  flex: 1;
+  color: white;
+}
+
+.todoItemProgressBars {
+  display: flex;
+  gap: 4px;
+  margin-right: 8px;
+  display: flex;
+  gap: 3px;
+  margin: 0 15px;
+}
+
+.miniProgressBar {
+  width: 4px;
+  height: 16px;
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 2px;
+  width: 6px;
+  height: 16px;
+  background-color: #ffd700;
+  border-radius: 3px;
+}
+
+.todoItemAvatar {
+  width: 24px;
+  height: 24px;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: #6a6a9f;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.emptyTodoState {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 16px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+}
+
+.addTodoButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+  padding: 12px 16px;
+  border-radius: 8px;
+  width: 100%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.addTodoButton:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  background-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.detailsFooter {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+  margin-top: 20px;
+}
+
+.viewFullButton {
+  background-color: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  background-color: rgba(255, 255, 255, 0.15);
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.viewFullButton:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+  background-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+}
+
+.addListItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #2a2a2a;
+  border-radius: 8px;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.addListItem:hover {
+  background-color: #3e3e3e;
+}
+
+.addButton {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background-color: #4d5696;
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 10;
+  transition: all 0.2s ease;
+}
+
+.addButton:hover {
+  background-color: #5a64a8;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+.floatingAddButton {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background-color: #3e4578;
+  color: white;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.floatingAddButton:hover {
+  transform: translateY(-4px);
+  background-color: #4a5490;
+}
+
+/* Add styles for the sort menu */
+.sortDropdown {
+  position: relative;
+}
+
+.sortMenu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  background-color: #333333;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 10;
+  min-width: 180px;
+  overflow: hidden;
+  animation: fadeIn 0.2s ease;
+}
+
+.sortOption {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: none;
+  border: none;
+  color: white;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  width: 100%;
+}
+
+.sortOption:last-child {
+  border-bottom: none;
+}
+
+.sortOption:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.sortOption.active {
+  background-color: rgba(77, 86, 150, 0.2);
+}
+
+.sortOption span {
+  flex: 1;
+}
+
+/* Smooth transitions */
+.listItem,
+.progressRing::before {
+  transition: all 0.3s ease;
+}
+
+/* Card hover effects */
+.card {
+  position: relative;
+  z-index: 0;
+}
+
+.cardFooter {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+}
+
+/* Improve scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .assignmentsContainer {
+    padding: 16px;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .addCard {
+    min-width: 180px;
+    height: 150px;
+  }
+  .listItem {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .listItemProgress {
+    margin-left: 0;
+    margin-top: 12px;
+  }
+
+  .rowContainer {
+    width: 100%;
+  }
+
+  .title {
+    font-size: 1.8rem;
+  }
+}
