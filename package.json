@@ -19,6 +19,7 @@
     "@azure/app-configuration": "^1.8.0",
     "@azure/identity": "^4.7.0",
     "@azure/keyvault-secrets": "^4.9.0",
+    "@hello-pangea/dnd": "^18.0.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
