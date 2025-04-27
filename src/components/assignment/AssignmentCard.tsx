@@ -1,6 +1,7 @@
 // components/AssignmentCard.tsx
 import type React from "react"
 import "./AssignmentCard.css"
+import ProgressCircle from "./ProgressCircle"
 
 interface AssignmentCardProps {
   title: string
@@ -29,6 +30,13 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({
   width = "280px",
   height = "150px",
 }) => {
+
+  // calc
+
+
+
+
+
   return (
     <div
       className="card"
@@ -48,9 +56,10 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({
         </div>
 
         <p className="cardDescription">{description}</p>
-
         <div className="cardFooter">
-          <div className="progressCircleContainer">
+        <ProgressCircle percentage={progress} />
+
+          {/* <div className="progressCircleContainer">
             <div className="progress-circle">
               <svg viewBox="0 0 36 36">
                 <path
@@ -71,7 +80,7 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({
                 </text>
               </svg>
             </div>
-          </div>
+          </div> */}
 
           <div className="daysIndicator">
             <span className="daysText">

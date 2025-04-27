@@ -31,6 +31,7 @@ import "./ExpandedAssignmentView.css"
 import TaskCard from "./TaskCard"
 import CreateTaskModal from "./CreateTaskModal"
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd"
+import ProgressCircle from "./ProgressCircle"
 
 interface Task {
   id: string
@@ -687,7 +688,9 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({ assignm
               </div>
             </div>
           </div>
-          <div className="progressCircleContainer">
+          <ProgressCircle percentage={progress} />
+
+          {/* <div className="progressCircleContainer">
             <div className="progress-circle">
               <svg viewBox="0 0 36 36">
                 <path
@@ -708,7 +711,7 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({ assignm
                 </text>
               </svg>
             </div>
-          </div>
+          </div> */}
           <button className="closeButton" onClick={onClose}>
             <X size={24} />
           </button>

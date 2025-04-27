@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import "./assignment.css"
+import { isLate } from "@/lib/utils"
 import AssignmentRow from "@/components/assignment/AssignmentRow"
 import AssignmentCard from "@/components/assignment/AssignmentCard"
 import AssignmentModal from "@/components/assignment/AssignmentModal"
@@ -19,6 +20,7 @@ import {
   Calendar,
   Clock,
 } from "lucide-react"
+import ProgressCircle from "@/components/assignment/ProgressCircle"
 
 // Define clear interfaces for data models
 interface Member {
@@ -248,15 +250,9 @@ export default function Assignments() {
     ]
   }, [])
   
-  /**
-   * Utility function to check if an assignment is late
-   */
-  const isAssignmentLate = useCallback((dueDate: string): boolean => {
-    return new Date(dueDate) < new Date()
-  }, [])
 
   /**
-   * Utility function to calculate days remaining
+   * Utility function to calculate days remaining -
    */
   const calculateDaysRemaining = useCallback((dueDate: string): number => {
     const dueDateTime = new Date(dueDate).getTime()
@@ -300,12 +296,12 @@ export default function Assignments() {
       return "#647A67" // Green color for completed items
     }
     
-    if (isAssignmentLate(assignment.dueDate)) {
+    if (isLate(assignment.dueDate)) {
       return "#900100" // Red color for late assignments
     }
     
     return "#DD992B" // Default gold color for active
-  }, [calculateProgress, isAssignmentLate])
+  }, [calculateProgress, isLate])
 
   /**
    * Create view model for assignment card display
@@ -337,14 +333,14 @@ export default function Assignments() {
       description: assignment.description,
       progress,
       daysRemaining,
-      isLate: isAssignmentLate(assignment.dueDate),
+      isLate: isLate(assignment.dueDate),
       bgColor: getCardBgColor(assignment),
       tasks: assignment.tasks,
       members: assignment.members,
       files: assignment.files,
       todos // For backwards compatibility with AssignmentModal
     }
-  }, [calculateProgress, calculateDaysRemaining, formatDate, isAssignmentLate, getCardBgColor])
+  }, [calculateProgress, calculateDaysRemaining, formatDate, isLate, getCardBgColor])
 
   /**
    * Load all assignments on component mount
@@ -710,28 +706,7 @@ export default function Assignments() {
                             </span>
                           </div>
                         </div>
-                        <div className="listItemProgress">
-                          <div className="progress-circle">
-                            <svg viewBox="0 0 36 36">
-                              <path
-                                className="progress-circle-bg"
-                                d="M18 2.0845
-                                  a 15.9155 15.9155 0 0 1 0 31.831
-                                  a 15.9155 15.9155 0 0 1 0 -31.831"
-                              />
-                              <path
-                                className="progress-circle-fill"
-                                strokeDasharray={`${viewModel.progress}, 100`}
-                                d="M18 2.0845
-                                  a 15.9155 15.9155 0 0 1 0 31.831
-                                  a 15.9155 15.9155 0 0 1 0 -31.831"
-                              />
-                              <text x="18" y="20.35" className="progress-text">
-                                {viewModel.progress}%
-                              </text>
-                            </svg>
-                          </div>
-                        </div>
+                        <ProgressCircle percentage={viewModel.progress} />
                       </div>
 
                       {expandedAssignment === assignment.id && (

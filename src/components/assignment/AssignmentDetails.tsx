@@ -27,6 +27,7 @@ import {
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState, useRef, useEffect } from "react"
+import ProgressCircle from "./ProgressCircle"
 
 interface TodoItem {
   id: string
@@ -295,7 +296,8 @@ const AssignmentDetails: React.FC<AssignmentDetailsProps> = ({
         <button className="closeButton" onClick={onClose}>
           <X size={24} />
         </button>
-        <div className="progressCircleContainer">
+        <ProgressCircle percentage={progress}/>
+        {/* <div className="progressCircleContainer">
           <div className="progress-circle">
             <svg viewBox="0 0 36 36">
               <path
@@ -316,7 +318,7 @@ const AssignmentDetails: React.FC<AssignmentDetailsProps> = ({
               </text>
             </svg>
           </div>
-        </div>
+        </div> */}
       </div>
 
       <div className="detailsContent">
