@@ -10,7 +10,7 @@ export default function EmailSignIn() {
         await signIn("nodemailer", formData)      }}
     >
       <input className="rect" type="text" name="email" placeholder="Enter Email Address" />
-      <button className="rect signInButton" type="submit">Signin with email</button>
+      <button className="rect signInButton" type="submit">Sign in with email</button>
     </form>
   )
 }
