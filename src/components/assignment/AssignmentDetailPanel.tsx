@@ -24,7 +24,7 @@ import SortMenu from "../SortMenu"
 import TaskCard from "../task/TaskCard"
 import { Task } from "@/types/task"
 import {AssignmentLink, FileAttachment} from "@/types/assignment"
-import { isLate } from "@/utils/utils"
+import { formatDate, isLate } from "@/utils/utils"
 import {  calculateProgress, getCardBgColor } from "@/utils/assignmentUtils"
 
 interface AssignmentDetailsProps {
@@ -244,7 +244,7 @@ const AssignmentDetailPanel: React.FC<AssignmentDetailsProps> = ({
           <h2 className="detailsTitle">{title}</h2>
           <div className="detailsMetaRow">
             <span className="detailsMeta">
-              {createdAt} + day due | weighing: {weight}%
+              Due: {formatDate(dueDate)} | Weighed: {weight}%
             </span>
             <div className="statusIndicator">
               <span>{islate ? "Overdue" : progress === 100 ? "Completed" : "In Progress"}</span>

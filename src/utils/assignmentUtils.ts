@@ -1,6 +1,5 @@
 import { Task } from "@/types/task";
 import { isLate } from "./utils";
-import { Assignment } from "@/types/assignment";
 
 export {calculateProgress,calculateDaysRemaining,getCardBgColor}
 

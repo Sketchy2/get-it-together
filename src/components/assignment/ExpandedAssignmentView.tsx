@@ -17,8 +17,7 @@ import {
   HelpCircle,
   BarChart,
   Filter,
-  ArrowUp,
-  ArrowDown,
+
   FileText,
   Edit,
   ChevronDown,
@@ -35,7 +34,6 @@ import ProgressCircle from "./ProgressCircle";
 import { TaskStatus, Task } from "@/types/task";
 import { Assignment, FileAttachment } from "@/types/assignment";
 import {  calculateProgress, getCardBgColor } from "@/utils/assignmentUtils";
-import { Sort } from "typeorm";
 import { SortDirection, SortOption } from "@/types/sort";
 import SortMenu from "../SortMenu";
 import { formatDate } from "@/utils/utils";
