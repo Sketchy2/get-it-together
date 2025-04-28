@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { signIn } from "@/auth";
 import "./EmailSignIn.css";
 import { toast } from "react-hot-toast";
+import { emailSignInAction } from "@/components/auth/EmailSignInAction";
 
 export default function EmailSignIn() {
   const [pending, setPending] = useState(false);
@@ -12,13 +12,12 @@ export default function EmailSignIn() {
     const email = formData.get("email")?.toString().trim();
 
     if (!email) {
-      toast.error("Please enter a valid email address");
       return;
     }
 
     try {
       setPending(true);
-      await signIn("nodemailer", formData);
+      await emailSignInAction(formData);
       toast.success("Sign-in link sent!");
     } catch (err) {
       console.error(err);
