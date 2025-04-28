@@ -28,8 +28,8 @@ import {
   Upload,
 } from "lucide-react";
 import "./ExpandedAssignmentView.css";
-import TaskCard from "./TaskCard";
-import CreateTaskModal from "./CreateTaskModal";
+import TaskCard from "../task/TaskCard";
+import CreateTaskModal from "../task/CreateTaskModal";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import ProgressCircle from "./ProgressCircle";
 import { TaskStatus, Task } from "@/types/task";
@@ -38,6 +38,7 @@ import {  calculateProgress, getCardBgColor } from "@/utils/assignmentUtils";
 import { Sort } from "typeorm";
 import { SortDirection, SortOption } from "@/types/sort";
 import SortMenu from "../SortMenu";
+import { formatDate } from "@/utils/utils";
 
 interface ExpandedAssignmentViewProps {
   assignment: Assignment;
@@ -293,7 +294,6 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
     }
   };
 
-  // TODO: MODIFY TO BE BASED ON SORT MENU
   const handleSortChange = (sortType:SortOption) => {
     if (sortBy.key === sortType.key) {
       // Toggle direction if same sort type
@@ -509,6 +509,7 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
     </div>)
   };
 
+  // render members
   const renderMemberView = () => {
     const members = getUniqueAssignees();
 
@@ -669,7 +670,7 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
       setEditedDescription(assignment.description);
     }
 
-    // Add click outside listener for menus
+    // Add click outside listener for menus TODO: MOVE LOGIC INTO MENUS?
     const handleClickOutside = (event: MouseEvent) => {
       if (
         filterMenuRef.current &&
@@ -705,9 +706,10 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
           <div className="headerContent">
             <h2 className="assignmentTitle">{assignment.title}</h2>
             <div className="assignmentMeta">
+              {/* TODO: STEAL TAGS */}
               <div className="metaItem">
                 <Calendar size={16} />
-                <span>Due: {assignment.dueDate}</span>
+                <span>Due: {formatDate(assignment.dueDate)}</span>
               </div>
               <div className="metaItem">
                 <Paperclip size={16} />
@@ -1034,67 +1036,9 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
                   sortDirection={sortDirection}
                   handleSortChange={handleSortChange}
                   options={sortOptions}
-                  displayText={true}
                 
                 />
-                {/* <button className="actionButton" onClick={toggleSortMenu}>
-                  {sortDirection === "asc" ? (
-                    <ArrowUp size={18} />
-                  ) : (
-                    <ArrowDown size={18} />
-                  )}
-                  <span>Sort</span>
-                </button>
 
-                {isSortMenuOpen && (
-                  <div className="sortMenu">
-                    <button
-                      className={`sortOption ${
-                        sortBy === "dueDate" ? "active" : ""
-                      }`}
-                      onClick={() => handleSortChange("dueDate")}
-                    >
-                      <Calendar size={16} />
-                      <span>Due Date</span>
-                      {sortBy === "dueDate" &&
-                        (sortDirection === "asc" ? (
-                          <ArrowUp size={16} />
-                        ) : (
-                          <ArrowDown size={16} />
-                        ))}
-                    </button>
-                    <button
-                      className={`sortOption ${
-                        sortBy === "weight" ? "active" : ""
-                      }`}
-                      onClick={() => handleSortChange("weight")}
-                    >
-                      <BarChart size={16} />
-                      <span>Weight</span>
-                      {sortBy === "weight" &&
-                        (sortDirection === "asc" ? (
-                          <ArrowUp size={16} />
-                        ) : (
-                          <ArrowDown size={16} />
-                        ))}
-                    </button>
-                    <button
-                      className={`sortOption ${
-                        sortBy === "priority" ? "active" : ""
-                      }`}
-                      onClick={() => handleSortChange("priority")}
-                    >
-                      <Flag size={16} />
-                      <span>Priority</span>
-                      {sortBy === "priority" &&
-                        (sortDirection === "asc" ? (
-                          <ArrowUp size={16} />
-                        ) : (
-                          <ArrowDown size={16} />
-                        ))}
-                    </button>
-                  </div>
-                )} */}
               </div>
 
               {/* add task */}

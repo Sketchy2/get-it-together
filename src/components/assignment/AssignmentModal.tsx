@@ -6,7 +6,7 @@ import { useState } from "react"
 import "./AssignmentModal.css"
 import AssignmentDetailPanel from "./AssignmentDetailPanel"
 import ExpandedAssignmentView from "./ExpandedAssignmentView"
-import CreateTaskModal from "./CreateTaskModal"
+import CreateTaskModal from "../task/CreateTaskModal"
 import { Assignment } from "@/types/assignment"
 import { Task } from "@/types/task"
 

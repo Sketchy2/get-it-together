@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import ProgressCircle from "@/components/assignment/ProgressCircle";
 import ViewToggle from "@/components/ViewToggle";
-import TaskCard from "@/components/assignment/TaskCard";
+import TaskCard from "@/components/task/TaskCard";
 import { SortOption, SortDirection } from "@/types/sort";
 import SortMenu from "@/components/SortMenu";
 import { Task, TaskStatus } from "@/types/task";
