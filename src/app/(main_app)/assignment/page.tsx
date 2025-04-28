@@ -573,13 +573,15 @@ export default function Assignments() {
                 {row.assignments.map((assignment) => 
                 
                 {
+                  const bgColor = getCardBgColor(assignment.tasks,assignment.dueDate)
+                  const progress = calculateProgress(assignment.tasks)
                   return (
                     <div key={assignment.id}>
                       <div
                         className={`listItem ${
                           expandedAssignment === assignment.id ? "expanded" : ""
                         }`}
-                        style={{ backgroundColor: viewModel.bgColor }}
+                        style={{ backgroundColor: bgColor }}
                         onClick={() => handleAssignmentClick(assignment.id)}
                       >
                         {/* list heading */}
@@ -591,24 +593,24 @@ export default function Assignments() {
                           )}
                         </div>
                         <div className="listItemContent">
-                          <h3 className="listItemTitle">{viewModel.title}</h3>
+                          <h3 className="listItemTitle">{assignment.title}</h3>
                           <div className="listItemMeta">
                             <span>
-                              {viewModel.createdAt} + day due | weightage{" "}
-                              {viewModel.weight}%
+                              {assignment.createdAt} + day due | weightage{" "}
+                              {assignment.weight}%
                             </span>
                           </div>
                         </div>
-                        <ProgressCircle percentage={viewModel.progress} />
+                        <ProgressCircle percentage={progress} />
                       </div>
 
                       {expandedAssignment === assignment.id && (
                         <div
                           className="listItemDetails"
-                          style={{ backgroundColor: viewModel.bgColor }}
+                          style={{ backgroundColor: bgColor }}
                         >
                           <div className="listItemDescription">
-                            <p>{viewModel.description}</p>
+                            <p>{assignment.description}</p>
                           </div>
                           <div className="todoItems">
                             <div className="todoItemHeader">
