@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { useRouter } from "next/navigation";
 import "./assignment.css";
 import { formatDate, isLate } from "@/lib/utils";
 import AssignmentRow from "@/components/assignment/AssignmentRow";
@@ -14,14 +13,10 @@ import {
   ArrowUpRightIcon,
   ChevronDownIcon,
   ChevronRightIcon,
-  CheckSquareIcon,
-  ArrowUp,
-  ArrowDown,
   Calendar,
   Clock,
 } from "lucide-react";
 import ProgressCircle from "@/components/assignment/ProgressCircle";
-import { None } from "motion/dist/react";
 import ViewToggle from "@/components/ViewToggle";
 import TaskCard from "@/components/assignment/TaskCard";
 import { SortOption, SortDirection } from "@/types/sort";
@@ -572,7 +567,7 @@ export default function Assignments() {
   /**
    * Handle creating new assignment
    */
-  const handleCreateAssignment = useCallback((newAssignmentData: any) => {
+  const handleCreateAssignment = useCallback((newAssignmentData: AssignmentData) => {
     // Generate a mock ID for the new assignment
     const id = `a${Date.now()}`;
 

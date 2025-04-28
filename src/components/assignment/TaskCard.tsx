@@ -27,7 +27,6 @@ interface Task {
   description: string
   assignee?: string
   dueDate?: string
-  completed: boolean
   status: "unassigned" | "todo" | "inProgress" | "completed"
   weight?: number
   createdAt?: string
@@ -50,7 +49,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onStatusChange }) => {
   }
 
   const toggleCompleted = () => {
-    const newStatus = task.completed ? "todo" : "completed"
+    const newStatus = task.status == "completed" ? "todo" : "completed"
     onStatusChange(task.id, newStatus)
   }
 
@@ -61,7 +60,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onStatusChange }) => {
 
   // Determine the status color
   const getStatusColor = () => {
-    if (task.completed) return "#647a67" // Green for completed
+    if (task.status === "completed") return "#647a67" // Green for completed
     if (task.status === "inProgress") return "#4d5696" // Purple for in progress
     if (task.status === "todo") return "#DD992B" // Gold for todo
     return "#777777" // Gray for unassigned
@@ -113,14 +112,14 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onStatusChange }) => {
   const daysInfo = getDaysInfo()
 
   return (
-    <div className={`taskCard ${task.completed ? "completed" : ""} ${task.status} ${isExpanded ? "expanded" : ""}`}>
+    <div className={`taskCard ${task.status == "completed" ? "completed" : ""} ${task.status} ${isExpanded ? "expanded" : ""}`}>
       <div className="taskCardHeader">
         <button
           className="checkButton"
           onClick={toggleCompleted}
-          aria-label={task.completed ? "Mark as incomplete" : "Mark as complete"}
+          aria-label={task.status == "completed" ? "Mark as incomplete" : "Mark as complete"}
         >
-          {task.completed ? (
+          {task.status == "completed" ? (
             <CheckCircle size={20} className="checkIcon completed" />
           ) : (
             <Circle size={20} className="checkIcon" />
@@ -128,7 +127,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onStatusChange }) => {
         </button>
 
         <div className="taskTitleContainer">
-          <h4 className={`taskTitle ${task.completed ? "completed" : ""}`}>{task.title}</h4>
+          <h4 className={`taskTitle ${task.status == "completed" ? "completed" : ""}`}>{task.title}</h4>
           <div className="taskBadges">
             <div className="taskStatusIndicator" style={{ backgroundColor: getStatusColor() }}>
               {task.status === "unassigned" && "Unassigned"}
