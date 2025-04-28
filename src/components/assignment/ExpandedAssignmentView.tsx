@@ -32,6 +32,7 @@ import TaskCard from "./TaskCard"
 import CreateTaskModal from "./CreateTaskModal"
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd"
 import ProgressCircle from "./ProgressCircle"
+import { TaskStatus } from "@/types/task"
 
 interface Task {
   id: string
@@ -40,7 +41,7 @@ interface Task {
   assignee?: string
   dueDate?: string
   completed: boolean
-  status: "unassigned" | "todo" | "inProgress" | "completed"
+  status: TaskStatus
   weight: number
   createdAt: string
   priority: "low" | "medium" | "high"
@@ -78,18 +79,8 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({ assignm
   useEffect(() => {
     if (assignment && assignment.todos) {
       // Convert todos to tasks format if needed
-      const convertedTasks = assignment.todos.map((todo: any) => ({
-        id: todo.id,
-        title: todo.text,
-        description: todo.description || "",
-        assignee: todo.assignee,
-        dueDate: todo.dueDate,
-        completed: todo.completed,
-        status: todo.status || (todo.assignee ? "todo" : "unassigned"),
-        weight: todo.weight || 1,
-        createdAt: todo.createdAt || new Date().toISOString(),
-        priority: todo.priority || "medium",
-      }))
+      // WHY DO WE NEED TODOS
+      const convertedTasks = assignment.todos
 
       setTasks(convertedTasks)
       calculateProgress(convertedTasks)
@@ -208,10 +199,10 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({ assignm
     onUpdate(updatedAssignment)
   }
 
-  const handleTaskStatusChange = (taskId: string, newStatus: "unassigned" | "todo" | "inProgress" | "completed") => {
+  const handleTaskStatusChange = (taskId: string, newStatus: TaskStatus) => {
     const updatedTasks = tasks.map((task) => {
       if (task.id === taskId) {
-        const completed = newStatus === "completed"
+        const completed = newStatus === "Completed"
         return { ...task, status: newStatus, completed }
       }
       return task
@@ -224,7 +215,7 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({ assignm
     // Also update the todos in the assignment
     const updatedTodos = (assignment.todos || []).map((todo: any) => {
       if (todo.id === taskId) {
-        return { ...todo, completed: newStatus === "completed", status: newStatus }
+        return { ...todo, completed: newStatus === "Completed", status: newStatus }
       }
       return todo
     })
@@ -261,8 +252,8 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({ assignm
     let updatedTask: Task
 
     if (viewMode === "status") {
-      const newStatus = destination.droppableId as "unassigned" | "todo" | "inProgress" | "completed"
-      const completed = newStatus === "completed"
+      const newStatus = destination.droppableId as TaskStatus
+      const completed = newStatus === "Completed"
       updatedTask = { ...draggedTask, status: newStatus, completed }
     } else {
       // In member view, we're changing the assignee but keeping the status
@@ -285,7 +276,7 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({ assignm
         if (viewMode === "status") {
           return {
             ...todo,
-            completed: updatedTask.completed,
+            completed: updatedTask.status === "Completed",
             status: updatedTask.status,
           }
         } else {
@@ -307,7 +298,7 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({ assignm
     onUpdate(updatedAssignment)
   }
 
-  const getTasksByStatus = (status: "unassigned" | "todo" | "inProgress" | "completed") => {
+  const getTasksByStatus = (status: TaskStatus) => {
     return applyFiltersAndSort(tasks.filter((task) => task.status === status))
   }
 
@@ -326,13 +317,11 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({ assignm
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case "unassigned":
-        return <HelpCircle size={18} />
-      case "todo":
+      case "To-do":
         return <Clock size={18} />
-      case "inProgress":
+      case "In Progress":
         return <AlertTriangle size={18} />
-      case "completed":
+      case "Completed":
         return <CheckCircle size={18} />
       default:
         return <HelpCircle size={18} />
@@ -349,6 +338,7 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({ assignm
     setIsFilterMenuOpen(false)
   }
 
+  // TODO FIX FILTER
   const handleFilterChange = (filterType: "status" | "priority" | "dueDate", value: string) => {
     if (filterType === "dueDate") {
       setFilters({
@@ -459,7 +449,8 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({ assignm
   // Update the kanban board rendering to ensure proper scrolling
   const renderStatusView = () => (
     <div className="kanbanBoard">
-      <div className="kanbanColumn">
+
+      {/* <div className="kanbanColumn">
         <div className="columnHeader">
           <div className="columnHeaderTitle">
             {getStatusIcon("unassigned")}
@@ -483,20 +474,20 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({ assignm
             </div>
           )}
         </Droppable>
-      </div>
+      </div> */}
 
       <div className="kanbanColumn">
         <div className="columnHeader">
           <div className="columnHeaderTitle">
-            {getStatusIcon("todo")}
+            {getStatusIcon("To-Do")}
             <h3>To Do</h3>
           </div>
-          <span className="taskCount">{getTasksByStatus("todo").length}</span>
+          <span className="taskCount">{getTasksByStatus("To-Do").length}</span>
         </div>
-        <Droppable droppableId="todo">
+        <Droppable droppableId="To-Do">
           {(provided) => (
             <div className="columnContent" {...provided.droppableProps} ref={provided.innerRef}>
-              {getTasksByStatus("todo").map((task, index) => (
+              {getTasksByStatus("To-Do").map((task, index) => (
                 <Draggable key={task.id} draggableId={task.id} index={index}>
                   {(provided) => (
                     <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
@@ -514,15 +505,15 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({ assignm
       <div className="kanbanColumn">
         <div className="columnHeader">
           <div className="columnHeaderTitle">
-            {getStatusIcon("inProgress")}
+            {getStatusIcon("In Progress")}
             <h3>In Progress</h3>
           </div>
-          <span className="taskCount">{getTasksByStatus("inProgress").length}</span>
+          <span className="taskCount">{getTasksByStatus("In Progress").length}</span>
         </div>
-        <Droppable droppableId="inProgress">
+        <Droppable droppableId="In Progress">
           {(provided) => (
             <div className="columnContent" {...provided.droppableProps} ref={provided.innerRef}>
-              {getTasksByStatus("inProgress").map((task, index) => (
+              {getTasksByStatus("In Progress").map((task, index) => (
                 <Draggable key={task.id} draggableId={task.id} index={index}>
                   {(provided) => (
                     <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
@@ -540,15 +531,15 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({ assignm
       <div className="kanbanColumn">
         <div className="columnHeader">
           <div className="columnHeaderTitle">
-            {getStatusIcon("completed")}
+            {getStatusIcon("Completed")}
             <h3>Completed</h3>
           </div>
-          <span className="taskCount">{getTasksByStatus("completed").length}</span>
+          <span className="taskCount">{getTasksByStatus("Completed").length}</span>
         </div>
-        <Droppable droppableId="completed">
+        <Droppable droppableId="Completed">
           {(provided) => (
             <div className="columnContent" {...provided.droppableProps} ref={provided.innerRef}>
-              {getTasksByStatus("completed").map((task, index) => (
+              {getTasksByStatus("Completed").map((task, index) => (
                 <Draggable key={task.id} draggableId={task.id} index={index}>
                   {(provided) => (
                     <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
@@ -618,21 +609,21 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({ assignm
                 <span className="taskStatDot todo"></span>
                 <span className="taskStatLabel">To Do:</span>
                 <span className="taskStatValue">
-                  {getTasksByMember(member).filter((t) => t.status === "todo").length}
+                  {getTasksByMember(member).filter((t) => t.status === "To-Do").length}
                 </span>
               </div>
               <div className="taskStatItem">
-                <span className="taskStatDot inProgress"></span>
+                <span className="taskStatDot In Progress"></span>
                 <span className="taskStatLabel">In Progress:</span>
                 <span className="taskStatValue">
-                  {getTasksByMember(member).filter((t) => t.status === "inProgress").length}
+                  {getTasksByMember(member).filter((t) => t.status === "In Progress").length}
                 </span>
               </div>
               <div className="taskStatItem">
                 <span className="taskStatDot completed"></span>
                 <span className="taskStatLabel">Completed:</span>
                 <span className="taskStatValue">
-                  {getTasksByMember(member).filter((t) => t.status === "completed").length}
+                  {getTasksByMember(member).filter((t) => t.status === "Completed").length}
                 </span>
               </div>
             </div>
@@ -818,24 +809,24 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({ assignm
                         <label className="filterOption">
                           <input
                             type="checkbox"
-                            checked={filters.status.includes("todo")}
-                            onChange={() => handleFilterChange("status", "todo")}
+                            checked={filters.status.includes("To-Do")}
+                            onChange={() => handleFilterChange("status", "To-Do")}
                           />
                           <span>To Do</span>
                         </label>
                         <label className="filterOption">
                           <input
                             type="checkbox"
-                            checked={filters.status.includes("inProgress")}
-                            onChange={() => handleFilterChange("status", "inProgress")}
+                            checked={filters.status.includes("In Progress")}
+                            onChange={() => handleFilterChange("status", "In Progress")}
                           />
                           <span>In Progress</span>
                         </label>
                         <label className="filterOption">
                           <input
                             type="checkbox"
-                            checked={filters.status.includes("completed")}
-                            onChange={() => handleFilterChange("status", "completed")}
+                            checked={filters.status.includes("Completed")}
+                            onChange={() => handleFilterChange("status", "Completed")}
                           />
                           <span>Completed</span>
                         </label>

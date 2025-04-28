@@ -21,6 +21,7 @@ import ViewToggle from "@/components/ViewToggle";
 import TaskCard from "@/components/assignment/TaskCard";
 import { SortOption, SortDirection } from "@/types/sort";
 import SortMenu from "@/components/SortMenu";
+import { Task, TaskStatus } from "@/types/task";
 
 
 // Define clear interfaces for data models
@@ -40,19 +41,19 @@ interface FileAttachment {
   uploadedAt: string;
 }
 
-interface Task {
-  id: string;
-  title: string;
-  description?: string;
-  status: "unassigned" | "todo" | "inProgress" | "completed";
-  priority: "low" | "medium" | "high";
-  assigneeId?: string;
-  dueDate?: string;
-  weight: number;
-  createdAt: string;
-  updatedAt?: string;
-  expanded?: boolean;
-}
+// interface Task {
+//   id: string;
+//   title: string;
+//   description?: string;
+//   status: TaskStatus;
+//   priority: "low" | "medium" | "high";
+//   assigneeId?: string;
+//   dueDate?: string;
+//   weight: number;
+//   createdAt: string;
+//   updatedAt?: string;
+//   expanded?: boolean;
+// }
 
 // Define interface for an assignment from the API
 interface AssignmentData {
@@ -82,7 +83,6 @@ interface AssignmentViewModel {
   tasks: Task[];
   members: Member[];
   files: FileAttachment[];
-  todos?: any[]; // For backwards compatibility with AssignmentModal
 }
 
 
@@ -188,10 +188,10 @@ export default function Assignments() {
         id: "t1",
         title: "Research topic",
         description: "Gather information from reliable sources",
-        status: "todo",
+        status: "To-Do",
         priority: "high",
         weight: 2,
-        assigneeId: "m1",
+        assignee: "m1",
         dueDate: nextWeek.toISOString(),
         createdAt: lastWeek.toISOString(),
       },
@@ -199,22 +199,21 @@ export default function Assignments() {
         id: "t2",
         title: "Create outline",
         description: "Structure the document with main points",
-        status: "completed",
+        status: "Completed",
         priority: "medium",
         weight: 1,
-        assigneeId: "m2",
+        assignee: "m2",
         dueDate: yesterday.toISOString(),
         createdAt: lastWeek.toISOString(),
-        expanded: true,
       },
       {
         id: "t3",
         title: "Write introduction",
         description: "Provide context and thesis statement",
-        status: "inProgress",
+        status: "In Progress",
         priority: "medium",
         weight: 3,
-        assigneeId: "m1",
+        assignee: "m1",
         dueDate: nextWeek.toISOString(),
         createdAt: lastWeek.toISOString(),
       },
@@ -265,7 +264,7 @@ export default function Assignments() {
         dueDate: lastWeek.toISOString(),
         weight: 50,
         members: members,
-        tasks: tasks.map((task) => ({ ...task, status: "completed" })),
+        tasks: tasks.map((task) => ({ ...task, status: "Completed" })),
         files: files,
       },
     ];
@@ -286,12 +285,12 @@ export default function Assignments() {
   const calculateProgress = useCallback((tasks: Task[]): number => {
     if (tasks.length === 0) return 0;
 
-    const totalWeight = tasks.reduce((sum, task) => sum + task.weight, 0);
+    const totalWeight = tasks.reduce((sum, task) => sum + (task.weight?task.weight:1), 0);
     if (totalWeight === 0) return 0;
 
     const completedWeight = tasks
-      .filter((task) => task.status === "completed")
-      .reduce((sum, task) => sum + task.weight, 0);
+      .filter((task) => task.status === "Completed")
+      .reduce((sum, task) => sum + (task.weight?task.weight:1), 0);
 
     return Math.round((completedWeight / totalWeight) * 100);
   }, []);
@@ -326,19 +325,19 @@ export default function Assignments() {
       const progress = calculateProgress(assignment.tasks);
       const daysRemaining = calculateDaysRemaining(assignment.dueDate);
 
-      // Create a string[] for todos to ensure we pass strings, not objects
-      const todos = assignment.tasks.map((task) => ({
-        id: task.id,
-        text: task.title,
-        description: task.description,
-        completed: task.status === "completed",
-        expanded: task.expanded,
-        assignee: task.assigneeId,
-        dueDate: task.dueDate ? formatDate(task.dueDate) : undefined,
-        weight: task.weight,
-        priority: task.priority,
-        status: task.status,
-      }));
+      // // Create a string[] for todos to ensure we pass strings, not objects
+      // const todos = assignment.tasks.map((task) => ({
+      //   id: task.id,
+      //   text: task.title,
+      //   description: task.description,
+      //   completed: task.status === "Completed",
+      //   expanded: task.expanded,
+      //   assignee: task.assigneeId,
+      //   dueDate: task.dueDate ? formatDate(task.dueDate) : undefined,
+      //   weight: task.weight,
+      //   priority: task.priority,
+      //   status: task.status,
+      // }));
 
       return {
         id: assignment.id,
@@ -354,14 +353,11 @@ export default function Assignments() {
         tasks: assignment.tasks,
         members: assignment.members,
         files: assignment.files,
-        todos, // For backwards compatibility with AssignmentModal
       };
     },
     [
       calculateProgress,
       calculateDaysRemaining,
-      formatDate,
-      isLate,
       getCardBgColor,
     ]
   );
@@ -444,6 +440,7 @@ export default function Assignments() {
     (id: string) => {
       if (viewMode === "list") {
         setExpandedAssignment((prevId) => (prevId === id ? null : id));
+        console.log(id)
       }
     },
     [viewMode]
@@ -479,7 +476,9 @@ export default function Assignments() {
    */
   const handleTaskToggle = useCallback(
     (taskId: string) => {
-      if (!selectedAssignmentData) return;
+      if (!selectedAssignmentData) {
+        return;
+      }
 
       setSelectedAssignmentData((prevData) => {
         if (!prevData) return null;
@@ -489,8 +488,8 @@ export default function Assignments() {
         if (!task) return prevData;
 
         // Toggle the task status with proper typing
-        const newStatus: "unassigned" | "todo" | "inProgress" | "completed" =
-          task.status === "completed" ? "inProgress" : "completed";
+        const newStatus:TaskStatus =
+          task.status === "Completed" ? "In Progress" :"Completed";
 
         // Update tasks array with explicit type
         const updatedTasks: Task[] = prevData.tasks.map((t) =>
@@ -527,8 +526,11 @@ export default function Assignments() {
     [selectedAssignmentData, createAssignmentViewModel]
   );
 
+// update task status
+
   /**
    * Handle expanding task details
+   * TODO REMOVE, HANDLE IN TASK CARD
    */
   const handleTaskExpand = useCallback(
     (taskId: string) => {
@@ -538,7 +540,7 @@ export default function Assignments() {
         if (!prevData) return null;
 
         const updatedTasks: Task[] = prevData.tasks.map((task) =>
-          task.id === taskId ? { ...task, expanded: !task.expanded } : task
+          task.id === taskId ? { ...task, expanded: true } : task
         );
 
         const updatedAssignment: AssignmentData = {
@@ -769,29 +771,18 @@ export default function Assignments() {
                             </div>
                             {assignment.tasks && assignment.tasks.length > 0 ? (
                               assignment.tasks.map((task) => (
-                                <TaskCard key={task.id} task={task} />
-                                //dont need to make another task card jus
-                                // <div key={task.id} className="todoItem">
-                                //   <div className="todoItemCheckbox">
-                                //     <CheckSquareIcon size={20} />
-                                //   </div>
-                                //   <span className="todoItemText">
-                                //     {task.title}
-                                //   </span>
-                                //   <div className="todoItemProgressBars">
-                                //     <div className="miniProgressBar"></div>
-                                //     <div className="miniProgressBar"></div>
-                                //     <div className="miniProgressBar"></div>
-                                //   </div>
-                                //   <div className="todoItemAvatar"></div>
-                                // </div>
+                                <TaskCard key={task.id} task={task} onStatusChange={handleTaskToggle} />
                               ))
                             ) : (
                               <div className="emptyTodoState">
                                 <p>No tasks added yet</p>
                               </div>
                             )}
+                                                          
+                            {/* TODO fix so opens task creation module
+
                             <div className="todoItem">
+                              
                               <div
                                 className="addTodoButton"
                                 onClick={() => handleCardClick(assignment)}
@@ -799,7 +790,7 @@ export default function Assignments() {
                                 <PlusIcon size={18} />
                                 <span>Add New Task</span>
                               </div>
-                            </div>
+                            </div>*/}
                           </div>
                           <div className="detailsFooter">
                             <button

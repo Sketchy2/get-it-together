@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useState } from "react"
 import "./AssignmentModal.css"
-import AssignmentDetails from "./AssignmentDetails"
+import AssignmentDetailPanel from "./AssignmentDetailPanel"
 import ExpandedAssignmentView from "./ExpandedAssignmentView"
 import CreateTaskModal from "./CreateTaskModal"
 
@@ -86,7 +86,7 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
   return (
     <div className="modalOverlay">
       <div className="modalContent">
-        <AssignmentDetails
+        <AssignmentDetailPanel
           id={assignment.id}
           title={assignment.title}
           date={assignment.date}
@@ -97,7 +97,7 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
           daysRemaining={assignment.daysRemaining}
           isLate={assignment.isLate}
           bgColor={assignment.bgColor}
-          todos={assignment.todos || []}
+          todos={assignment.tasks || []}
           onClose={onClose}
           onTodoToggle={onTodoToggle}
           onTodoExpand={onTodoExpand}

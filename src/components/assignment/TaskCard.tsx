@@ -17,52 +17,43 @@ import {
   Flag,
   Edit,
   Trash,
-  HelpCircle,
 } from "lucide-react"
 import "./TaskCard.css"
+import { Task, TaskStatus } from "@/types/task"
 
-interface Task {
-  id: string
-  title: string
-  description: string
-  assignee?: string
-  dueDate?: string
-  status: "unassigned" | "todo" | "inProgress" | "completed"
-  weight?: number
-  createdAt?: string
-  priority?: "low" | "medium" | "high"
-  comments?: { author: string; text: string; date: string }[]
-}
+
 
 interface TaskCardProps {
   task: Task
-  onStatusChange: (taskId: string, newStatus: "unassigned" | "todo" | "inProgress" | "completed") => void
+  onStatusChange: (taskId: string, newStatus: TaskStatus) => void
 }
 
 const TaskCard: React.FC<TaskCardProps> = ({ task, onStatusChange }) => {
   const [isExpanded, setIsExpanded] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [newComment, setNewComment] = useState("")
+  console.log(task);
+  console.log("task");
 
   const toggleExpanded = () => {
     setIsExpanded(!isExpanded)
   }
 
   const toggleCompleted = () => {
-    const newStatus = task.status == "completed" ? "todo" : "completed"
+    const newStatus = task.status == "Completed" ? "To-Do" : "Completed"
     onStatusChange(task.id, newStatus)
   }
 
-  const handleStatusChange = (newStatus: "unassigned" | "todo" | "inProgress" | "completed") => {
+  const handleStatusChange = (newStatus:TaskStatus) => {
     onStatusChange(task.id, newStatus)
     setIsMenuOpen(false)
   }
 
   // Determine the status color
   const getStatusColor = () => {
-    if (task.status === "completed") return "#647a67" // Green for completed
-    if (task.status === "inProgress") return "#4d5696" // Purple for in progress
-    if (task.status === "todo") return "#DD992B" // Gold for todo
+    if (task.status === "Completed") return "#647a67" // Green for completed
+    if (task.status ===  "In Progress") return "#4d5696" // Purple for in progress
+    if (task.status === "To-Do" ) return "#DD992B" // Gold for todo
     return "#777777" // Gray for unassigned
   }
 
@@ -112,14 +103,15 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onStatusChange }) => {
   const daysInfo = getDaysInfo()
 
   return (
-    <div className={`taskCard ${task.status == "completed" ? "completed" : ""} ${task.status} ${isExpanded ? "expanded" : ""}`}>
+    <div className={`taskCard ${task.status == "Completed" ? "completed" : ""} ${task.status} ${isExpanded ? "expanded" : ""}`}>
+      {/* Main task infomation */}
       <div className="taskCardHeader">
         <button
           className="checkButton"
           onClick={toggleCompleted}
-          aria-label={task.status == "completed" ? "Mark as incomplete" : "Mark as complete"}
+          aria-label={task.status == "Completed" ? "Mark as incomplete" : "Mark as complete"}
         >
-          {task.status == "completed" ? (
+          {task.status == "Completed" ? (
             <CheckCircle size={20} className="checkIcon completed" />
           ) : (
             <Circle size={20} className="checkIcon" />
@@ -127,13 +119,12 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onStatusChange }) => {
         </button>
 
         <div className="taskTitleContainer">
-          <h4 className={`taskTitle ${task.status == "completed" ? "completed" : ""}`}>{task.title}</h4>
+          <h4 className={`taskTitle ${task.status == "Completed" ? "Completed" : ""}`}>  {task.title}</h4>
           <div className="taskBadges">
             <div className="taskStatusIndicator" style={{ backgroundColor: getStatusColor() }}>
-              {task.status === "unassigned" && "Unassigned"}
-              {task.status === "todo" && "To Do"}
-              {task.status === "inProgress" && "In Progress"}
-              {task.status === "completed" && "Completed"}
+              {task.status === "To-Do" && "To Do"}
+              {task.status === "In Progress" && "In Progress"}
+              {task.status === "Completed" && "Completed"}
             </div>
             {task.weight && task.weight > 1 && (
               <div className="taskWeightBadge">
@@ -166,19 +157,15 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onStatusChange }) => {
 
             {isMenuOpen && (
               <div className="menuDropdown">
-                <button className="menuItem" onClick={() => handleStatusChange("unassigned")}>
-                  <HelpCircle size={14} />
-                  <span>Mark as Unassigned</span>
-                </button>
-                <button className="menuItem" onClick={() => handleStatusChange("todo")}>
+                <button className="menuItem" onClick={() => handleStatusChange("To-Do")}>
                   <Clock size={14} />
                   <span>Move to To Do</span>
                 </button>
-                <button className="menuItem" onClick={() => handleStatusChange("inProgress")}>
+                <button className="menuItem" onClick={() => handleStatusChange("In Progress")}>
                   <AlertTriangle size={14} />
                   <span>Move to In Progress</span>
                 </button>
-                <button className="menuItem" onClick={() => handleStatusChange("completed")}>
+                <button className="menuItem" onClick={() => handleStatusChange("Completed")}>
                   <CheckCircle size={14} />
                   <span>Mark as Completed</span>
                 </button>
@@ -196,6 +183,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onStatusChange }) => {
           </div>
         </div>
       </div>
+
 
       {isExpanded && (
         <div className="taskCardContent">
@@ -272,7 +260,8 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onStatusChange }) => {
             </div>
           </div>
 
-          {task.comments && task.comments.length > 0 && (
+          {/* mb keep if want to add commenting functionality
+           {task.comments && task.comments.length > 0 && (
             <div className="taskComments">
               <div className="taskCommentsHeader">
                 <MessageSquare size={14} />
@@ -293,7 +282,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onStatusChange }) => {
                 ))}
               </div>
             </div>
-          )}
+          )} */}
 
           <div className="addCommentForm">
             <input
