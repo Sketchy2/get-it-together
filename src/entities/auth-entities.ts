@@ -8,8 +8,7 @@ import {
 
 import type { Relation } from "typeorm"
 
-import { Group } from "./Groups";
-import { GroupMember } from "./Groups";
+import { Assignment } from "./Assignments";
 
   @Entity({ name: "users" })
   export class User {
@@ -41,13 +40,9 @@ import { GroupMember } from "./Groups";
     @OneToMany(() => Account, (account) => account.user)
     accounts!: Account[]
 
-    /** Groups this user has created */
-    @OneToMany(() => Group, (group) => group.creator)
-    groupsCreated!: Relation<Group[]>;
-  
-    /** Groups this user belongs to */
-    @OneToMany(() => GroupMember, (gm) => gm.user)
-    groupMemberships!: Relation<GroupMember[]>;
+    /** Assignements this user is in */
+    @OneToMany(() => Assignment, (Assignment) => Assignment.createdByUser)
+    assignments!: Relation<Assignment[]>;
  }
   
   @Entity({ name: "accounts" })

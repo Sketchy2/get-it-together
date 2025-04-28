@@ -6,8 +6,8 @@ import {
     JoinColumn
   } from "typeorm";
   import type { Relation } from "typeorm";
-  import { Group } from "./Groups";
   
+  import { User } from "./auth-entities";
   /**
    * Represents a coursework assignment within a group.
    */
@@ -45,17 +45,8 @@ import {
     @Column({ name: "assignment_final_grade", type: "float", nullable: true })
     finalGrade: number | null;
   
-    /** User ID of creator */
-    @Column({ name: "assignment_created_by", type: "int" })
-    createdBy: number;
-  
-    /** Foreign key: group this assignment belongs to */
-    @Column({ name: "group_id", type: "int" })
-    groupId: number;
-  
-    /** Relation to Group entity */
-    @ManyToOne(() => Group, (group) => group.assignments)
-    @JoinColumn({ name: "group_id" })
-    group: Relation<Group>;
+    @ManyToOne(() => User, (user) => user.assignments)
+    @JoinColumn({ name: "assignment_created_by" })
+    createdByUser!: Relation<User>;
   }
   
