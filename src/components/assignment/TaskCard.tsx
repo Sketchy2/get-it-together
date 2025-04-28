@@ -100,7 +100,9 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onStatusChange }) => {
   const daysInfo = getDaysInfo()
 
   return (
-    <div className={`taskCard ${task.status == "Completed" ? "completed" : ""} ${task.status} ${isExpanded ? "expanded" : ""}`}>
+    <div className={`taskCard ${task.status == "Completed" ? "completed" : ""} ${task.status} ${isExpanded ? "expanded" : ""} `}
+          style={{borderLeftColor:getStatusColor()}}
+    >
       {/* Main task infomation */}
       <div className="taskCardHeader">
         <button
@@ -116,7 +118,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onStatusChange }) => {
         </button>
 
         <div className="taskTitleContainer">
-          <h4 className={`taskTitle ${task.status == "Completed" ? "Completed" : ""}`}>  {task.title}</h4>
+          <h4 className={`taskTitle ${task.status == "Completed" ? "completed" : ""}`}>  {task.title}</h4>
           <div className="taskBadges">
             <div className="taskStatusIndicator" style={{ backgroundColor: getStatusColor() }}>
               {task.status === "To-Do" && "To Do"}
