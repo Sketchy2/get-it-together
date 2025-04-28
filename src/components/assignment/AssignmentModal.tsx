@@ -7,13 +7,14 @@ import "./AssignmentModal.css"
 import AssignmentDetailPanel from "./AssignmentDetailPanel"
 import ExpandedAssignmentView from "./ExpandedAssignmentView"
 import CreateTaskModal from "./CreateTaskModal"
+import { Assignment } from "@/types/assignment"
+import { Task } from "@/types/task"
 
 interface AssignmentModalProps {
   isOpen: boolean
-  assignment: any
+  assignment: Assignment
   onClose: () => void
   onTodoToggle: (id: string) => void
-  onTodoExpand: (id: string) => void
   onAddTodo: () => void
   onUpdate: (updatedAssignment: any) => void
 }
@@ -23,7 +24,6 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
   assignment,
   onClose,
   onTodoToggle,
-  onTodoExpand,
   onAddTodo,
   onUpdate,
 }) => {
@@ -40,11 +40,11 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
     setIsExpanded(false)
   }
 
-  const handleAddTodo = () => {
-    setIsCreateTaskModalOpen(true)
-  }
+  // const handleAddTodo = () => {
+  //   setIsCreateTaskModalOpen(true)
+  // }
 
-  const handleCreateTask = (newTask: any) => {
+  const handleCreateTask = (newTask: Task) => {
     // Create a new todo item from the task
     const newTodo = {
       id: newTask.id,
@@ -61,7 +61,7 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
     }
 
     // Add the new todo to the assignment
-    const updatedTodos = [...(assignment.todos || []), newTodo]
+    const updatedTodos = [...(assignment.tasks || []), newTodo]
     const updatedAssignment = {
       ...assignment,
       todos: updatedTodos,
@@ -82,6 +82,7 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
       />
     )
   }
+  console.log(assignment.createdAt)
 
   return (
     <div className="modalOverlay">
@@ -89,31 +90,29 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
         <AssignmentDetailPanel
           id={assignment.id}
           title={assignment.title}
-          date={assignment.date}
+          createdAt={assignment.createdAt}
           dueDate={assignment.dueDate}
           weight={assignment.weight}
           description={assignment.description}
-          progress={assignment.progress}
-          daysRemaining={assignment.daysRemaining}
-          isLate={assignment.isLate}
-          bgColor={assignment.bgColor}
-          todos={assignment.tasks || []}
+          files={assignment.files || []}
+
+          tasks={assignment.tasks || []}
           onClose={onClose}
           onTodoToggle={onTodoToggle}
-          onTodoExpand={onTodoExpand}
-          onAddTodo={handleAddTodo}
+          // onTodoExpand={onTodoExpand}
+          // onAddTodo={handleAddTodo}
           onExpand={handleExpandView}
-          files={assignment.files || []}
         />
       </div>
 
+      {/* todo fix */}
       <CreateTaskModal
         isOpen={isCreateTaskModalOpen}
         onClose={() => setIsCreateTaskModalOpen(false)}
         onSave={handleCreateTask}
         members={assignment.members || []}
         maxWeight={assignment.weight || 100}
-        currentWeight={assignment.todos?.reduce((sum: number, todo: any) => sum + (todo.weight || 0), 0) || 0}
+        currentWeight={assignment.tasks?.reduce((sum: number, todo: any) => sum + (todo.weight || 0), 0) || 0}
       />
     </div>
   )

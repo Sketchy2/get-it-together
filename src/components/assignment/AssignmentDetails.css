@@ -129,16 +129,7 @@
   transform: scale(1.1);
 }
 
-/* Fix progress tracker and close button positioning */
-.progressCircleContainer {
-  position: absolute;
-  top: 16px;
-  right: 70px; /* Move further from the close button */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 5;
-}
+
 
 .closeButton {
   position: absolute;
@@ -179,16 +170,7 @@
   background-color: rgba(255, 255, 255, 0.1);
 }
 
-/* Fix progress tracker position */
-.progressCircleContainer {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 5;
-}
+
 
 
 .progress-text {

@@ -75,12 +75,7 @@
     border-radius: 20px;
   }
   
-  .progressCircleContainer {
-    position: absolute;
-    top: 20px;
-    right: 80px; /* Move further from the close button */
-    margin-right: 0;
-  }
+
   
 
   
@@ -682,11 +677,6 @@
       gap: 16px;
     }
   
-    .progressCircleContainer {
-      position: absolute;
-      top: 20px;
-      right: 60px;
-    }
   
     .toolbarContainer {
       flex-direction: column;

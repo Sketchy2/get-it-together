@@ -13,7 +13,6 @@ import {
   AlertTriangle,
   Weight,
   Clock,
-  MessageSquare,
   Flag,
   Edit,
   Trash,
@@ -32,8 +31,6 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onStatusChange }) => {
   const [isExpanded, setIsExpanded] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [newComment, setNewComment] = useState("")
-  console.log(task);
-  console.log("task");
 
   const toggleExpanded = () => {
     setIsExpanded(!isExpanded)

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from "react";
 import "./assignment.css";
-import { formatDate, isLate } from "@/lib/utils";
+import { formatDate, isLate } from "@/utils/utils";
 import AssignmentRow from "@/components/assignment/AssignmentRow";
 import AssignmentCard from "@/components/assignment/AssignmentCard";
 import AssignmentModal from "@/components/assignment/AssignmentModal";
@@ -22,68 +22,8 @@ import TaskCard from "@/components/assignment/TaskCard";
 import { SortOption, SortDirection } from "@/types/sort";
 import SortMenu from "@/components/SortMenu";
 import { Task, TaskStatus } from "@/types/task";
-
-
-// Define clear interfaces for data models
-interface Member {
-  id: string;
-  name: string;
-  email?: string;
-  avatar?: string;
-}
-
-interface FileAttachment {
-  id: string;
-  name: string;
-  size: number;
-  type: string;
-  url?: string;
-  uploadedAt: string;
-}
-
-// interface Task {
-//   id: string;
-//   title: string;
-//   description?: string;
-//   status: TaskStatus;
-//   priority: "low" | "medium" | "high";
-//   assigneeId?: string;
-//   dueDate?: string;
-//   weight: number;
-//   createdAt: string;
-//   updatedAt?: string;
-//   expanded?: boolean;
-// }
-
-// Define interface for an assignment from the API
-interface AssignmentData {
-  id: string;
-  title: string;
-  description: string;
-  createdAt: string;
-  dueDate: string;
-  weight: number;
-  members: Member[];
-  tasks: Task[];
-  files: FileAttachment[];
-}
-
-// Define interface for assignment view model (for display)
-interface AssignmentViewModel {
-  id: string;
-  title: string;
-  date: string;
-  dueDate: string;
-  weight: number;
-  description: string;
-  progress: number;
-  daysRemaining: number;
-  isLate: boolean;
-  bgColor?: string;
-  tasks: Task[];
-  members: Member[];
-  files: FileAttachment[];
-}
+import { Assignment,AssignmentLink,FileAttachment,User } from "@/types/assignment";
+import { calculateDaysRemaining, calculateProgress, getCardBgColor } from "@/utils/assignmentUtils";
 
 
 
@@ -93,10 +33,10 @@ type ViewMode = "kanban" | "list";
 // Define sort function outside the component to avoid hoisting issues
 // TODO: ADJUST BASED ON PROVIDED 
 function sortAssignmentsList(
-  assignmentList: AssignmentData[],
+  assignmentList: Assignment[],
   sortType: SortOption,
   sortDir: SortDirection
-): AssignmentData[] {
+): Assignment[] {
   return [...assignmentList].sort((a, b) => {
     if (sortType.key === "dueDate") {
       const dateA = new Date(a.dueDate).getTime();
@@ -121,13 +61,11 @@ export default function Assignments() {
   const [expandedAssignment, setExpandedAssignment] = useState<string | null>(
     null
   );
-  const [selectedAssignment, setSelectedAssignment] =
-    useState<AssignmentViewModel | null>(null);
   const [selectedAssignmentData, setSelectedAssignmentData] =
-    useState<AssignmentData | null>(null);
+    useState<Assignment | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [assignments, setAssignments] = useState<AssignmentData[]>([]);
+  const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sortMenuOpen, setSortMenuOpen] = useState(false);
@@ -149,7 +87,7 @@ export default function Assignments() {
    * This provides mock data for development.
    * The structure matches what we expect from the backend API.
    */
-  const getSampleAssignments = useCallback((): AssignmentData[] => {
+  const getSampleAssignments = useCallback((): Assignment[] => {
     const now = new Date();
     const yesterday = new Date(now);
     yesterday.setDate(yesterday.getDate() - 1);
@@ -160,10 +98,10 @@ export default function Assignments() {
     const lastWeek = new Date(now);
     lastWeek.setDate(lastWeek.getDate() - 7);
 
-    const members: Member[] = [
-      { id: "m1", name: "John Doe", avatar: "/avatars/john.jpg" },
-      { id: "m2", name: "Jane Smith", avatar: "/avatars/jane.jpg" },
-      { id: "m3", name: "Alex Johnson", avatar: "/avatars/alex.jpg" },
+    const members: User[] = [
+      { id: "m1", name: "John Doe",  },
+      { id: "m2", name: "Jane Smith",  },
+      { id: "m3", name: "Alex Johnson", },
     ];
 
     const files: FileAttachment[] = [
@@ -218,6 +156,10 @@ export default function Assignments() {
         createdAt: lastWeek.toISOString(),
       },
     ];
+    const links: AssignmentLink[] = [
+      {title: "js destructuing" , url: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring"}
+
+    ]
 
     return [
       {
@@ -231,6 +173,7 @@ export default function Assignments() {
         members: members,
         tasks: tasks,
         files: files,
+        links:links
       },
       {
         id: "a2",
@@ -243,6 +186,7 @@ export default function Assignments() {
         members: [members[0], members[1]],
         tasks: tasks.slice(0, 2),
         files: files.slice(0, 1),
+        links:[]
       },
       {
         id: "a3",
@@ -255,112 +199,23 @@ export default function Assignments() {
         members: [members[2]],
         tasks: [tasks[0]],
         files: [],
+        links:links
       },
       {
         id: "a4",
         title: "Final Project Report",
         description: "Comprehensive documentation of the project results.",
-        createdAt: lastWeek.toISOString(),
+        createdAt: yesterday.toISOString(),
         dueDate: lastWeek.toISOString(),
         weight: 50,
         members: members,
         tasks: tasks.map((task) => ({ ...task, status: "Completed" })),
         files: files,
+        links:[]
       },
     ];
   }, []);
 
-  /**
-   * Utility function to calculate days remaining -
-   */
-  const calculateDaysRemaining = useCallback((dueDate: string): number => {
-    const dueDateTime = new Date(dueDate).getTime();
-    const currentTime = new Date().getTime();
-    return Math.ceil((dueDateTime - currentTime) / (1000 * 60 * 60 * 24));
-  }, []);
-
-  /**
-   * Utility function to calculate progress
-   */
-  const calculateProgress = useCallback((tasks: Task[]): number => {
-    if (tasks.length === 0) return 0;
-
-    const totalWeight = tasks.reduce((sum, task) => sum + (task.weight?task.weight:1), 0);
-    if (totalWeight === 0) return 0;
-
-    const completedWeight = tasks
-      .filter((task) => task.status === "Completed")
-      .reduce((sum, task) => sum + (task.weight?task.weight:1), 0);
-
-    return Math.round((completedWeight / totalWeight) * 100);
-  }, []);
-
-
-
-  /**
-   * Get background color for assignment card
-   */
-  const getCardBgColor = useCallback(
-    (assignment: AssignmentData): string => {
-      const progress = calculateProgress(assignment.tasks);
-
-      if (progress === 100) {
-        return "#647A67"; // Green color for completed items
-      }
-
-      if (isLate(assignment.dueDate)) {
-        return "#900100"; // Red color for late assignments
-      }
-
-      return "#DD992B"; // Default gold color for active
-    },
-    [calculateProgress, isLate]
-  );
-
-  /**
-   * Create view model for assignment card display
-   */
-  const createAssignmentViewModel = useCallback(
-    (assignment: AssignmentData): AssignmentViewModel => {
-      const progress = calculateProgress(assignment.tasks);
-      const daysRemaining = calculateDaysRemaining(assignment.dueDate);
-
-      // // Create a string[] for todos to ensure we pass strings, not objects
-      // const todos = assignment.tasks.map((task) => ({
-      //   id: task.id,
-      //   text: task.title,
-      //   description: task.description,
-      //   completed: task.status === "Completed",
-      //   expanded: task.expanded,
-      //   assignee: task.assigneeId,
-      //   dueDate: task.dueDate ? formatDate(task.dueDate) : undefined,
-      //   weight: task.weight,
-      //   priority: task.priority,
-      //   status: task.status,
-      // }));
-
-      return {
-        id: assignment.id,
-        title: assignment.title,
-        date: formatDate(assignment.createdAt),
-        dueDate: formatDate(assignment.dueDate),
-        weight: assignment.weight,
-        description: assignment.description,
-        progress,
-        daysRemaining,
-        isLate: isLate(assignment.dueDate),
-        bgColor: getCardBgColor(assignment),
-        tasks: assignment.tasks,
-        members: assignment.members,
-        files: assignment.files,
-      };
-    },
-    [
-      calculateProgress,
-      calculateDaysRemaining,
-      getCardBgColor,
-    ]
-  );
 
   /**
    * Load all assignments on component mount
@@ -397,7 +252,7 @@ export default function Assignments() {
       (assignment) => calculateProgress(assignment.tasks) < 100
     );
     return sortAssignmentsList(filtered, sortBy, sortDirection);
-  }, [assignments, calculateProgress, sortBy, sortDirection]);
+  }, [assignments, sortBy, sortDirection]);
 
   /**
    * Get completed assignments with memoization
@@ -407,7 +262,7 @@ export default function Assignments() {
       (assignment) => calculateProgress(assignment.tasks) === 100
     );
     return sortAssignmentsList(filtered, sortBy, sortDirection);
-  }, [assignments, calculateProgress, sortBy, sortDirection]);
+  }, [assignments, sortBy, sortDirection]);
 
   /**
    * Handle sort change
@@ -450,13 +305,11 @@ export default function Assignments() {
    * Handle assignment card click
    */
   const handleCardClick = useCallback(
-    (assignment: AssignmentData) => {
-      const viewModel = createAssignmentViewModel(assignment);
+    (assignment: Assignment) => {
       setSelectedAssignmentData(assignment);
-      setSelectedAssignment(viewModel);
       setIsModalOpen(true);
     },
-    [createAssignmentViewModel]
+    []
   );
 
   /**
@@ -466,7 +319,7 @@ export default function Assignments() {
     setIsModalOpen(false);
     // Use a timeout to prevent memory issues with large objects
     setTimeout(() => {
-      setSelectedAssignment(null);
+      // setSelectedAssignment(null);
       setSelectedAssignmentData(null);
     }, 300);
   }, []);
@@ -503,7 +356,7 @@ export default function Assignments() {
         );
 
         // Create updated assignment object
-        const updatedAssignment: AssignmentData = {
+        const updatedAssignment: Assignment = {
           ...prevData,
           tasks: updatedTasks,
         };
@@ -515,66 +368,63 @@ export default function Assignments() {
           )
         );
 
-        // Update selected assignment view model too
-        setSelectedAssignment((prev) =>
-          prev ? createAssignmentViewModel(updatedAssignment) : null
-        );
-
         return updatedAssignment;
       });
     },
-    [selectedAssignmentData, createAssignmentViewModel]
+    [selectedAssignmentData]
   );
 
+
+  //might need for handling task status
+    // const handleTaskStatusChange = (taskId: string, newStatus: TaskStatus) => {
+    //   const updatedTasks = tasks.map((task) => {
+    //     if (task.id === taskId) {
+    //       const completed = newStatus === "Completed"
+    //       return { ...task, status: newStatus, completed }
+    //     }
+    //     return task
+    //   })
+  
+    //   setTasks(updatedTasks)
+    //   calculateProgress(updatedTasks)
+    //   calculateMemberProgress(updatedTasks)
+  
+    //   // Also update the todos in the assignment
+    //   const updatedTodos = (assignment.todos || []).map((todo: any) => {
+    //     if (todo.id === taskId) {
+    //       return { ...todo, status: newStatus }
+    //     }
+    //     return todo
+    //   })
+  
+    //   const updatedAssignment = {
+    //     ...assignment,
+    //     todos: updatedTodos,
+    //     tasks: updatedTasks,
+    //   }
+  
+    //   onUpdate(updatedAssignment)
+    // }
 // update task status
-
-  /**
-   * Handle expanding task details
-   * TODO REMOVE, HANDLE IN TASK CARD
-   */
-  const handleTaskExpand = useCallback(
-    (taskId: string) => {
-      if (!selectedAssignmentData) return;
-
-      setSelectedAssignmentData((prevData) => {
-        if (!prevData) return null;
-
-        const updatedTasks: Task[] = prevData.tasks.map((task) =>
-          task.id === taskId ? { ...task, expanded: true } : task
-        );
-
-        const updatedAssignment: AssignmentData = {
-          ...prevData,
-          tasks: updatedTasks,
-        };
-
-        setSelectedAssignment((prev) =>
-          prev ? createAssignmentViewModel(updatedAssignment) : null
-        );
-
-        return updatedAssignment;
-      });
-    },
-    [selectedAssignmentData, createAssignmentViewModel]
-  );
 
   /**
    * Stable empty function for onAddTodo to prevent re-renders
    */
   const handleAddTodo = useCallback(() => {
     // Will be implemented later
+    // should add todo to assignment and update view plus state
     console.log("Add todo clicked");
   }, []);
 
   /**
    * Handle creating new assignment
    */
-  const handleCreateAssignment = useCallback((newAssignmentData: AssignmentData) => {
+  const handleCreateAssignment = useCallback((newAssignmentData: Assignment) => {
     // Generate a mock ID for the new assignment
     const id = `a${Date.now()}`;
 
     // Create the assignment with the ID
-    const createdAssignment: AssignmentData = {
+    const createdAssignment: Assignment = {
       id,
       title: newAssignmentData.title || "",
       description: newAssignmentData.description || "",
@@ -595,7 +445,7 @@ export default function Assignments() {
    * Handle updating assignment
    */
   const handleUpdateAssignment = useCallback(
-    (updatedAssignment: AssignmentData) => {
+    (updatedAssignment: Assignment) => {
       // Update local state
       setAssignments((prev) =>
         prev.map((assignment) =>
@@ -608,10 +458,9 @@ export default function Assignments() {
       // Update selected assignment if it's the one being edited
       if (selectedAssignmentData?.id === updatedAssignment.id) {
         setSelectedAssignmentData(updatedAssignment);
-        setSelectedAssignment(createAssignmentViewModel(updatedAssignment));
       }
     },
-    [selectedAssignmentData, createAssignmentViewModel]
+    [selectedAssignmentData]
   );
 
   // Rows data for rendering
@@ -679,24 +528,22 @@ export default function Assignments() {
           {rows.map((row) => (
             <AssignmentRow key={row.id} title={row.title} color={row.color}>
               {row.assignments.map((assignment) => {
-                const viewModel = createAssignmentViewModel(assignment);
                 return (
                   <div
                     key={assignment.id}
                     onClick={() => handleCardClick(assignment)}
                   >
                     <AssignmentCard
-                      title={viewModel.title}
-                      date={viewModel.date}
-                      dueDate={viewModel.dueDate}
-                      weight={viewModel.weight}
-                      description={viewModel.description}
-                      progress={viewModel.progress}
-                      daysRemaining={viewModel.daysRemaining}
-                      isLate={viewModel.isLate}
-                      bgColor={viewModel.bgColor}
-                      width="230px"
-                      height="180px"
+                      title={assignment.title}
+                      dueDate={assignment.dueDate}
+                      weight={assignment.weight}
+                      description={assignment.description}
+                      progress={calculateProgress(assignment.tasks)}
+                      daysRemaining={calculateDaysRemaining(assignment.dueDate)}
+                      isLate={isLate(assignment.dueDate)}
+                      bgColor={getCardBgColor(assignment.tasks,assignment.dueDate)}
+                      // width="230px"
+                      // height="180px"
                     />
                   </div>
                 );
@@ -726,7 +573,6 @@ export default function Assignments() {
                 {row.assignments.map((assignment) => 
                 
                 {
-                  const viewModel = createAssignmentViewModel(assignment);
                   return (
                     <div key={assignment.id}>
                       <div
@@ -748,7 +594,7 @@ export default function Assignments() {
                           <h3 className="listItemTitle">{viewModel.title}</h3>
                           <div className="listItemMeta">
                             <span>
-                              {viewModel.date} + day due | weightage{" "}
+                              {viewModel.createdAt} + day due | weightage{" "}
                               {viewModel.weight}%
                             </span>
                           </div>
@@ -827,14 +673,16 @@ export default function Assignments() {
         <PlusIcon size={24} />
       </button>
 
+      
+
+      {/* TODO PROVIDE STATE OF ASSIGNMENT DETAILS USING USE CONTEXT */}
       {/* Display modal */}
-      {selectedAssignment && (
+      {selectedAssignmentData && (
         <AssignmentModal
           isOpen={isModalOpen}
-          assignment={selectedAssignment}
+          assignment={selectedAssignmentData} // should just pass the assignment
           onClose={handleCloseModal}
           onTodoToggle={handleTaskToggle}
-          onTodoExpand={handleTaskExpand}
           onAddTodo={handleAddTodo}
           onUpdate={handleUpdateAssignment}
         />
