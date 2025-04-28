@@ -14,8 +14,8 @@ interface AssignmentCardProps {
 
   isLate: boolean;
   bgColor?: string;
-  width?: string;
-  height?: string;
+  // width?: string;
+  // height?: string;
 }
 
 const AssignmentCard: React.FC<AssignmentCardProps> = ({
@@ -27,8 +27,8 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({
   daysRemaining,
   isLate,
   bgColor = "#DD992B",
-  width = "280px",
-  height = "200px",
+  // width = "280px",
+  // height = "200px",
 }) => {
   // calc
 

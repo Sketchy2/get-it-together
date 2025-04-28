@@ -35,6 +35,9 @@ import ProgressCircle from "./ProgressCircle";
 import { TaskStatus, Task } from "@/types/task";
 import { Assignment, FileAttachment } from "@/types/assignment";
 import {  calculateProgress, getCardBgColor } from "@/utils/assignmentUtils";
+import { Sort } from "typeorm";
+import { SortDirection, SortOption } from "@/types/sort";
+import SortMenu from "../SortMenu";
 
 interface ExpandedAssignmentViewProps {
   assignment: Assignment;
@@ -50,23 +53,34 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
   onUpdate,
 }) => {
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [isCreateTaskModalOpen, setIsCreateTaskModalOpen] = useState(false);
   const [progress, setProgress] = useState(0);
   const [viewMode, setViewMode] = useState<"status" | "member">("status");
   const [memberProgress, setMemberProgress] = useState<Record<string, number>>(
     {}
   );
+
+  const [isCreateTaskModalOpen, setIsCreateTaskModalOpen] = useState(false);
+
   const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
-  const [isSortMenuOpen, setIsSortMenuOpen] = useState(false);
-  const [sortBy, setSortBy] = useState<"dueDate" | "weight" | "priority">(
-    "dueDate"
-  );
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [filters, setFilters] = useState({
     status: [] as string[],
     priority: [] as string[],
     dueDate: "all" as "all" | "today" | "week" | "month",
   });
+  const [isSortMenuOpen, setIsSortMenuOpen] = useState(false);
+  const sortOptions: SortOption[] = [
+    { key: "dueDate", label: "Due Date", icon: <Calendar size={16} /> },
+    { key: "createdAt", label: "Created At", icon: <Clock size={16} /> },
+    { key: "weight", label: "Weight", icon: <BarChart size={16}  /> },
+    { key: "priority", label: "Priority", icon: <Flag size={16}  /> },
+  ] as const;
+  const [sortBy, setSortBy] = useState<SortOption>(
+    sortOptions[0]
+  );
+  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+
+
+
   const [isEditingDescription, setIsEditingDescription] = useState(false);
   const [editedDescription, setEditedDescription] = useState("");
   const [showFiles, setShowFiles] = useState(false);
@@ -78,34 +92,6 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
 
   const calcProgress = (taskList: Task[]) =>
     setProgress(calculateProgress(taskList));
-
-  // todo - confirm if need this or can use utils veriosn
-  // const calcProgress = (taskList: Task[]) => {
-  // if (taskList.length === 0) {
-  //   setProgress(0)
-  //   return
-  // }
-
-  // // Calculate weighted progress
-  // const totalWeight = taskList.reduce((sum, task) => sum + task.weight, 0)
-  // if (totalWeight === 0) {
-  //   setProgress(0)
-  //   return
-  // }
-
-  // const completedWeight = taskList.filter((task) => task.status==="Completed").reduce((sum, task) => sum + task.weight, 0)
-
-  // const newProgress = Math.round((completedWeight / totalWeight) * 100)
-  // setProgress(newProgress)
-
-  // // Update the assignment progress
-  // if (onUpdate && newProgress !== assignment.progress) {
-  //   onUpdate({
-  //     ...assignment,
-  //     progress: newProgress,
-  //     tasks: taskList,
-  //   })
-  // }
 
   // create utils from this
   const getUniqueAssignees = useCallback(() => {
@@ -308,8 +294,8 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
   };
 
   // TODO: MODIFY TO BE BASED ON SORT MENU
-  const handleSortChange = (sortType: "dueDate" | "weight" | "priority") => {
-    if (sortBy === sortType) {
+  const handleSortChange = (sortType:SortOption) => {
+    if (sortBy.key === sortType.key) {
       // Toggle direction if same sort type
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
@@ -367,9 +353,9 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
       });
     }
 
-    // Apply sorting
+    // TODO: provide a general sorting function
     return filteredTasks.sort((a, b) => {
-      if (sortBy === "dueDate") {
+      if (sortBy.key === "dueDate") {
         if (!a.dueDate) return sortDirection === "asc" ? 1 : -1;
         if (!b.dueDate) return sortDirection === "asc" ? -1 : 1;
 
@@ -377,11 +363,11 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
         const dateB = new Date(b.dueDate).getTime();
 
         return sortDirection === "asc" ? dateA - dateB : dateB - dateA;
-      } else if (sortBy === "weight") {
+      } else if (sortBy.key === "weight") {
         return sortDirection === "asc"
           ? (a.weight ? a.weight : 0) - (b.weight ? b.weight : 0)
           : (b.weight ? b.weight : 0) - (a.weight ? a.weight : 0); //TODO: CONFIRM LOGIC
-      } else if (sortBy === "priority") {
+      } else if (sortBy.key === "priority") {
         const priorityValues = { high: 3, medium: 2, low: 1 };
         const valueA = priorityValues[a.priority] || 0;
         const valueB = priorityValues[b.priority] || 0;
@@ -895,6 +881,7 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
             </div>
 
             <div className="taskActions">
+              {/* filter  */}
               <div className="filterContainer" ref={filterMenuRef}>
                 <button className="actionButton" onClick={toggleFilterMenu}>
                   <Filter size={18} />
@@ -1038,8 +1025,19 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
                 )}
               </div>
 
+              {/* sort */}
               <div className="sortContainer" ref={sortMenuRef}>
-                <button className="actionButton" onClick={toggleSortMenu}>
+                <SortMenu
+                  sortMenuOpen={isSortMenuOpen}
+                  setSortMenuOpen={toggleSortMenu}
+                  sortBy={sortBy}
+                  sortDirection={sortDirection}
+                  handleSortChange={handleSortChange}
+                  options={sortOptions}
+                  displayText={true}
+                
+                />
+                {/* <button className="actionButton" onClick={toggleSortMenu}>
                   {sortDirection === "asc" ? (
                     <ArrowUp size={18} />
                   ) : (
@@ -1096,9 +1094,10 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
                         ))}
                     </button>
                   </div>
-                )}
+                )} */}
               </div>
 
+              {/* add task */}
               <button
                 className="createTaskButton"
                 onClick={() => setIsCreateTaskModalOpen(true)}

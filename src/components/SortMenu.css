@@ -29,7 +29,6 @@
     cursor: pointer;
     transition: background-color 0.2s;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    width: 100%;
   }
   
   .sortOption:last-child {
@@ -47,3 +46,9 @@
   .sortOption span {
     flex: 1;
   }
+/* Add styles for sort direction indicators */
+.sortDirection {
+  margin-left: auto;
+  display: flex;
+  align-items:end
+}

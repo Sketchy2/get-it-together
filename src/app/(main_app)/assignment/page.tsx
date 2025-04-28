@@ -436,6 +436,7 @@ export default function Assignments() {
         members: newAssignmentData.members || [],
         tasks: newAssignmentData.tasks || [],
         files: newAssignmentData.files || [],
+        links:newAssignmentData.links || [],
       };
 
       // Update local state
