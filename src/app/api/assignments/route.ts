@@ -1,223 +1,171 @@
-/**
- * API Routes for Assignment entity CRUD operations.
- * Uses Next.js Edge runtime and TypeORM for database access.
- */
-
 import { NextRequest, NextResponse } from "next/server";
-import { AppDataSource } from "@/auth";
+import { auth } from "@/auth";
+import { DataSource } from "typeorm";
+import { typeormOptions } from "@/typeorm-datasource";
 import { Assignment } from "@/entities/Assignments";
+import { UserEntity } from "@/entities/auth-entities";
 
 /**
- * Initializes the database connection if not already initialized.
- * Ensures AppDataSource is ready before any DB operations.
+ * Helper: create a fresh connection
  */
-async function initDB(): Promise<void> {
-  if (!AppDataSource.isInitialized) {
-    await AppDataSource.initialize();
-    console.log("Database initialized");
+async function getDataSource() {
+  const dataSource = new DataSource(typeormOptions);
+  if (!dataSource.isInitialized) {
+    await dataSource.initialize();
   }
+  return dataSource;
 }
 
 /**
  * GET /api/assignments
- * Fetches all assignments along with their group relation.
- *
- * @returns JSON array of Assignment objects
+ * Fetch all assignments (with assignees and tasks)
  */
-export async function GET(): Promise<NextResponse> {
+export async function GET() {
   try {
-    await initDB();
-    const repo = AppDataSource.getRepository(Assignment);
-    const assignments = await repo.find({ relations: ["group"] });
+    const session = await auth();
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const dataSource = await getDataSource();
+    const repo = dataSource.getRepository(Assignment);
+
+    const assignments = await repo.find({
+      relations: ["assignees", "tasks"], // 🔥 load tasks too
+    });
+
+    await dataSource.destroy();
+
     return NextResponse.json(assignments);
   } catch (err) {
-    return handleError(err);
+    console.error(err);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
 
 /**
  * POST /api/assignments
- * Creates a new assignment.
- *
- * Expects a JSON body with:
- * - title (string) required
- * - description (string) optional
- * - weighting (number) optional
- * - deadline (ISO string) optional
- * - progress (number 0–100) optional
- * - status (string) required
- * - finalGrade (number) optional
- * - createdBy (number) required
- * - groupId (number) required
- *
- * @param req NextRequest containing assignment data
- * @returns JSON of saved Assignment with status 201 or error JSON
+ * Create a new assignment
  */
-export async function POST(req: NextRequest): Promise<NextResponse> {
+export async function POST(req: NextRequest) {
   try {
-    await initDB();
-    const {
-      title,
-      description,
-      weighting,
-      deadline,
-      progress,
-      status,
-      finalGrade,
-      createdBy,
-      groupId,
-    } = await req.json();
-
-    if (!title || !status || groupId === undefined || createdBy === undefined) {
-      return NextResponse.json(
-        { error: "Title, status, groupId and createdBy are required" },
-        { status: 400 }
-      );
+    const session = await auth();
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const repo = AppDataSource.getRepository(Assignment);
-    const newAssignment = repo.create({
+    const { title, description, weighting, deadline, progress, status, finalGrade } = await req.json();
+
+    if (!title || !status) {
+      return NextResponse.json({ error: "Title and Status are required" }, { status: 400 });
+    }
+
+    const dataSource = await getDataSource();
+    const assignmentRepo = dataSource.getRepository(Assignment);
+    const userRepo = dataSource.getRepository(UserEntity);
+
+    const user = await userRepo.findOneBy({ id: session.user.id as any });
+    if (!user) {
+      await dataSource.destroy();
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    const assignment = assignmentRepo.create({
       title,
-      description: description ?? null,
+      description: description || null,
       weighting: weighting ?? null,
       deadline: deadline ? new Date(deadline) : null,
       progress: progress ?? 0,
       status,
       finalGrade: finalGrade ?? null,
-      createdBy,
-      groupId,
+      createdByUser: user,
     });
 
-    const saved = await repo.save(newAssignment);
-    return NextResponse.json(saved, { status: 201 });
+    const savedAssignment = await assignmentRepo.save(assignment);
+    await dataSource.destroy();
+
+    return NextResponse.json(savedAssignment, { status: 201 });
   } catch (err) {
-    return handleError(err);
+    console.error(err);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
 
 /**
- * PUT /api/assignments?id={id}
- * Updates an existing assignment by ID.
- *
- * Expects query param id and JSON body with any updatable fields.
- *
- * @param req NextRequest containing id and update data
- * @returns JSON of updated Assignment or error JSON
+ * PUT /api/assignments?id={assignmentId}
+ * Update an existing assignment
  */
-export async function PUT(req: NextRequest): Promise<NextResponse> {
+export async function PUT(req: NextRequest) {
   try {
-    const url = new URL(req.url);
-    const idParam = url.searchParams.get("id");
-    if (!idParam) {
-      return NextResponse.json(
-        { error: "Assignment ID is required" },
-        { status: 400 }
-      );
-    }
-    const assignmentId = Number(idParam);
-    if (isNaN(assignmentId)) {
-      return NextResponse.json(
-        { error: "Invalid Assignment ID" },
-        { status: 400 }
-      );
+    const session = await auth();
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    await initDB();
-    const repo = AppDataSource.getRepository(Assignment);
-    const assignment = await repo.findOneBy({ id: assignmentId });
-    if (!assignment) {
-      return NextResponse.json(
-        { error: "Assignment not found" },
-        { status: 404 }
-      );
+    const dataSource = await getDataSource();
+    const repo = dataSource.getRepository(Assignment);
+
+    const { searchParams } = new URL(req.url);
+    const id = parseInt(searchParams.get("id") || "");
+
+    if (isNaN(id)) {
+      await dataSource.destroy();
+      return NextResponse.json({ error: "Invalid Assignment ID" }, { status: 400 });
     }
 
-    const {
-      title,
-      description,
-      weighting,
-      deadline,
-      progress,
-      status,
-      finalGrade,
-      createdBy,
-      groupId,
-    } = await req.json();
+    const existingAssignment = await repo.findOne({ where: { id } });
+    if (!existingAssignment) {
+      await dataSource.destroy();
+      return NextResponse.json({ error: "Assignment not found" }, { status: 404 });
+    }
 
-    if (title       !== undefined) assignment.title       = title;
-    if (description !== undefined) assignment.description = description;
-    if (weighting  !== undefined) assignment.weighting  = weighting;
-    if (deadline    !== undefined) assignment.deadline    = deadline ? new Date(deadline) : null;
-    if (progress    !== undefined) assignment.progress    = progress;
-    if (status      !== undefined) assignment.status      = status;
-    if (finalGrade  !== undefined) assignment.finalGrade  = finalGrade;
-    if (createdBy   !== undefined) assignment.createdBy   = createdBy;
-    if (groupId     !== undefined) assignment.groupId     = groupId;
+    const updateData = await req.json();
+    repo.merge(existingAssignment, updateData);
 
-    const updated = await repo.save(assignment);
-    return NextResponse.json(updated);
+    const updatedAssignment = await repo.save(existingAssignment);
+    await dataSource.destroy();
+
+    return NextResponse.json(updatedAssignment);
   } catch (err) {
-    return handleError(err);
+    console.error(err);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
 
 /**
- * DELETE /api/assignments?id={id}
- * Deletes an assignment by ID.
- *
- * Expects query param id.
- *
- * @param req NextRequest containing id
- * @returns JSON confirmation message or error JSON
+ * DELETE /api/assignments?id={assignmentId}
+ * Delete an assignment
  */
-export async function DELETE(req: NextRequest): Promise<NextResponse> {
+export async function DELETE(req: NextRequest) {
   try {
-    const url = new URL(req.url);
-    const idParam = url.searchParams.get("id");
-    if (!idParam) {
-      return NextResponse.json(
-        { error: "Assignment ID is required" },
-        { status: 400 }
-      );
-    }
-    const assignmentId = Number(idParam);
-    if (isNaN(assignmentId)) {
-      return NextResponse.json(
-        { error: "Invalid Assignment ID" },
-        { status: 400 }
-      );
+    const session = await auth();
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    await initDB();
-    const repo = AppDataSource.getRepository(Assignment);
+    const dataSource = await getDataSource();
+    const repo = dataSource.getRepository(Assignment);
 
-    const assignment = await repo.findOneBy({ id: assignmentId });
+    const { searchParams } = new URL(req.url);
+    const id = parseInt(searchParams.get("id") || "");
+
+    if (isNaN(id)) {
+      await dataSource.destroy();
+      return NextResponse.json({ error: "Invalid Assignment ID" }, { status: 400 });
+    }
+
+    const assignment = await repo.findOne({ where: { id } });
     if (!assignment) {
-      return NextResponse.json(
-        { error: "Assignment not found" },
-        { status: 404 }
-      );
+      await dataSource.destroy();
+      return NextResponse.json({ error: "Assignment not found" }, { status: 404 });
     }
 
-    await repo.delete(assignmentId);
-    return NextResponse.json(
-      { message: `Assignment ${assignmentId} deleted` },
-      { status: 200 }
-    );
-  } catch (err) {
-    return handleError(err);
-  }
-}
+    await repo.remove(assignment);
+    await dataSource.destroy();
 
-/**
- * Standard error handler for API routes.
- * Logs the error and returns a 500 response.
- *
- * @param error Unknown error object
- * @returns JSON error response with status 500
- */
-function handleError(error: unknown): NextResponse {
-  console.error("❌", error);
-  const msg = error instanceof Error ? error.message : "Unknown error";
-  return NextResponse.json({ error: msg }, { status: 500 });
+    return NextResponse.json({ message: "Assignment deleted successfully" });
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
 }

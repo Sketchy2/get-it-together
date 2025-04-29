@@ -1,190 +1,175 @@
-/**
- * API Routes for Task entity CRUD operations.
- * Uses Next.js Edge runtime and TypeORM for database access.
- */
-
 import { NextRequest, NextResponse } from "next/server";
-import { AppDataSource } from "@/auth";
+import { auth } from "@/auth";
+import { DataSource } from "typeorm";
+import { typeormOptions } from "@/typeorm-datasource";
 import { Task } from "@/entities/Tasks";
+import { UserEntity } from "@/entities/auth-entities";
+import { Assignment } from "@/entities/Assignments";
 
 /**
- * Initializes the database connection if not already initialized.
- * Ensures AppDataSource is ready before any DB operations.
+ * Helper: create a fresh connection
  */
-async function initDB(): Promise<void> {
-  if (!AppDataSource.isInitialized) {
-    await AppDataSource.initialize();
-    console.log("Database initialized");
+async function getDataSource() {
+  const dataSource = new DataSource(typeormOptions);
+  if (!dataSource.isInitialized) {
+    await dataSource.initialize();
   }
+  return dataSource;
 }
 
 /**
  * GET /api/tasks
- * Fetches all tasks along with their assignees.
- *
- * @returns JSON array of Task objects
+ * Fetch all tasks
  */
-export async function GET(): Promise<NextResponse> {
+export async function GET() {
   try {
-    await initDB();
-    const repo = AppDataSource.getRepository(Task);
+    const session = await auth();
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const dataSource = await getDataSource();
+    const repo = dataSource.getRepository(Task);
+
     const tasks = await repo.find({ relations: ["assignees"] });
+    await dataSource.destroy();
+
     return NextResponse.json(tasks);
   } catch (err) {
-    return handleError(err);
+    console.error(err);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
 
 /**
  * POST /api/tasks
- * Creates a new task.
- *
- * Expects a JSON body with:
- * - title (string) required
- * - description (string) optional
- * - status ("To-Do" | "In Progress" | "Completed") required
- * - priority (number) optional
- * - dueDate (ISO string) optional
- *
- * @param req NextRequest containing task data
- * @returns JSON of saved Task with status 201 or error JSON
+ * Create a new task
  */
-export async function POST(req: NextRequest): Promise<NextResponse> {
+export async function POST(req: NextRequest) {
   try {
-    await initDB();
-    const { title, description, status, priority, dueDate } = await req.json();
-
-    if (!title || !status) {
-      return NextResponse.json(
-        { error: "Title and status are required" },
-        { status: 400 }
-      );
+    const session = await auth();
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const repo = AppDataSource.getRepository(Task);
-    const newTask = repo.create({
+    const { title, description, status, priority, dueDate, assignmentId } = await req.json();
+
+    if (!title || !status || !assignmentId) {
+      return NextResponse.json({ error: "Title, Status, and AssignmentId are required" }, { status: 400 });
+    }
+
+    const dataSource = await getDataSource();
+    const taskRepo = dataSource.getRepository(Task);
+    const userRepo = dataSource.getRepository(UserEntity);
+    const assignmentRepo = dataSource.getRepository(Assignment);
+
+    const user = await userRepo.findOneBy({ id: session.user.id as any });
+    if (!user) {
+      await dataSource.destroy();
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    const assignment = await assignmentRepo.findOne({ where: { id: assignmentId } });
+    if (!assignment) {
+      await dataSource.destroy();
+      return NextResponse.json({ error: "Assignment not found" }, { status: 404 });
+    }
+
+    const task = taskRepo.create({
       title,
-      description: description ?? null,
+      description: description || null,
       status,
       priority: priority ?? null,
       dueDate: dueDate ? new Date(dueDate) : null,
+      createdByUser: user,
+      assignment,
     });
 
-    const saved = await repo.save(newTask);
-    return NextResponse.json(saved, { status: 201 });
+    const savedTask = await taskRepo.save(task);
+    await dataSource.destroy();
+
+    return NextResponse.json(savedTask, { status: 201 });
   } catch (err) {
-    return handleError(err);
+    console.error(err);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
 
 /**
- * PUT /api/tasks?id={id}
- * Updates an existing task by ID.
- *
- * Expects query param id and JSON body with any updatable fields.
- *
- * @param req NextRequest containing id and update data
- * @returns JSON of updated Task or error JSON
+ * PUT /api/tasks?id={taskId}
+ * Update an existing task
  */
-export async function PUT(req: NextRequest): Promise<NextResponse> {
+export async function PUT(req: NextRequest) {
   try {
-    const url = new URL(req.url);
-    const idParam = url.searchParams.get("id");
-    if (!idParam) {
-      return NextResponse.json(
-        { error: "Task ID is required" },
-        { status: 400 }
-      );
-    }
-    const taskId = Number(idParam);
-    if (isNaN(taskId)) {
-      return NextResponse.json(
-        { error: "Invalid Task ID" },
-        { status: 400 }
-      );
+    const session = await auth();
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    await initDB();
-    const repo = AppDataSource.getRepository(Task);
-    const task = await repo.findOneBy({ id: taskId });
-    if (!task) {
-      return NextResponse.json(
-        { error: "Task not found" },
-        { status: 404 }
-      );
+    const dataSource = await getDataSource();
+    const repo = dataSource.getRepository(Task);
+
+    const { searchParams } = new URL(req.url);
+    const id = parseInt(searchParams.get("id") || "");
+
+    if (isNaN(id)) {
+      await dataSource.destroy();
+      return NextResponse.json({ error: "Invalid Task ID" }, { status: 400 });
     }
 
-    const { title, description, status, priority, dueDate } = await req.json();
-    if (title       !== undefined) task.title       = title;
-    if (description !== undefined) task.description = description;
-    if (status      !== undefined) task.status      = status;
-    if (priority    !== undefined) task.priority    = priority;
-    if (dueDate     !== undefined) task.dueDate     = dueDate ? new Date(dueDate) : null;
+    const existingTask = await repo.findOne({ where: { id } });
+    if (!existingTask) {
+      await dataSource.destroy();
+      return NextResponse.json({ error: "Task not found" }, { status: 404 });
+    }
 
-    const updated = await repo.save(task);
-    return NextResponse.json(updated);
+    const updateData = await req.json();
+
+    repo.merge(existingTask, updateData);
+    const updatedTask = await repo.save(existingTask);
+
+    await dataSource.destroy();
+    return NextResponse.json(updatedTask);
   } catch (err) {
-    return handleError(err);
+    console.error(err);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
 
 /**
- * DELETE /api/tasks?id={id}
- * Deletes a task by ID.
- *
- * Expects query param id.
- *
- * @param req NextRequest containing id
- * @returns JSON confirmation message or error JSON
+ * DELETE /api/tasks?id={taskId}
+ * Delete a task
  */
-export async function DELETE(req: NextRequest): Promise<NextResponse> {
+export async function DELETE(req: NextRequest) {
   try {
-    const url = new URL(req.url);
-    const idParam = url.searchParams.get("id");
-    if (!idParam) {
-      return NextResponse.json(
-        { error: "Task ID is required" },
-        { status: 400 }
-      );
-    }
-    const taskId = Number(idParam);
-    if (isNaN(taskId)) {
-      return NextResponse.json(
-        { error: "Invalid Task ID" },
-        { status: 400 }
-      );
+    const session = await auth();
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    await initDB();
-    const repo = AppDataSource.getRepository(Task);
+    const dataSource = await getDataSource();
+    const repo = dataSource.getRepository(Task);
 
-    const task = await repo.findOneBy({ id: taskId });
+    const { searchParams } = new URL(req.url);
+    const id = parseInt(searchParams.get("id") || "");
+
+    if (isNaN(id)) {
+      await dataSource.destroy();
+      return NextResponse.json({ error: "Invalid Task ID" }, { status: 400 });
+    }
+
+    const task = await repo.findOne({ where: { id } });
     if (!task) {
-      return NextResponse.json(
-        { error: "Task not found" },
-        { status: 404 }
-      );
+      await dataSource.destroy();
+      return NextResponse.json({ error: "Task not found" }, { status: 404 });
     }
 
-    await repo.delete(taskId);
-    return NextResponse.json(
-      { message: `Task ${taskId} deleted` },
-      { status: 200 }
-    );
-  } catch (err) {
-    return handleError(err);
-  }
-}
+    await repo.remove(task);
+    await dataSource.destroy();
 
-/**
- * Standard error handler for API routes.
- * Logs the error and returns a 500 response.
- *
- * @param error Unknown error object
- * @returns JSON error response with status 500
- */
-function handleError(error: unknown): NextResponse {
-  console.error("❌", error);
-  const msg = error instanceof Error ? error.message : "Unknown error";
-  return NextResponse.json({ error: msg }, { status: 500 });
+    return NextResponse.json({ message: "Task deleted successfully" });
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
 }

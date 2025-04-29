@@ -3,11 +3,14 @@ import {
     PrimaryGeneratedColumn,
     Column,
     ManyToOne,
-    JoinColumn
+    JoinColumn,
+    OneToMany
   } from "typeorm";
   import type { Relation } from "typeorm";
   
-  import { User } from "./auth-entities";
+  import { UserEntity } from "./auth-entities";
+  import { AssignmentAssignee } from "./AssignmentAssignee";
+  import { Task } from "./Tasks";
   /**
    * Represents a coursework assignment within a group.
    */
@@ -45,8 +48,14 @@ import {
     @Column({ name: "assignment_final_grade", type: "float", nullable: true })
     finalGrade: number | null;
   
-    @ManyToOne(() => User, (user) => user.assignments)
-    @JoinColumn({ name: "assignment_created_by" })
-    createdByUser!: Relation<User>;
+    @OneToMany(() => Task, (task) => task.assignment)
+    tasks!: Relation<Task[]>;
+
+    @ManyToOne(() => UserEntity, (UserEntity) => UserEntity.id)
+    createdByUser!: Relation<UserEntity>;
+
+    @OneToMany(() => AssignmentAssignee, (assignee) => assignee.assignment)
+    assignees!: Relation<AssignmentAssignee[]>;
+    
   }
   
