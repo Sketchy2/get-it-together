@@ -220,32 +220,29 @@ export default function Assignments() {
     ];
   }, []);
 
-  /**
-   * Load all assignments on component mount
-   */
+  // Fetch all assignments 
+
   useEffect(() => {
-    // Only load data if we haven't already
-    if (assignments.length === 0) {
-      setIsLoading(true);
-
-      // Timeout to simulate network request
-      const timer = setTimeout(() => {
-        try {
-          // Load mock data
-          const data = getSampleAssignments();
-          setAssignments(data);
-          setError(null);
-        } catch (err) {
-          console.error("Error loading assignments:", err);
-          setError("Failed to load assignments. Please try again.");
-        } finally {
-          setIsLoading(false);
-        }
-      }, 1000);
-
-      return () => clearTimeout(timer);
-    }
-  }, [assignments.length, getSampleAssignments]);
+    const fetchAssignments = async () => {
+      try {
+        setIsLoading(true);
+        const res = await fetch("/api/assignments");
+        if (!res.ok) throw new Error("Failed to fetch assignments");
+  
+        const data = await res.json();
+        setAssignments(data);
+        setError(null);
+      } catch (err) {
+        console.error(err);
+        setError("Failed to load assignments. Please try again.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+  
+    fetchAssignments();
+  }, []);
+  
 
   /**
    * Get active assignments with memoization
@@ -382,53 +379,60 @@ export default function Assignments() {
   /**
    * Handle creating new assignment
    */
-  const handleCreateAssignment = useCallback(
-    (newAssignmentData: Assignment) => {
-      // Generate a mock ID for the new assignment
-      const id = `a${Date.now()}`;
-
-      // Create the assignment with the ID
-      const createdAssignment: Assignment = {
-        id,
-        title: newAssignmentData.title || "",
-        description: newAssignmentData.description || "",
-        createdAt: newAssignmentData.createdAt || new Date().toISOString(),
-        dueDate: newAssignmentData.dueDate || new Date().toISOString(),
-        weight: newAssignmentData.weight || 0,
-        members: newAssignmentData.members || [],
-        tasks: newAssignmentData.tasks || [],
-        files: newAssignmentData.files || [],
-        links:newAssignmentData.links || [],
-      };
-
-      // Update local state
-      setAssignments((prev) => [...prev, createdAssignment]);
+  const handleCreateAssignment = useCallback(async (newAssignmentData: Assignment) => {
+    try {
+      const res = await fetch("/api/assignments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: newAssignmentData.title,
+          description: newAssignmentData.description,
+          weighting: newAssignmentData.weight,
+          deadline: newAssignmentData.dueDate,
+          status: "Not Started", // or other default
+          progress: 0,
+          finalGrade: null,
+        }),
+      });
+  
+      if (!res.ok) throw new Error("Failed to create assignment");
+  
+      const created = await res.json();
+      setAssignments(prev => [...prev, created]);
       setIsCreateModalOpen(false);
-    },
-    []
-  );
+    } catch (err) {
+      console.error(err);
+      // optionally show toast here
+    }
+  }, []);
+  
 
   /**
    * Handle updating assignment
    */
-  const handleUpdateAssignment = useCallback(
-    (updatedAssignment: Assignment) => {
-      // Update local state
+  const handleUpdateAssignment = useCallback(async (updatedAssignment: Assignment) => {
+    try {
+      const res = await fetch(`/api/assignments/${updatedAssignment.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedAssignment),
+      });
+  
+      if (!res.ok) throw new Error("Failed to update assignment");
+  
+      const updated = await res.json();
+  
       setAssignments((prev) =>
-        prev.map((assignment) =>
-          assignment.id === updatedAssignment.id
-            ? updatedAssignment
-            : assignment
-        )
+        prev.map((assignment) => assignment.id === updated.id ? updated : assignment)
       );
-
-      // Update selected assignment if it's the one being edited
-      if (selectedAssignmentData?.id === updatedAssignment.id) {
-        setSelectedAssignmentData(updatedAssignment);
+      if (selectedAssignmentData?.id === updated.id) {
+        setSelectedAssignmentData(updated);
       }
-    },
-    [selectedAssignmentData]
-  );
+    } catch (err) {
+      console.error(err);
+    }
+  }, [selectedAssignmentData]);
+  
 
   // Rows data for rendering
   const rows = useMemo(
