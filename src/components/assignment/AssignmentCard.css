@@ -2,22 +2,75 @@
   border-radius: 12px;
   color: white;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: all 0.3s ease;
   cursor: pointer;
-  overflow: hidden;
   position: relative;
+  text-wrap: wrap;
+  height: 95%;
+  width: 280px;
+  z-index: 2;
 }
 
 .card:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
 }
-
 .cardContent {
   padding: 16px;
+  padding-top: 30px;
   height: 100%;
   display: flex;
   flex-direction: column;
+  z-index: 2
+}
+
+/* Days indicator extension */
+.days-extension {
+  display: none;
+  position: absolute;
+  left: 0; 
+  bottom: -40px; /* moved below the card */
+  width: 100%; 
+  height: 40px; 
+  background-color: rgba(0, 0, 0, 0.2);
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  transition: transform 0.3s ease;
+  transform: translateY(200%); /* start hidden downward */
+  border-radius: 0 0 12px 12px; /* round bottom corners */
+  filter: brightness(0.9);
+}
+
+
+.card:hover .days-extension {
+  display: flex;
+  transform: translateY(-10px); /* slide upward into view */
+  z-index: 1;
+}
+
+/* Wrapper to handle the card and its extension */
+.card-wrapper {
+  position: relative;
+  width: 280px;
+  height: 95%;
+  transition: all 0.3s ease;
+  overflow: visible;/* Allow extension to overflow */
+}
+
+
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+  position: relative;
+}
+
+.cardTitleContainer {
+  flex: 1;
+  padding-right: 50px; /* Make room for progress circle */
 }
 
 .cardTitle {
@@ -38,11 +91,12 @@
 .cardDescription {
   font-size: 0.9rem;
   margin: 0 0 auto 0;
-  overflow: hidden;
+  line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
-  line-height: 1.4;
+  overflow: hidden;
+  word-break: break-word;
 }
 
 .cardFooter {
@@ -52,9 +106,11 @@
   margin-top: 12px;
 }
 
-.progressCircleContainer {
-  position: relative;
-  z-index: 1;
+.circleContainer {
+  position: relative ;
+  top: -10px;
+  right: 15px;
+  z-index: 3;
   width: 40px;
   height: 40px;
 }
@@ -68,7 +124,4 @@
   transform-origin: center;
 }
 
-.daysIndicator {
-  font-size: 0.8rem;
-  opacity: 0.9;
-}
+

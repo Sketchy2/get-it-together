@@ -138,7 +138,7 @@ const CreateAssignmentModal: React.FC<CreateAssignmentModalProps> = ({ isOpen, o
           </div>
 
           <div className="formRow">
-            <div className="formGroup">
+            <div className="formGroup shared">
               <label htmlFor="dueDate" className="inputWithIcon">
                 <Calendar size={16} />
                 <span>Due Date</span>
@@ -146,7 +146,7 @@ const CreateAssignmentModal: React.FC<CreateAssignmentModalProps> = ({ isOpen, o
               <input type="date" id="dueDate" value={dueDate} onChange={(e) => setDueDate(e.target.value)} required />
             </div>
 
-            <div className="formGroup">
+            <div className="formGroup shared">
               <label htmlFor="weight" className="inputWithIcon">
                 <Percent size={16} />
                 <span>Total Weight (%)</span>

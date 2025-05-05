@@ -1,25 +1,21 @@
-// components/AssignmentCard.tsx
-import type React from "react"
-import "./AssignmentCard.css"
-import ProgressCircle from "./ProgressCircle"
+import type React from "react";
+import "./AssignmentCard.css";
+import ProgressCircle from "./ProgressCircle";
+import { formatDate } from "@/utils/utils";
 
 interface AssignmentCardProps {
-  title: string
-  date: string
-  dueDate: string
-  weight: number
-  description: string
-  progress: number
-  daysRemaining: number
-  isLate: boolean
-  bgColor?: string
-  width?: string
-  height?: string
+  title: string;
+  dueDate: string;
+  weight: number;
+  description: string;
+  progress: number;
+  daysRemaining: number;
+  isLate: boolean;
+  bgColor?: string;
 }
 
 const AssignmentCard: React.FC<AssignmentCardProps> = ({
   title,
-  date,
   dueDate,
   weight,
   description,
@@ -27,47 +23,56 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({
   daysRemaining,
   isLate,
   bgColor = "#DD992B",
-  width = "280px",
-  height = "150px",
 }) => {
 
-  // calc
-
-
-
-
-
+  const daysText = () => {
+    if (progress == 100)
+    { return "Completed!" }
+    else {
+      if (isLate) {
+        return `${Math.abs(daysRemaining)} day${Math.abs(daysRemaining)>1?"s":""} overdue`
+      } else {
+        return `${Math.abs(daysRemaining)} day${Math.abs(daysRemaining)>1?"s":""} remaining`
+      }
+    }
+  }
+    
   return (
-    <div
-      className="card"
-      style={{
-        backgroundColor: bgColor,
-        width,
-        height,
-      }}
-    >
-      <div className="cardContent">
-        <h3 className="cardTitle">{title}</h3>
-
-        <div className="cardMeta">
-          <span>
-            {date} + day due | Weighed {weight}%
-          </span>
-        </div>
-
-        <p className="cardDescription">{description}</p>
-        <div className="cardFooter">
-        <ProgressCircle percentage={progress} />
-
-          <div className="daysIndicator">
-            <span className="daysText">
-              {isLate ? `${Math.abs(daysRemaining)} days overdue` : `${daysRemaining} days remaining`}
+    <div className="card-wrapper">
+      <div
+        className="card"
+        style={{
+          backgroundColor: bgColor,
+        }}
+      >
+        <div className="cardContent">
+          <div className="cardHeader">
+            <div className="cardTitleContainer">
+              <h3 className="cardTitle">{title}</h3>
+            </div>
+            <div className="circleContainer">
+              <ProgressCircle percentage={progress} />
+            </div>
+          </div>
+          <div className="cardMeta">
+            <span>
+              Due: {formatDate(dueDate)} | Weighed: {weight}%
             </span>
           </div>
+          <p className="cardDescription">{description}</p>
+          <div className="cardFooter">
+            <div className="daysIndicator">
+            </div>
+          </div>
+        </div>
+        
+        <div className="days-extension" style={{backgroundColor: bgColor}}>
+          {daysText()}
         </div>
       </div>
-    </div>
-  )
-}
 
-export default AssignmentCard
+    </div>
+  );
+};
+
+export default AssignmentCard;

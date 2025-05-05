@@ -4,87 +4,66 @@ import type React from "react"
 import "./AssignmentDetails.css"
 import {
   X,
-  CheckCircle,
-  Circle,
   ChevronRight,
   ChevronDown,
-  Plus,
   Maximize2,
-  User,
   Calendar,
   Weight,
   Flag,
   Clock,
-  MoreVertical,
   FileText,
   Edit,
   Filter,
-  ArrowUpDown,
   Link,
   Upload,
-  ArrowUp,
-  ArrowDown,
 } from "lucide-react"
-import { useRouter } from "next/navigation"
 import { useState, useRef, useEffect } from "react"
 import ProgressCircle from "./ProgressCircle"
 import { SortDirection, SortOption } from "@/types/sort"
 import SortMenu from "../SortMenu"
-
-interface TodoItem {
-  id: string
-  text: string
-  completed: boolean
-  expanded?: boolean
-  assignee?: string
-  dueDate?: string
-  weight?: number
-  priority?: "low" | "medium" | "high"
-  status?: "unassigned" | "todo" | "inProgress" | "completed"
-}
+import TaskCard from "../task/TaskCard"
+import { Task } from "@/types/task"
+import {AssignmentLink, FileAttachment} from "@/types/assignment"
+import { formatDate, isLate } from "@/utils/utils"
+import {  calculateProgress, getCardBgColor } from "@/utils/assignmentUtils"
 
 interface AssignmentDetailsProps {
   id: string
   title: string
-  date: string
+  createdAt: string
   dueDate: string
   weight: number
   description: string
-  progress: number
-  daysRemaining: number
-  isLate: boolean
-  bgColor: string
-  todos: TodoItem[]
-  files?: string[]
-  links?: { url: string; title: string }[]
+  files?: FileAttachment[]
+  links?: AssignmentLink[]
+  tasks: Task[]
+  members?: string[] 
+
   onClose: () => void
   onTodoToggle: (id: string) => void
-  onTodoExpand: (id: string) => void
-  onAddTodo: () => void
+  // onTodoExpand: (id: string) => void
+  // onAddTodo: () => void
   onExpand: () => void
-  assignment?: { members?: string[] }
 }
 
-const AssignmentDetails: React.FC<AssignmentDetailsProps> = ({
+// TODO: CHANGE SO PASSES ASSIGNMENTOPBJECT
+const AssignmentDetailPanel: React.FC<AssignmentDetailsProps> = ({
   id,
   title,
-  date,
+  description,
+  createdAt,
   dueDate,
   weight,
-  description,
-  progress,
-  daysRemaining,
-  isLate,
-  bgColor,
-  todos,
+  members,
+  tasks,
   files = [],
   links = [],
+
   onClose,
   onTodoToggle,
-  onTodoExpand,
-  onAddTodo,
+  // onTodoExpand,
+  // onAddTodo,
   onExpand,
-  assignment,
 }) => {
   const sortOptions:SortOption[] = [
     { key: "dueDate", label: "Due Date", icon: <Calendar size={16} /> },
@@ -92,8 +71,11 @@ const AssignmentDetails: React.FC<AssignmentDetailsProps> = ({
     { key: "weight", label: "Weight", icon: <Weight size={16} /> },
     { key: "priority", label: "Priority", icon: <Flag size={16} /> },
   ] as const;
+
+  const progress: number = calculateProgress(tasks);
+  const islate: boolean = isLate(dueDate);
+  const bgColor: string = getCardBgColor(tasks,dueDate)
   
-  const router = useRouter()
   const [isEditing, setIsEditing] = useState(false)
   const [editedDescription, setEditedDescription] = useState(description)
   const [showFiles, setShowFiles] = useState(false)
@@ -131,37 +113,6 @@ const AssignmentDetails: React.FC<AssignmentDetailsProps> = ({
     }
   }, [])
 
-  // Format date for display
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return "No date set"
-    return dateString
-  }
-
-  // Get priority icon and color
-  const getPriorityInfo = (priority?: string) => {
-    switch (priority) {
-      case "high":
-        return { color: "#e74c3c" }
-      case "medium":
-        return { color: "#f39c12" }
-      case "low":
-        return { color: "#3498db" }
-      default:
-        return { color: "#95a5a6" }
-    }
-  }
-
-  // Get status color
-  const getStatusColor = (status?: string, completed?: boolean) => {
-    if (completed) return "#647a67" // Green for completed
-    if (status === "inProgress") return "#4d5696" // Purple for in progress
-    if (status === "todo") return "#DD992B" // Gold for todo
-    return "#777777" // Gray for unassigned
-  }
-
-  const navigateToHome = () => {
-    router.push("/dashboard")
-  }
 
   const handleSaveDescription = () => {
     // In a real app, this would save to the backend
@@ -205,13 +156,13 @@ const AssignmentDetails: React.FC<AssignmentDetailsProps> = ({
     }
   }
 
-  const applyFiltersAndSort = (todoList: TodoItem[]) => {
+  const applyFiltersAndSort = (todoList: Task[]) => {
     // Apply filters
     let filteredTodos = todoList
 
     // Filter by status
     if (filters.status.length > 0) {
-      filteredTodos = filteredTodos.filter((todo) => filters.status.includes(todo.status || "todo"))
+      filteredTodos = filteredTodos.filter((todo) => filters.status.includes(todo.status || "To-do"))
     }
 
     // Filter by priority
@@ -283,7 +234,8 @@ const AssignmentDetails: React.FC<AssignmentDetailsProps> = ({
     })
   }
 
-  const filteredAndSortedTodos = applyFiltersAndSort(todos)
+  const filteredAndSortedTodos = applyFiltersAndSort(tasks)
+  
 
   return (
     <div className="assignmentDetails">
@@ -292,10 +244,10 @@ const AssignmentDetails: React.FC<AssignmentDetailsProps> = ({
           <h2 className="detailsTitle">{title}</h2>
           <div className="detailsMetaRow">
             <span className="detailsMeta">
-              {date} + day due | weighing: {weight}%
+              Due: {formatDate(dueDate)} | Weighed: {weight}%
             </span>
             <div className="statusIndicator">
-              <span>{isLate ? "Overdue" : progress === 100 ? "Completed" : "In Progress"}</span>
+              <span>{islate ? "Overdue" : progress === 100 ? "Completed" : "In Progress"}</span>
             </div>
           </div>
         </div>
@@ -305,7 +257,7 @@ const AssignmentDetails: React.FC<AssignmentDetailsProps> = ({
         <button className="closeButton" onClick={onClose}>
           <X size={24} />
         </button>
-        <ProgressCircle percentage={progress}/>
+        <ProgressCircle percentage={progress} />
       </div>
 
       <div className="detailsContent">
@@ -347,11 +299,11 @@ const AssignmentDetails: React.FC<AssignmentDetailsProps> = ({
           </div>
           {showFiles && (
             <div className="filesContainer">
-              {files.length > 0 ? (
+              {files.length > 0 ? ( //TODO: CREATE FILE CONTAINER 
                 files.map((file, index) => (
                   <div key={index} className="fileItem">
                     <FileText size={16} />
-                    <span className="fileName">{file}</span>
+                    <span className="fileName">{file.name}</span>
                   </div>
                 ))
               ) : links && links.length > 0 ? (
@@ -459,7 +411,7 @@ const AssignmentDetails: React.FC<AssignmentDetailsProps> = ({
                     <div className="filterSection">
                       <h4>Members</h4>
                       <div className="filterOptions">
-                        {assignment?.members?.map((member: string) => (
+                        {members?.map((member: string) => (
                           <label key={member} className="filterOption">
                             <input
                               type="checkbox"
@@ -512,207 +464,26 @@ const AssignmentDetails: React.FC<AssignmentDetailsProps> = ({
                           options = {sortOptions}
                         />
 
-              {/* <div className="sortContainer" ref={sortMenuRef}>
-                <button className="actionButton" onClick={toggleSortMenu}>
-                  <ArrowUpDown size={18} />
-                </button>
-                {isSortMenuOpen && (
-                  <div className="sortMenu">
-                    <button
-                      className={`sortOption ${sortBy === "dueDate" ? "active" : ""}`}
-                      onClick={() => handleSortChange("dueDate")}
-                    >
-                      <Calendar size={16} />
-                      <span>Due Date</span>
-                      {sortBy === "dueDate" && (
-                        <span className="sortDirection">
-                          {sortDirection === "asc" ? <ArrowUp size={14} /> : <ArrowDown size={14} />}
-                        </span>
-                      )}
-                    </button>
-                    <button
-                      className={`sortOption ${sortBy === "weight" ? "active" : ""}`}
-                      onClick={() => handleSortChange("weight")}
-                    >
-                      <Weight size={16} />
-                      <span>Weight</span>
-                      {sortBy === "weight" && (
-                        <span className="sortDirection">
-                          {sortDirection === "asc" ? <ArrowUp size={14} /> : <ArrowDown size={14} />}
-                        </span>
-                      )}
-                    </button>
-                    <button
-                      className={`sortOption ${sortBy === "priority" ? "active" : ""}`}
-                      onClick={() => handleSortChange("priority")}
-                    >
-                      <Flag size={16} />
-                      <span>Priority</span>
-                      {sortBy === "priority" && (
-                        <span className="sortDirection">
-                          {sortDirection === "asc" ? <ArrowUp size={14} /> : <ArrowDown size={14} />}
-                        </span>
-                      )}
-                    </button>
-                  </div>
-                )}
-              </div> */}
-
 
             </div>
           </div>
 
           <div className="todoList">
             {filteredAndSortedTodos.length > 0 ? (
-              filteredAndSortedTodos.map((todo) => (
-                <div
-                  key={todo.id}
-                  className={`taskCard ${todo.completed ? "completed" : ""} ${todo.status || "todo"} ${
-                    todo.expanded ? "expanded" : ""
-                  }`}
-                >
-                  <div className="taskCardHeader">
-                    <button
-                      className="checkButton"
-                      onClick={() => onTodoToggle(todo.id)}
-                      aria-label={todo.completed ? "Mark as incomplete" : "Mark as complete"}
-                    >
-                      {todo.completed ? (
-                        <CheckCircle size={20} className="checkIcon completed" />
-                      ) : (
-                        <Circle size={20} className="checkIcon" />
-                      )}
-                    </button>
-
-                    <div className="taskTitleContainer">
-                      <h4 className={`taskTitle ${todo.completed ? "completed" : ""}`}>{todo.text}</h4>
-                      <div className="taskBadges">
-                        <div
-                          className="taskStatusIndicator"
-                          style={{ backgroundColor: getStatusColor(todo.status, todo.completed) }}
-                        >
-                          {todo.status === "unassigned" && "Unassigned"}
-                          {todo.status === "todo" && "To Do"}
-                          {todo.status === "inProgress" && "In Progress"}
-                          {todo.status === "completed" && "Completed"}
-                          {!todo.status && (todo.completed ? "Completed" : "To Do")}
-                        </div>
-                        {todo.weight && todo.weight > 1 && (
-                          <div className="taskWeightBadge">
-                            <Weight size={12} />
-                            <span>{todo.weight}%</span>
-                          </div>
-                        )}
-                        {todo.priority && (
-                          <div
-                            className="taskPriorityBadge"
-                            style={{ backgroundColor: getPriorityInfo(todo.priority).color }}
-                          >
-                            <Flag size={12} />
-                            <span>{todo.priority}</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="taskCardActions">
-                      <button
-                        className="expandButton"
-                        onClick={() => onTodoExpand(todo.id)}
-                        aria-label={todo.expanded ? "Collapse task" : "Expand task"}
-                      >
-                        {todo.expanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
-                      </button>
-                      <button className="menuButton">
-                        <MoreVertical size={18} />
-                      </button>
-                    </div>
-                  </div>
-
-                  {todo.expanded && (
-                    <div className="taskCardContent">
-                      <div className="taskDetailGrid">
-                        {todo.assignee && (
-                          <div className="taskDetailItem">
-                            <div className="taskDetailLabel">
-                              <User size={14} />
-                              <span>Assignee</span>
-                            </div>
-                            <div className="taskDetailValue">
-                              <div className="assigneeInfo">
-                                <div className="assigneeAvatar">{todo.assignee.charAt(0).toUpperCase()}</div>
-                                <span>{todo.assignee}</span>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        {todo.dueDate && (
-                          <div className="taskDetailItem">
-                            <div className="taskDetailLabel">
-                              <Calendar size={14} />
-                              <span>Due Date</span>
-                            </div>
-                            <div className="taskDetailValue">
-                              <span>{formatDate(todo.dueDate)}</span>
-                            </div>
-                          </div>
-                        )}
-
-                        {todo.weight && (
-                          <div className="taskDetailItem">
-                            <div className="taskDetailLabel">
-                              <Weight size={14} />
-                              <span>Weight</span>
-                            </div>
-                            <div className="taskDetailValue">
-                              <div className="weightInfo">
-                                <div className="weightBar">
-                                  {Array.from({ length: 5 }).map((_, i) => (
-                                    <div
-                                      key={i}
-                                      className={`weightUnit ${i < (todo.weight || 1) ? "active" : ""}`}
-                                      style={{ opacity: i < (todo.weight || 1) ? 1 : 0.3 }}
-                                    ></div>
-                                  ))}
-                                </div>
-                                <span>{todo.weight || 1}% of total weight</span>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        <div className="taskDetailItem">
-                          <div className="taskDetailLabel">
-                            <Clock size={14} />
-                            <span>Status</span>
-                          </div>
-                          <div className="taskDetailValue">
-                            <span>
-                              {todo.completed
-                                ? "Completed"
-                                : todo.status === "inProgress"
-                                  ? "In Progress"
-                                  : todo.status === "unassigned"
-                                    ? "Unassigned"
-                                    : "To Do"}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))
+              filteredAndSortedTodos.map((task) =>
+                <TaskCard key={task.id} task={task} onStatusChange={onTodoToggle} />)
+              
+  
             ) : (
               <div className="emptyTodoState">
                 <p>No tasks added yet</p>
               </div>
             )}
-            <button className="addTaskButton" onClick={onAddTodo}>
+            {/* TO DO: ADD THIS
+             <button className="addTaskButton" onClick={onAddTodo}>
               <Plus size={18} />
               <span>Add New Task</span>
-            </button>
+            </button> */}
           </div>
         </div>
       </div>
@@ -720,4 +491,4 @@ const AssignmentDetails: React.FC<AssignmentDetailsProps> = ({
   )
 }
 
-export default AssignmentDetails
+export default AssignmentDetailPanel

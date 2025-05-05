@@ -2,9 +2,6 @@ import {
   ArrowDown,
   ArrowUp,
   ArrowUpDown,
-  ArrowUpRightIcon,
-  Calendar,
-  Clock,
 } from "lucide-react";
 import { SortOption, SortDirection } from "@/types/sort";
 import "./SortMenu.css";
@@ -32,7 +29,8 @@ export default function SortMenu({
         className="iconButton"
         onClick={() => setSortMenuOpen(!sortMenuOpen)}
       >
-        <ArrowUpDown size={18} />
+        <ArrowUpDown size={18} />  
+
       </button>
 
       {
@@ -41,20 +39,17 @@ export default function SortMenu({
             {options.map((option) => (
               <button
                 key={option.key}
-                className={`sortOption ${sortBy === option ? "active" : ""}`}
+                className={`sortOption ${sortBy.key === option.key ? "active" : ""}`}
                 onClick={() => handleSortChange(option)}
               >
-                {option.icon}
                 <span>{option.label}</span>
-                {sortBy.key === option.key && (
-                  <span className="sortDirection">
-                    {sortDirection === "asc" ? (
-                      <ArrowUp size={14} />
-                    ) : (
-                      <ArrowDown size={14} />
-                    )}
-                  </span>
-                )}
+                      {sortBy.key === option.key &&
+                        (sortDirection === "asc" ? (
+                          <ArrowUp size={16} />
+                        ) : (
+                          <ArrowDown size={16} />
+                        ))}
+
               </button>
             ))}
           </div>
