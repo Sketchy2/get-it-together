@@ -29,7 +29,7 @@ export class Task {
   priority: number | null;
 
   @Column({ name: "due_date", type: "timestamp", nullable: true })
-  dueDate: Date | null;
+  deadline: Date | null;
 
   @CreateDateColumn({ name: "created_at", type: "timestamp" })
   createdAt: Date;

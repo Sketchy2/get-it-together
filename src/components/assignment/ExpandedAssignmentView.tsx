@@ -64,11 +64,11 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
   const [filters, setFilters] = useState({
     status: [] as string[],
     priority: [] as string[],
-    dueDate: "all" as "all" | "today" | "week" | "month",
+    deadline: "all" as "all" | "today" | "week" | "month",
   });
   const [isSortMenuOpen, setIsSortMenuOpen] = useState(false);
   const sortOptions: SortOption[] = [
-    { key: "dueDate", label: "Due Date", icon: <Calendar size={16} /> },
+    { key: "deadline", label: "Due Date", icon: <Calendar size={16} /> },
     { key: "createdAt", label: "Created At", icon: <Clock size={16} /> },
     { key: "weight", label: "Weight", icon: <BarChart size={16}  /> },
     { key: "priority", label: "Priority", icon: <Flag size={16}  /> },
@@ -267,13 +267,13 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
 
   // TODO FIX FILTER
   const handleFilterChange = (
-    filterType: "status" | "priority" | "dueDate",
+    filterType: "status" | "priority" | "deadline",
     value: string
   ) => {
-    if (filterType === "dueDate") {
+    if (filterType === "deadline") {
       setFilters({
         ...filters,
-        dueDate: value as "all" | "today" | "week" | "month",
+        deadline: value as "all" | "today" | "week" | "month",
       });
     } else {
       const currentFilters = [...filters[filterType]];
@@ -322,8 +322,8 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
 
     // Filter by due date
     if (
-      filters.dueDate !== "all" &&
-      filteredTasks.some((task) => task.dueDate)
+      filters.deadline !== "all" &&
+      filteredTasks.some((task) => task.deadline)
     ) {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
@@ -335,17 +335,17 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
       monthLater.setMonth(today.getMonth() + 1);
 
       filteredTasks = filteredTasks.filter((task) => {
-        if (!task.dueDate) return false;
+        if (!task.deadline) return false;
 
-        const dueDate = new Date(task.dueDate);
-        dueDate.setHours(0, 0, 0, 0);
+        const deadline = new Date(task.deadline);
+        deadline.setHours(0, 0, 0, 0);
 
-        if (filters.dueDate === "today") {
-          return dueDate.getTime() === today.getTime();
-        } else if (filters.dueDate === "week") {
-          return dueDate >= today && dueDate <= weekLater;
-        } else if (filters.dueDate === "month") {
-          return dueDate >= today && dueDate <= monthLater;
+        if (filters.deadline === "today") {
+          return deadline.getTime() === today.getTime();
+        } else if (filters.deadline === "week") {
+          return deadline >= today && deadline <= weekLater;
+        } else if (filters.deadline === "month") {
+          return deadline >= today && deadline <= monthLater;
         }
         return true;
       });
@@ -353,12 +353,12 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
 
     // TODO: provide a general sorting function
     return filteredTasks.sort((a, b) => {
-      if (sortBy.key === "dueDate") {
-        if (!a.dueDate) return sortDirection === "asc" ? 1 : -1;
-        if (!b.dueDate) return sortDirection === "asc" ? -1 : 1;
+      if (sortBy.key === "deadline") {
+        if (!a.deadline) return sortDirection === "asc" ? 1 : -1;
+        if (!b.deadline) return sortDirection === "asc" ? -1 : 1;
 
-        const dateA = new Date(a.dueDate).getTime();
-        const dateB = new Date(b.dueDate).getTime();
+        const dateA = new Date(a.deadline).getTime();
+        const dateB = new Date(b.deadline).getTime();
 
         return sortDirection === "asc" ? dateA - dateB : dateB - dateA;
       } else if (sortBy.key === "weight") {
@@ -648,8 +648,8 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
     );
   };
 
-  // const daysRemaining: number = calculateDaysRemaining(assignment.dueDate)
-  const bgColor: string = getCardBgColor(assignment.tasks,assignment.dueDate)
+  // const daysRemaining: number = calculateDaysRemaining(assignment.deadline)
+  const bgColor: string = getCardBgColor(assignment.tasks,assignment.deadline)
 
   useEffect(() => {
     if (assignment && assignment.tasks) {
@@ -707,7 +707,7 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
               {/* TODO: STEAL TAGS */}
               <div className="metaItem">
                 <Calendar size={16} />
-                <span>Due: {formatDate(assignment.dueDate)}</span>
+                <span>Due: {formatDate(assignment.deadline)}</span>
               </div>
               <div className="metaItem">
                 <Paperclip size={16} />
@@ -978,10 +978,10 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
                         <label className="filterOption">
                           <input
                             type="radio"
-                            name="dueDate"
-                            checked={filters.dueDate === "all"}
+                            name="deadline"
+                            checked={filters.deadline === "all"}
                             onChange={() =>
-                              handleFilterChange("dueDate", "all")
+                              handleFilterChange("deadline", "all")
                             }
                           />
                           <span>All</span>
@@ -989,10 +989,10 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
                         <label className="filterOption">
                           <input
                             type="radio"
-                            name="dueDate"
-                            checked={filters.dueDate === "today"}
+                            name="deadline"
+                            checked={filters.deadline === "today"}
                             onChange={() =>
-                              handleFilterChange("dueDate", "today")
+                              handleFilterChange("deadline", "today")
                             }
                           />
                           <span>Today</span>
@@ -1000,10 +1000,10 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
                         <label className="filterOption">
                           <input
                             type="radio"
-                            name="dueDate"
-                            checked={filters.dueDate === "week"}
+                            name="deadline"
+                            checked={filters.deadline === "week"}
                             onChange={() =>
-                              handleFilterChange("dueDate", "week")
+                              handleFilterChange("deadline", "week")
                             }
                           />
                           <span>This Week</span>
@@ -1011,10 +1011,10 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
                         <label className="filterOption">
                           <input
                             type="radio"
-                            name="dueDate"
-                            checked={filters.dueDate === "month"}
+                            name="deadline"
+                            checked={filters.deadline === "month"}
                             onChange={() =>
-                              handleFilterChange("dueDate", "month")
+                              handleFilterChange("deadline", "month")
                             }
                           />
                           <span>This Month</span>

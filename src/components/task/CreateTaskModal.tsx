@@ -25,7 +25,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [assignee, setAssignee] = useState("")
-  const [dueDate, setDueDate] = useState("")
+  const [deadline, setDueDate] = useState("")
   const [weight, setWeight] = useState(1)
   const [status, setStatus] = useState<"unassigned" | "todo" | "inProgress" | "completed">("todo")
   const [priority, setPriority] = useState<"low" | "medium" | "high">("medium")
@@ -43,7 +43,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
       title,
       description,
       assignee: assignee || undefined,
-      dueDate: dueDate || undefined,
+      deadline: deadline || undefined,
       completed: status === "completed",
       status,
       weight,
@@ -138,7 +138,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
                 <Calendar size={16} />
                 <span>Due Date</span>
               </label>
-              <input type="date" id="taskDueDate" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+              <input type="date" id="taskDueDate" value={deadline} onChange={(e) => setDueDate(e.target.value)} />
             </div>
           </div>
 

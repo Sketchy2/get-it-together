@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { title, description, status, priority, dueDate, assignmentId } = await req.json();
+    const { title, description, status, priority, deadline, assignmentId } = await req.json();
 
     if (!title || !status || !assignmentId) {
       return NextResponse.json({ error: "Title, Status, and AssignmentId are required" }, { status: 400 });
@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
       description: description || null,
       status,
       priority: priority ?? null,
-      dueDate: dueDate ? new Date(dueDate) : null,
+      deadline: deadline ? new Date(deadline) : null,
       createdByUser: user,
       assignment,
     });

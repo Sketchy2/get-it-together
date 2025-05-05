@@ -7,8 +7,8 @@ type Assignment = {
   title: string;
   description: string;
   createdAt: string;
-  dueDate: string;
-  weight: number;
+  deadline: string;
+  weighting: number;
   members: User[];
   tasks: Task[];
   files: FileAttachment[];

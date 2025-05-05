@@ -41,9 +41,9 @@ function sortAssignmentsList(
   sortDir: SortDirection
 ): Assignment[] {
   return [...assignmentList].sort((a, b) => {
-    if (sortType.key === "dueDate") {
-      const dateA = new Date(a.dueDate).getTime();
-      const dateB = new Date(b.dueDate).getTime();
+    if (sortType.key === "deadline") {
+      const dateA = new Date(a.deadline).getTime();
+      const dateB = new Date(b.deadline).getTime();
       return sortDir === "asc" ? dateA - dateB : dateB - dateA;
     } else {
       const dateA = new Date(a.createdAt).getTime();
@@ -55,7 +55,7 @@ function sortAssignmentsList(
 
 export default function Assignments() {
   const sortOptions: SortOption[] = [
-    { key: "dueDate", label: "Due Date", icon: <Calendar size={16} /> },
+    { key: "deadline", label: "Due Date", icon: <Calendar size={16} /> },
     { key: "createdAt", label: "Created At", icon: <Clock size={16} /> },
   ] as const;
 
@@ -132,7 +132,7 @@ export default function Assignments() {
         priority: "high",
         weight: 2,
         assignee: "m1",
-        dueDate: nextWeek.toISOString(),
+        deadline: nextWeek.toISOString(),
         createdAt: lastWeek.toISOString(),
       },
       {
@@ -143,7 +143,7 @@ export default function Assignments() {
         priority: "medium",
         weight: 1,
         assignee: "m2",
-        dueDate: yesterday.toISOString(),
+        deadline: yesterday.toISOString(),
         createdAt: lastWeek.toISOString(),
       },
       {
@@ -154,7 +154,7 @@ export default function Assignments() {
         priority: "medium",
         weight: 3,
         assignee: "m1",
-        dueDate: nextWeek.toISOString(),
+        deadline: nextWeek.toISOString(),
         createdAt: lastWeek.toISOString(),
       },
     ];
@@ -172,8 +172,8 @@ export default function Assignments() {
         description:
           "A comprehensive analysis of climate change factors and their global impact.",
         createdAt: lastWeek.toISOString(),
-        dueDate: yesterday.toISOString(),
-        weight: 40,
+        deadline: yesterday.toISOString(),
+        weighting: 40,
         members: members,
         tasks: tasks,
         files: files,
@@ -185,8 +185,8 @@ export default function Assignments() {
         description:
           "Review of major works in the field with critical analysis.",
         createdAt: lastWeek.toISOString(),
-        dueDate: nextWeek.toISOString(),
-        weight: 30,
+        deadline: nextWeek.toISOString(),
+        weighting: 30,
         members: [members[0], members[1]],
         tasks: tasks.slice(0, 2),
         files: files.slice(0, 1),
@@ -198,8 +198,8 @@ export default function Assignments() {
         description:
           "Prepare slides and talking points for the final presentation.",
         createdAt: lastWeek.toISOString(),
-        dueDate: nextWeek.toISOString(),
-        weight: 25,
+        deadline: nextWeek.toISOString(),
+        weighting: 25,
         members: [members[2]],
         tasks: [tasks[0]],
         files: [],
@@ -210,8 +210,8 @@ export default function Assignments() {
         title: "Final Project Report",
         description: "Comprehensive documentation of the project results.",
         createdAt: yesterday.toISOString(),
-        dueDate: lastWeek.toISOString(),
-        weight: 50,
+        deadline: lastWeek.toISOString(),
+        weighting: 50,
         members: members,
         tasks: tasks.map((task) => ({ ...task, status: "Completed" })),
         files: files,
@@ -228,6 +228,7 @@ export default function Assignments() {
         setIsLoading(true);
         const res = await fetch("/api/assignments");
         if (!res.ok) throw new Error("Failed to fetch assignments");
+   
   
         const data = await res.json();
         setAssignments(data);
@@ -387,8 +388,8 @@ export default function Assignments() {
         body: JSON.stringify({
           title: newAssignmentData.title,
           description: newAssignmentData.description,
-          weighting: newAssignmentData.weight,
-          deadline: newAssignmentData.dueDate,
+          weighting: newAssignmentData.weighting,
+          deadline: newAssignmentData.deadline,
           status: "Not Started", // or other default
           progress: 0,
           finalGrade: null,
@@ -510,15 +511,15 @@ export default function Assignments() {
                     >
                       <AssignmentCard
                         title={assignment.title}
-                        dueDate={assignment.dueDate}
-                        weight={assignment.weight}
+                        deadline={assignment.deadline}
+                        weight={assignment.weighting}
                         description={assignment.description}
                         progress={calculateProgress(assignment.tasks)}
-                        daysRemaining={calculateDaysRemaining(assignment.dueDate)}
-                        isLate={isLate(assignment.dueDate)}
+                        daysRemaining={calculateDaysRemaining(assignment.deadline)}
+                        isLate={isLate(assignment.deadline)}
                         bgColor={getCardBgColor(
                           assignment.tasks,
-                          assignment.dueDate
+                          assignment.deadline
                         )} />
                     </div>
                   );
@@ -586,7 +587,7 @@ export default function Assignments() {
             //           {row.assignments.map((assignment) =>
                   
             //           {
-            //             const bgColor = getCardBgColor(assignment.tasks,assignment.dueDate)
+            //             const bgColor = getCardBgColor(assignment.tasks,assignment.deadline)
             //             const progress = calculateProgress(assignment.tasks)
             //             return (
             //               <div key={assignment.id}>

@@ -7,8 +7,8 @@ export {calculateProgress,calculateDaysRemaining,getCardBgColor}
   /**
    * Utility function to calculate days remaining -
    */
-const calculateDaysRemaining = (dueDate: string): number => {
-    const dueDateTime = new Date(dueDate).getTime();
+const calculateDaysRemaining = (deadline: string): number => {
+    const dueDateTime = new Date(deadline).getTime();
     const currentTime = new Date().getTime();
     return Math.ceil((dueDateTime - currentTime) / (1000 * 60 * 60 * 24));
 }
@@ -34,14 +34,14 @@ const calculateDaysRemaining = (dueDate: string): number => {
    * Get background color for assignment card
    */
 const getCardBgColor =
-    (tasks:Task[],dueDate:string): string => {
+    (tasks:Task[],deadline:string): string => {
         const progress = calculateProgress(tasks);
     
         if (progress === 100) {
             return "#647A67"; // Green color for completed items
         }
     
-        if (isLate(dueDate)) {
+        if (isLate(deadline)) {
             return "#900100"; // Red color for late assignments
         }
     

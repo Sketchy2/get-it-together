@@ -52,7 +52,7 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
       description: newTask.description,
       expanded: false,
       assignee: newTask.assignee,
-      dueDate: newTask.dueDate,
+      deadline: newTask.deadline,
       weight: newTask.weight,
       priority: newTask.priority,
       status: newTask.status,
@@ -90,7 +90,7 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
           id={assignment.id}
           title={assignment.title}
           createdAt={assignment.createdAt}
-          dueDate={assignment.dueDate}
+          deadline={assignment.deadline}
           weight={assignment.weight}
           description={assignment.description}
           files={assignment.files || []}

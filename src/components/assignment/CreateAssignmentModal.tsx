@@ -15,7 +15,7 @@ interface CreateAssignmentModalProps {
 const CreateAssignmentModal: React.FC<CreateAssignmentModalProps> = ({ isOpen, onClose, onSave }) => {
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
-  const [dueDate, setDueDate] = useState("")
+  const [deadline, setDueDate] = useState("")
   const [weight, setWeight] = useState(100) // Default to 100% for the total assignment
   const [members, setMembers] = useState<string[]>([])
   const [newMember, setNewMember] = useState("")
@@ -45,14 +45,14 @@ const CreateAssignmentModal: React.FC<CreateAssignmentModalProps> = ({ isOpen, o
 
     // Calculate days remaining
     const today = new Date()
-    const due = new Date(dueDate)
+    const due = new Date(deadline)
     const daysRemaining = Math.ceil((due.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
 
     const newAssignment = {
       id: `assignment-${Date.now()}`,
       title,
       date: today.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-      dueDate: due.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+      deadline: due.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
       weight,
       description,
       progress: 0,
@@ -139,11 +139,11 @@ const CreateAssignmentModal: React.FC<CreateAssignmentModalProps> = ({ isOpen, o
 
           <div className="formRow">
             <div className="formGroup shared">
-              <label htmlFor="dueDate" className="inputWithIcon">
+              <label htmlFor="deadline" className="inputWithIcon">
                 <Calendar size={16} />
                 <span>Due Date</span>
               </label>
-              <input type="date" id="dueDate" value={dueDate} onChange={(e) => setDueDate(e.target.value)} required />
+              <input type="date" id="deadline" value={deadline} onChange={(e) => setDueDate(e.target.value)} required />
             </div>
 
             <div className="formGroup shared">

@@ -6,7 +6,7 @@ type Task = {
     title: string
     description: string
     assignee?: string
-    dueDate?: string
+    deadline?: string
     status: TaskStatus
     weight?: number
     createdAt?: string

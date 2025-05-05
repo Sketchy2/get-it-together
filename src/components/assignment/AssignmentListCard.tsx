@@ -25,7 +25,7 @@ export const AssignmentListCard = ({
   onViewDetails,
   onStatusChange
 }:AssignmentCardProps) => {
-  const bgColor = getCardBgColor(assignment.tasks, assignment.dueDate);
+  const bgColor = getCardBgColor(assignment.tasks, assignment.deadline);
   const progress = calculateProgress(assignment.tasks);
 
   return (
@@ -47,7 +47,7 @@ export const AssignmentListCard = ({
           <h3 className="listItemTitle">{assignment.title}</h3>
           <div className="listItemMeta">
             <span>
-              Due date: {formatDate(assignment.dueDate)} | Weighting:{" "}
+              Due date: {formatDate(assignment.deadline)} | Weighting:{" "}
               {assignment.weight}%
             </span>
           </div>
