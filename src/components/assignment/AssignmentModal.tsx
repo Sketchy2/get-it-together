@@ -50,7 +50,6 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
       id: newTask.id,
       text: newTask.title,
       description: newTask.description,
-      completed: newTask.completed,
       expanded: false,
       assignee: newTask.assignee,
       dueDate: newTask.dueDate,
@@ -105,7 +104,7 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
         />
       </div>
 
-      {/* todo fix */}
+      {/* TODO: fix */}
       <CreateTaskModal
         isOpen={isCreateTaskModalOpen}
         onClose={() => setIsCreateTaskModalOpen(false)}

@@ -5,7 +5,7 @@
   height: 250px;
   background-color: #3A3A3A;
   border-radius: 10px;
-  overflow: hidden;
+  overflow-x: visible;
   overflow-y:hidden;
 
 }
@@ -15,14 +15,8 @@
   flex-direction: column; /* Changed to column */
   justify-content: center;
   align-items: center;
-  .rowContainer {
-    display: flex;
-    flex-direction: row; /* Changed from column to row */
-    width: 97%;
-    background-color: #3a3a3a;
-    border-radius: 10px;
-    overflow: hidden;
-  }
+
+
   
   .rowHeader {
     display: flex;
