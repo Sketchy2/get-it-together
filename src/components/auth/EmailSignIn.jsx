@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import "./EmailSignIn.css";
-import { toast } from "react-hot-toast";
 import { emailSignInAction } from "@/components/auth/EmailSignInAction";
 
 export default function EmailSignIn() {
@@ -18,10 +17,8 @@ export default function EmailSignIn() {
     try {
       setPending(true);
       await emailSignInAction(formData);
-      toast.success("Sign-in link sent!");
     } catch (err) {
       console.error(err);
-      toast.error("Sign-in failed");
     } finally {
       setPending(false);
     }
