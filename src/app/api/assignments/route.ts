@@ -22,20 +22,21 @@ async function getDataSource() {
  */
 export async function GET() {
   try {
+    // Authenticate the user
     const session = await auth();
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Get all assignments, including related assignees and tasks
     const dataSource = await getDataSource();
     const repo = dataSource.getRepository(Assignment);
 
     const assignments = await repo.find({
-      relations: ["assignees", "tasks"], // 🔥 load tasks too
+      relations: ["assignees", "tasks"],
     });
 
     await dataSource.destroy();
-
     return NextResponse.json(assignments);
   } catch (err) {
     console.error(err);
@@ -49,11 +50,13 @@ export async function GET() {
  */
 export async function POST(req: NextRequest) {
   try {
+    // Authenticate the user
     const session = await auth();
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Parse input from the request body
     const { title, description, weighting, deadline, progress, status, finalGrade } = await req.json();
 
     if (!title || !status) {
@@ -64,12 +67,14 @@ export async function POST(req: NextRequest) {
     const assignmentRepo = dataSource.getRepository(Assignment);
     const userRepo = dataSource.getRepository(UserEntity);
 
+    // Fetch the current user from the database
     const user = await userRepo.findOneBy({ id: session.user.id as any });
     if (!user) {
       await dataSource.destroy();
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
+    // Create and save the new assignment updated to use the correct user type
     const assignment = assignmentRepo.create({
       title,
       description: description || null,
@@ -85,85 +90,6 @@ export async function POST(req: NextRequest) {
     await dataSource.destroy();
 
     return NextResponse.json(savedAssignment, { status: 201 });
-  } catch (err) {
-    console.error(err);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
-  }
-}
-
-/**
- * PUT /api/assignments?id={assignmentId}
- * Update an existing assignment
- */
-export async function PUT(req: NextRequest) {
-  try {
-    const session = await auth();
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const dataSource = await getDataSource();
-    const repo = dataSource.getRepository(Assignment);
-
-    const { searchParams } = new URL(req.url);
-    const id = parseInt(searchParams.get("id") || "");
-
-    if (isNaN(id)) {
-      await dataSource.destroy();
-      return NextResponse.json({ error: "Invalid Assignment ID" }, { status: 400 });
-    }
-
-    const existingAssignment = await repo.findOne({ where: { id } });
-    if (!existingAssignment) {
-      await dataSource.destroy();
-      return NextResponse.json({ error: "Assignment not found" }, { status: 404 });
-    }
-
-    const updateData = await req.json();
-    repo.merge(existingAssignment, updateData);
-
-    const updatedAssignment = await repo.save(existingAssignment);
-    await dataSource.destroy();
-
-    return NextResponse.json(updatedAssignment);
-  } catch (err) {
-    console.error(err);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
-  }
-}
-
-/**
- * DELETE /api/assignments?id={assignmentId}
- * Delete an assignment
- */
-export async function DELETE(req: NextRequest) {
-  try {
-    const session = await auth();
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const dataSource = await getDataSource();
-    const repo = dataSource.getRepository(Assignment);
-
-    const { searchParams } = new URL(req.url);
-    const id = parseInt(searchParams.get("id") || "");
-
-    if (isNaN(id)) {
-      await dataSource.destroy();
-      return NextResponse.json({ error: "Invalid Assignment ID" }, { status: 400 });
-    }
-
-    const assignment = await repo.findOne({ where: { id } });
-    if (!assignment) {
-      await dataSource.destroy();
-      return NextResponse.json({ error: "Assignment not found" }, { status: 404 });
-    }
-
-    await repo.remove(assignment);
-    await dataSource.destroy();
-
-    return NextResponse.json({ message: "Assignment deleted successfully" });
   } catch (err) {
     console.error(err);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
