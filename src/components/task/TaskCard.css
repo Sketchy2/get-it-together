@@ -1,5 +1,5 @@
 .taskCard {
-  background: rgba(58, 58, 58, 0.7);
+  background: #3a3a3a;
   border-radius: 12px;
   padding: 16px;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
@@ -205,7 +205,7 @@
   position: absolute;
   top: 100%;
   right: 0;
-  background: rgba(42, 42, 42, 0.95);
+  background: #2a2a2a;
   border-radius: 12px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
   z-index: 10;
@@ -274,7 +274,7 @@
   color: rgba(255, 255, 255, 0.85);
   line-height: 1.6;
   padding: 12px 16px;
-  background: rgba(0, 0, 0, 0.2);
+  background: #232323;
   border-radius: 10px;
   border-left: 3px solid rgba(255, 255, 255, 0.15);
 }
@@ -287,7 +287,7 @@
 }
 
 .taskDetailItem {
-  background: rgba(0, 0, 0, 0.2);
+  background: #232323;
   border-radius: 10px;
   padding: 12px 16px;
   border: 1px solid rgba(255, 255, 255, 0.05);
@@ -449,7 +449,7 @@
   padding: 10px 16px;
   border-radius: 24px;
   border: none;
-  background: rgba(0, 0, 0, 0.2);
+  background: #232323;
   color: white;
   font-size: 0.95rem;
   border: 1px solid rgba(255, 255, 255, 0.05);

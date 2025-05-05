@@ -1,5 +1,5 @@
 .taskGroup {
-    background: rgba(0, 0, 0, 0.2);
+    background: #232323;
     border-radius: 16px;
     overflow: hidden;
     transition: all 0.3s ease;
@@ -87,7 +87,7 @@
   
   .taskGroupContent {
     padding: 20px;
-    background: rgba(0, 0, 0, 0.1);
+    background: #2a2a2a;
   }
   
   .taskGroupContent.kanbanContent {
