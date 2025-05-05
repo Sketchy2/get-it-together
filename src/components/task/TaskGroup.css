@@ -1,0 +1,163 @@
+.taskGroup {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  
+  .taskGroup:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+  }
+  
+  .taskGroup.kanbanGroup {
+    flex: 1;
+    min-width: 320px;
+    max-width: 380px;
+    height: fit-content;
+  }
+  
+  .taskGroupHeader {
+    padding: 16px 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .taskGroupHeader:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.05);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  .taskGroupHeader:hover:before {
+    opacity: 1;
+  }
+  
+  .taskGroupHeaderContent {
+    display: flex;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .taskGroupHeaderIcon {
+    margin-right: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 50%;
+    transition: transform 0.3s ease;
+  }
+  
+  .taskGroupHeader:hover .taskGroupHeaderIcon {
+    transform: rotate(5deg);
+  }
+  
+  .taskGroupTitle {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+    flex: 1;
+    letter-spacing: 0.5px;
+  }
+  
+  .taskGroupCount {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    min-width: 32px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+  
+  .taskGroupContent {
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.1);
+  }
+  
+  .taskGroupContent.kanbanContent {
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+  
+  .taskGroupContent::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .taskGroupContent::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 3px;
+  }
+  
+  .taskGroupContent::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+  }
+  
+  .taskGroupContent::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+  
+  .taskCardWrapper {
+    position: relative;
+    margin-bottom: 20px;
+    transition: transform 0.3s ease;
+  }
+  
+  .taskCardWrapper:hover {
+    transform: translateY(-3px);
+  }
+  
+  .taskCardWrapper:last-child {
+    margin-bottom: 0;
+  }
+  
+  .taskAssignmentBadge {
+    position: absolute;
+    bottom: -8px;
+    right: 12px;
+    background: linear-gradient(135deg, #4d5696, #3e4578);
+    color: white;
+    font-size: 0.75rem;
+    padding: 4px 12px;
+    border-radius: 20px;
+    max-width: 180px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    z-index: 2;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  @media (max-width: 768px) {
+    .taskGroup.kanbanGroup {
+      min-width: 100%;
+    }
+  
+    .taskGroupHeader {
+      padding: 14px 16px;
+    }
+  
+    .taskGroupContent {
+      padding: 16px;
+    }
+  }
+  
