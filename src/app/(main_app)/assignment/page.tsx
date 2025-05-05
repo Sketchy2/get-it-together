@@ -132,7 +132,7 @@ export default function Assignments() {
         priority: "high",
         weighting: 2,
         assignee: [members[0]],
-        dueDate: nextWeek.toISOString(),
+        deadline: nextWeek.toISOString(),
         createdAt: lastWeek.toISOString(),
       },
       {
@@ -173,7 +173,7 @@ export default function Assignments() {
           "A comprehensive analysis of climate change factors and their global impact.",
         createdAt: lastWeek.toISOString(),
         deadline: yesterday.toISOString(),
-        weightinging: 40,
+        weighting: 40,
         members: members,
         tasks: tasks,
         files: files,
@@ -186,7 +186,7 @@ export default function Assignments() {
           "Review of major works in the field with critical analysis.",
         createdAt: lastWeek.toISOString(),
         deadline: nextWeek.toISOString(),
-        weightinging: 30,
+        weighting: 30,
         members: [members[0], members[1]],
         tasks: tasks.slice(0, 2),
         files: files.slice(0, 1),
@@ -199,7 +199,7 @@ export default function Assignments() {
           "Prepare slides and talking points for the final presentation.",
         createdAt: lastWeek.toISOString(),
         deadline: nextWeek.toISOString(),
-        weightinging: 25,
+        weighting: 25,
         members: [members[2]],
         tasks: [tasks[0]],
         files: [],
@@ -211,7 +211,7 @@ export default function Assignments() {
         description: "Comprehensive documentation of the project results.",
         createdAt: yesterday.toISOString(),
         deadline: lastWeek.toISOString(),
-        weightinging: 50,
+        weighting: 50,
         members: members,
         tasks: tasks.map((task) => ({ ...task, status: "Completed" })),
         files: files,
@@ -512,7 +512,7 @@ export default function Assignments() {
                       <AssignmentCard
                         title={assignment.title}
                         deadline={assignment.deadline}
-                        weighting={assignment.weightinging}
+                        weighting={assignment.weighting}
                         description={assignment.description}
                         progress={calculateProgress(assignment.tasks)}
                         daysRemaining={calculateDaysRemaining(assignment.deadline)}
@@ -571,7 +571,6 @@ export default function Assignments() {
             })}
           </div>
         )}</div>
-
 
         {/* create assignment button */}
         <button

@@ -17,3 +17,5 @@ type Task = {
 
 // todo - change to enums
 type TaskStatus = "To-Do" | "In Progress" | "Completed"
+
+type TaskPriority = "low" | "medium" | "high"  

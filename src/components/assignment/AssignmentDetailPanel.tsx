@@ -172,7 +172,7 @@ const AssignmentDetailPanel: React.FC<AssignmentDetailsProps> = ({
 
     // Filter by members TODO:FIX FILTERS
     if (filters.members.length > 0) {
-      filteredTodos = filteredTodos.filter((todo) => todo.assignee && filters.members.includes(todo.assignee))
+      filteredTodos = filteredTodos.filter((todo) => todo.assignee && filters.members.includes(todo.assignee[0].name))
     }
 
     // Filter by date range

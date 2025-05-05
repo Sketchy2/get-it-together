@@ -5,6 +5,7 @@ import { useState } from "react"
 import { X, Calendar, User, AlignLeft, Weight, Flag, HelpCircle, Clock, AlertTriangle, CheckCircle } from "lucide-react"
 import "./CreateTaskModal.css"
 import { User as Member } from "@/types/assignment"
+import {TaskStatus} from "@/types/task"
 
 interface CreateTaskModalProps {
   isOpen: boolean
@@ -26,9 +27,9 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [assignee, setAssignee] = useState("")
-  const [deadline, setDueDate] = useState("")
+  const [deadline, setDeadline] = useState("")
   const [weighting, setWeight] = useState(1)
-  const [status, setStatus] = useState<"unassigned" | "todo" | "inProgress" | "completed">("todo")
+  const [status, setStatus] = useState<TaskStatus>("To-Do")
   const [priority, setPriority] = useState<"low" | "medium" | "high">("medium")
 
   // Calculate remaining weighting
@@ -45,7 +46,6 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
       description,
       assignee: assignee || undefined,
       deadline: deadline || undefined,
-      completed: status === "completed",
       status,
       weighting,
       priority,
@@ -60,21 +60,20 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
     setTitle("")
     setDescription("")
     setAssignee("")
-    setDueDate("")
+    setDeadline("")
     setWeight(1)
-    setStatus("todo")
+    setStatus("To-Do")
     setPriority("medium")
   }
 
-  const getStatusIcon = (statusType: string) => {
+  const getStatusIcon = (statusType: TaskStatus) => {
     switch (statusType) {
-      case "unassigned":
-        return <HelpCircle size={16} />
-      case "todo":
+
+      case "To-Do":
         return <Clock size={16} />
-      case "inProgress":
+      case "In Progress":
         return <AlertTriangle size={16} />
-      case "completed":
+      case "Completed":
         return <CheckCircle size={16} />
       default:
         return <HelpCircle size={16} />
@@ -139,7 +138,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
                 <Calendar size={16} />
                 <span>Due Date</span>
               </label>
-              <input type="date" id="taskDueDate" value={deadline} onChange={(e) => setDueDate(e.target.value)} />
+              <input type="date" id="taskDueDate" value={deadline} onChange={(e) => setDeadline(e.target.value)} />
             </div>
           </div>
 
@@ -209,34 +208,26 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
             <div className="statusSelector">
               <button
                 type="button"
-                className={`statusButton ${status === "unassigned" ? "active" : ""}`}
-                onClick={() => setStatus("unassigned")}
+                className={`statusButton ${status === "To-Do" ? "active" : ""}`}
+                onClick={() => setStatus("To-Do")}
               >
-                {getStatusIcon("unassigned")}
-                <span>Unassigned</span>
-              </button>
-              <button
-                type="button"
-                className={`statusButton ${status === "todo" ? "active" : ""}`}
-                onClick={() => setStatus("todo")}
-              >
-                {getStatusIcon("todo")}
+                {getStatusIcon("To-Do")}
                 <span>To Do</span>
               </button>
               <button
                 type="button"
-                className={`statusButton ${status === "inProgress" ? "active" : ""}`}
-                onClick={() => setStatus("inProgress")}
+                className={`statusButton ${status === "In Progress" ? "active" : ""}`}
+                onClick={() => setStatus("In Progress")}
               >
-                {getStatusIcon("inProgress")}
+                {getStatusIcon("In Progress")}
                 <span>In Progress</span>
               </button>
               <button
                 type="button"
-                className={`statusButton ${status === "completed" ? "active" : ""}`}
-                onClick={() => setStatus("completed")}
+                className={`statusButton ${status === "Completed" ? "active" : ""}`}
+                onClick={() => setStatus("Completed")}
               >
-                {getStatusIcon("completed")}
+                {getStatusIcon("Completed")}
                 <span>Completed</span>
               </button>
             </div>

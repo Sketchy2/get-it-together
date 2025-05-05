@@ -26,6 +26,7 @@ export const AssignmentListCard = ({
   onStatusChange
 }:AssignmentCardProps) => {
   const bgColor = getCardBgColor(assignment.tasks, assignment.deadline);
+  const bgColor = getCardBgColor(assignment.tasks, assignment.deadline);
   const progress = calculateProgress(assignment.tasks);
 
   return (
