@@ -79,11 +79,11 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onStatusChange }) => {
 
   // Calculate days remaining or overdue
   const getDaysInfo = () => {
-    if (!task.dueDate) return null
+    if (!task.deadline) return null
 
     const today = new Date()
-    const dueDate = new Date(task.dueDate)
-    const diffTime = dueDate.getTime() - today.getTime()
+    const deadline = new Date(task.deadline)
+    const diffTime = deadline.getTime() - today.getTime()
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
 
     if (diffDays < 0) {
@@ -213,9 +213,9 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onStatusChange }) => {
                 <span>Due Date</span>
               </div>
               <div className="taskDetailValue">
-                {task.dueDate ? (
+                {task.deadline ? (
                   <div className="dueDateInfo">
-                    <span>{formatDate(task.dueDate)}</span>
+                    <span>{formatDate(task.deadline)}</span>
                     {daysInfo && (
                       <span className={`daysRemaining ${daysInfo.isOverdue ? "overdue" : ""}`}>{daysInfo.text}</span>
                     )}

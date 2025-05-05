@@ -41,9 +41,9 @@ function sortAssignmentsList(
   sortDir: SortDirection
 ): Assignment[] {
   return [...assignmentList].sort((a, b) => {
-    if (sortType.key === "dueDate") {
-      const dateA = new Date(a.dueDate).getTime();
-      const dateB = new Date(b.dueDate).getTime();
+    if (sortType.key === "deadline") {
+      const dateA = new Date(a.deadline).getTime();
+      const dateB = new Date(b.deadline).getTime();
       return sortDir === "asc" ? dateA - dateB : dateB - dateA;
     } else {
       const dateA = new Date(a.createdAt).getTime();
@@ -55,7 +55,7 @@ function sortAssignmentsList(
 
 export default function Assignments() {
   const sortOptions: SortOption[] = [
-    { key: "dueDate", label: "Due Date", icon: <Calendar size={16} /> },
+    { key: "deadline", label: "Due Date", icon: <Calendar size={16} /> },
     { key: "createdAt", label: "Created At", icon: <Clock size={16} /> },
   ] as const;
 
@@ -143,7 +143,7 @@ export default function Assignments() {
         priority: "medium",
         weighting: 1,
         assignee:  [members[0], members[1]],
-        dueDate: yesterday.toISOString(),
+        deadline: yesterday.toISOString(),
         createdAt: lastWeek.toISOString(),
       },
       {
@@ -154,7 +154,7 @@ export default function Assignments() {
         priority: "medium",
         weighting: 3,
         assignee:  [members[2]],
-        dueDate: nextWeek.toISOString(),
+        deadline: nextWeek.toISOString(),
         createdAt: lastWeek.toISOString(),
       },
     ];
@@ -172,8 +172,8 @@ export default function Assignments() {
         description:
           "A comprehensive analysis of climate change factors and their global impact.",
         createdAt: lastWeek.toISOString(),
-        dueDate: yesterday.toISOString(),
-        weighting: 40,
+        deadline: yesterday.toISOString(),
+        weightinging: 40,
         members: members,
         tasks: tasks,
         files: files,
@@ -185,8 +185,8 @@ export default function Assignments() {
         description:
           "Review of major works in the field with critical analysis.",
         createdAt: lastWeek.toISOString(),
-        dueDate: nextWeek.toISOString(),
-        weighting: 30,
+        deadline: nextWeek.toISOString(),
+        weightinging: 30,
         members: [members[0], members[1]],
         tasks: tasks.slice(0, 2),
         files: files.slice(0, 1),
@@ -198,8 +198,8 @@ export default function Assignments() {
         description:
           "Prepare slides and talking points for the final presentation.",
         createdAt: lastWeek.toISOString(),
-        dueDate: nextWeek.toISOString(),
-        weighting: 25,
+        deadline: nextWeek.toISOString(),
+        weightinging: 25,
         members: [members[2]],
         tasks: [tasks[0]],
         files: [],
@@ -210,8 +210,8 @@ export default function Assignments() {
         title: "Final Project Report",
         description: "Comprehensive documentation of the project results.",
         createdAt: yesterday.toISOString(),
-        dueDate: lastWeek.toISOString(),
-        weighting: 50,
+        deadline: lastWeek.toISOString(),
+        weightinging: 50,
         members: members,
         tasks: tasks.map((task) => ({ ...task, status: "Completed" })),
         files: files,
@@ -220,32 +220,30 @@ export default function Assignments() {
     ];
   }, []);
 
-  /**
-   * Load all assignments on component mount
-   */
+  // Fetch all assignments 
+
   useEffect(() => {
-    // Only load data if we haven't already
-    if (assignments.length === 0) {
-      setIsLoading(true);
-
-      // Timeout to simulate network request
-      const timer = setTimeout(() => {
-        try {
-          // Load mock data
-          const data = getSampleAssignments();
-          setAssignments(data);
-          setError(null);
-        } catch (err) {
-          console.error("Error loading assignments:", err);
-          setError("Failed to load assignments. Please try again.");
-        } finally {
-          setIsLoading(false);
-        }
-      }, 1000);
-
-      return () => clearTimeout(timer);
-    }
-  }, [assignments.length, getSampleAssignments]);
+    const fetchAssignments = async () => {
+      try {
+        setIsLoading(true);
+        const res = await fetch("/api/assignments");
+        if (!res.ok) throw new Error("Failed to fetch assignments");
+   
+  
+        const data = await res.json();
+        setAssignments(data);
+        setError(null);
+      } catch (err) {
+        console.error(err);
+        setError("Failed to load assignments. Please try again.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+  
+    fetchAssignments();
+  }, []);
+  
 
   /**
    * Get active assignments with memoization
@@ -382,53 +380,60 @@ export default function Assignments() {
   /**
    * Handle creating new assignment
    */
-  const handleCreateAssignment = useCallback(
-    (newAssignmentData: Assignment) => {
-      // Generate a mock ID for the new assignment
-      const id = `a${Date.now()}`;
-
-      // Create the assignment with the ID
-      const createdAssignment: Assignment = {
-        id,
-        title: newAssignmentData.title || "",
-        description: newAssignmentData.description || "",
-        createdAt: newAssignmentData.createdAt || new Date().toISOString(),
-        dueDate: newAssignmentData.dueDate || new Date().toISOString(),
-        weighting: newAssignmentData.weighting || 0,
-        members: newAssignmentData.members || [],
-        tasks: newAssignmentData.tasks || [],
-        files: newAssignmentData.files || [],
-        links:newAssignmentData.links || [],
-      };
-
-      // Update local state
-      setAssignments((prev) => [...prev, createdAssignment]);
+  const handleCreateAssignment = useCallback(async (newAssignmentData: Assignment) => {
+    try {
+      const res = await fetch("/api/assignments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: newAssignmentData.title,
+          description: newAssignmentData.description,
+          weighting: newAssignmentData.weighting,
+          deadline: newAssignmentData.deadline,
+          status: "Not Started", // or other default
+          progress: 0,
+          finalGrade: null,
+        }),
+      });
+  
+      if (!res.ok) throw new Error("Failed to create assignment");
+  
+      const created = await res.json();
+      setAssignments(prev => [...prev, created]);
       setIsCreateModalOpen(false);
-    },
-    []
-  );
+    } catch (err) {
+      console.error(err);
+      // optionally show toast here
+    }
+  }, []);
+  
 
   /**
    * Handle updating assignment
    */
-  const handleUpdateAssignment = useCallback(
-    (updatedAssignment: Assignment) => {
-      // Update local state
+  const handleUpdateAssignment = useCallback(async (updatedAssignment: Assignment) => {
+    try {
+      const res = await fetch(`/api/assignments/${updatedAssignment.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedAssignment),
+      });
+  
+      if (!res.ok) throw new Error("Failed to update assignment");
+  
+      const updated = await res.json();
+  
       setAssignments((prev) =>
-        prev.map((assignment) =>
-          assignment.id === updatedAssignment.id
-            ? updatedAssignment
-            : assignment
-        )
+        prev.map((assignment) => assignment.id === updated.id ? updated : assignment)
       );
-
-      // Update selected assignment if it's the one being edited
-      if (selectedAssignmentData?.id === updatedAssignment.id) {
-        setSelectedAssignmentData(updatedAssignment);
+      if (selectedAssignmentData?.id === updated.id) {
+        setSelectedAssignmentData(updated);
       }
-    },
-    [selectedAssignmentData]
-  );
+    } catch (err) {
+      console.error(err);
+    }
+  }, [selectedAssignmentData]);
+  
 
   // Rows data for rendering
   const rows = useMemo(
@@ -506,15 +511,15 @@ export default function Assignments() {
                     >
                       <AssignmentCard
                         title={assignment.title}
-                        dueDate={assignment.dueDate}
-                        weighting={assignment.weighting}
+                        deadline={assignment.deadline}
+                        weighting={assignment.weightinging}
                         description={assignment.description}
                         progress={calculateProgress(assignment.tasks)}
-                        daysRemaining={calculateDaysRemaining(assignment.dueDate)}
-                        isLate={isLate(assignment.dueDate)}
+                        daysRemaining={calculateDaysRemaining(assignment.deadline)}
+                        isLate={isLate(assignment.deadline)}
                         bgColor={getCardBgColor(
                           assignment.tasks,
-                          assignment.dueDate
+                          assignment.deadline
                         )} />
                     </div>
                   );

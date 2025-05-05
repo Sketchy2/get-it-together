@@ -3,9 +3,13 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
+  ManyToOne,
   OneToMany,
 } from "typeorm";
+import { Assignment } from "./Assignments"; // 🔥 important
 import { TaskAssignee } from "./TaskAssignee";
+import { UserEntity } from "./auth-entities";
+import type { Relation } from "typeorm";
 
 @Entity("task")
 export class Task {
@@ -25,10 +29,16 @@ export class Task {
   priority: number | null;
 
   @Column({ name: "due_date", type: "timestamp", nullable: true })
-  dueDate: Date | null;
+  deadline: Date | null;
 
   @CreateDateColumn({ name: "created_at", type: "timestamp" })
   createdAt: Date;
+
+  @ManyToOne(() => UserEntity, (user) => user.id)
+  createdByUser!: Relation<UserEntity>;
+
+  @ManyToOne(() => Assignment, (assignment) => assignment.tasks)
+  assignment!: Relation<Assignment>;
 
   @OneToMany(() => TaskAssignee, (taskAssignee) => taskAssignee.task)
   assignees: TaskAssignee[];

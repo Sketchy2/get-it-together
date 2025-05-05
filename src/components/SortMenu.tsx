@@ -58,12 +58,12 @@ export default function SortMenu({
         // (
         //   <div className="sortMenu">
         //     <button
-        //       className={`sortOption ${sortBy === "dueDate" ? "active" : ""}`}
-        //       onClick={() => handleSortChange("dueDate")}
+        //       className={`sortOption ${sortBy === "deadline" ? "active" : ""}`}
+        //       onClick={() => handleSortChange("deadline")}
         //     >
         //       <Calendar size={16} />
         //       <span>Due Date</span>
-        //       {sortBy === "dueDate" && (
+        //       {sortBy === "deadline" && (
         //         sortDirection === "asc" ? <ArrowUp size={16} /> : <ArrowDown size={16} />
         //       )}
         //     </button>

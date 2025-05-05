@@ -1,115 +1,150 @@
-import {
-    Entity,
-    PrimaryGeneratedColumn,
-    Column,
-    ManyToOne,
-    OneToMany
-  } from "typeorm"
-  
+ import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  OneToMany,
+  ValueTransformer,
+} from "typeorm"
 
-  @Entity({ name: "users" })
-  export class User {
-    @PrimaryGeneratedColumn("uuid")
-    id!: string
-  
-    @Column({ type: "varchar", length: 255, nullable: true })
-    name!: string | null
-  
-    @Column({ type: "varchar", length: 255, nullable: true, unique: true })
-    email!: string | null
-  
-    @Column({ 
-      type: "varchar", 
-      nullable: true,
-      transformer: {
-        to: (value: Date | null): string | null => (value ? value.toISOString() : null),
-        from: (value: string | null): Date | null => (value ? new Date(value) : null)
-      }
-    })
-    emailVerified!: Date | null;
-    
-    @Column({ type: "varchar", length: 500, nullable: true })
-    image!: string | null
-  
-    @OneToMany(() => Session, (session) => session.userId)
-    sessions!: Session[]
-  
-    @OneToMany(() => Account, (account) => account.user)
-    accounts!: Account[]
-  }
-  
-  @Entity({ name: "accounts" })
-  export class Account {
-    @PrimaryGeneratedColumn("uuid")
-    id!: string
-  
-    @Column({ type: "varchar", length: 255 })
-    type!: string
-  
-    @Column({ type: "varchar", length: 255 })
-    provider!: string
-  
-    @Column({ type: "varchar", length: 255 })
-    providerAccountId!: string
-  
-    @Column({ type: "varchar", length: 500, nullable: true })
-    refresh_token!: string | null
-  
-    @Column({ type: "varchar", length: 500, nullable: true })
-    access_token!: string | null
-  
-    @Column({ type: "int", nullable: true})
-    expires_at!: number | null
-  
-    @Column({ type: "varchar", length: 255, nullable: true })
-    token_type!: string | null
-  
-    @Column({ type: "varchar", length: 500, nullable: true })
-    scope!: string | null
-  
-    @Column({ type: "text", nullable: true })
-    id_token!: string | null
-  
-    @Column({ type: "varchar", length: 255, nullable: true })
-    session_state!: string | null
-  
-    @Column({ type: "varchar", length: 500, nullable: true })
-    oauth_token_secret!: string | null
-  
-    @Column({ type: "varchar", length: 500, nullable: true })
-    oauth_token!: string | null
-  
-    @ManyToOne(() => User, (user) => user.accounts)
-    user!: User
-  }
-  
-  @Entity({ name: "sessions" })
-  export class Session {
-    @PrimaryGeneratedColumn("uuid")
-    id!: string
-  
-    @Column({ type: "varchar", length: 255, unique: true })
-    sessionToken!: string
-  
-    @Column({ type: "timestamp"})
-    expires!: Date
-  
-    @ManyToOne(() => User, (user) => user.sessions)
-    userId!: User
-  }
-  
-  @Entity({ name: "verification_tokens" })
-  export class VerificationToken {
-    @PrimaryGeneratedColumn("uuid")
-    id!: string
-  
-    @Column({ type: "varchar", length: 255 })
-    token!: string
-  
-    @Column({ type: "varchar", length: 255 })
-    identifier!: string
-  
-    @Column({ type: "timestamp" })
-    expires!: Date    
-  }
-  
+import { TaskAssignee } from "./TaskAssignee"
+import { AssignmentAssignee } from "./AssignmentAssignee"
+import { Assignment } from "./Assignments";
+import { Task } from "./Tasks";
+ 
+const transformer: Record<"date" | "bigint", ValueTransformer> = {
+  date: {
+    from: (date: string | null) => date && new Date(parseInt(date, 10)),
+    to: (date?: Date) => date?.valueOf().toString(),
+  },
+  bigint: {
+    from: (bigInt: string | null) => bigInt && parseInt(bigInt, 10),
+    to: (bigInt?: number) => bigInt?.toString(),
+  },
+}
+ 
+@Entity({ name: "users" })
+export class UserEntity {
+  @PrimaryGeneratedColumn("uuid")
+  id!: string
+ 
+  @Column({ type: "varchar", nullable: true })
+  name!: string | null
+ 
+  @Column({ type: "varchar", nullable: true, unique: true })
+  email!: string | null
+ 
+  @Column({ type: "varchar", nullable: true, transformer: transformer.date })
+  emailVerified!: string | null
+ 
+  @Column({ type: "varchar", nullable: true })
+  image!: string | null
+ 
+  @Column({ type: "varchar", nullable: true })
+ role!: string | null
+ 
+  @OneToMany(() => SessionEntity, (session) => session.userId)
+  sessions!: SessionEntity[]
+ 
+  @OneToMany(() => AccountEntity, (account) => account.userId)
+  accounts!: AccountEntity[]
+
+  @OneToMany(() => TaskAssignee, (taskAssignee) => taskAssignee.user)
+  taskAssignees!: TaskAssignee[];
+
+  @OneToMany(() => AssignmentAssignee, (assignmentAssignee) => assignmentAssignee.user)
+  assignmentAssignees!: AssignmentAssignee[];
+
+  @OneToMany(() => Assignment, (Assignment) => Assignment.id)
+  createdAssignments!: Assignment[];
+
+  @OneToMany(() => Task, (Task) => Task.id)
+  createdTasks!: Task[];
+}
+ 
+@Entity({ name: "accounts" })
+export class AccountEntity {
+  @PrimaryGeneratedColumn("uuid")
+  id!: string
+ 
+  @Column({ type: "uuid" })
+  userId!: string
+ 
+  @Column()
+  type!: string
+ 
+  @Column()
+  provider!: string
+ 
+  @Column()
+  providerAccountId!: string
+ 
+  @Column({ type: "varchar", nullable: true })
+  refresh_token!: string | null
+ 
+  @Column({ type: "varchar", nullable: true })
+  access_token!: string | null
+ 
+  @Column({
+    nullable: true,
+    type: "bigint",
+    transformer: transformer.bigint,
+  })
+  expires_at!: number | null
+ 
+  @Column({ type: "varchar", nullable: true })
+  token_type!: string | null
+ 
+  @Column({ type: "varchar", nullable: true })
+  scope!: string | null
+ 
+  @Column({ type: "varchar", nullable: true })
+  id_token!: string | null
+ 
+  @Column({ type: "varchar", nullable: true })
+  session_state!: string | null
+ 
+  @Column({ type: "varchar", nullable: true })
+  oauth_token_secret!: string | null
+ 
+  @Column({ type: "varchar", nullable: true })
+  oauth_token!: string | null
+ 
+  @ManyToOne(() => UserEntity, (user) => user.accounts, {
+    createForeignKeyConstraints: true,
+  })
+  user!: UserEntity
+}
+ 
+@Entity({ name: "sessions" })
+export class SessionEntity {
+  @PrimaryGeneratedColumn("uuid")
+  id!: string
+ 
+  @Column({ unique: true })
+  sessionToken!: string
+ 
+  @Column({ type: "uuid" })
+  userId!: string
+ 
+  @Column({ transformer: transformer.date })
+  expires!: string
+ 
+  @ManyToOne(() => UserEntity, (user) => user.sessions)
+  user!: UserEntity
+}
+ 
+@Entity({ name: "verification_tokens" })
+export class VerificationTokenEntity {
+  @PrimaryGeneratedColumn("uuid")
+  id!: string
+ 
+  @Column()
+  token!: string
+ 
+  @Column()
+  identifier!: string
+ 
+  @Column({ transformer: transformer.date })
+  expires!: string
+}

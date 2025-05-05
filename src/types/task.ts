@@ -7,7 +7,7 @@ type Task = {
     title: string
     description: string
     assignee?: User[]
-    dueDate?: string
+    deadline?: string
     status: TaskStatus
     weighting?: number
     createdAt?: string

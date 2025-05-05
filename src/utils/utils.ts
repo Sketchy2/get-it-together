@@ -1,7 +1,7 @@
 export  {isLate,formatDate}
 
-  const isLate = (dueDate: string): boolean => {
-    return new Date(dueDate) < new Date()
+  const isLate = (deadline: string): boolean => {
+    return new Date(deadline) < new Date()
   }
 
 

@@ -8,7 +8,7 @@ import {
   ChevronDown,
   Maximize2,
   Calendar,
-  weighting,
+  Weight,
   Flag,
   Clock,
   FileText,
@@ -31,7 +31,7 @@ interface AssignmentDetailsProps {
   id: string
   title: string
   createdAt: string
-  dueDate: string
+  deadline: string
   weighting: number
   description: string
   files?: FileAttachment[]
@@ -52,7 +52,7 @@ const AssignmentDetailPanel: React.FC<AssignmentDetailsProps> = ({
   title,
   description,
   createdAt,
-  dueDate,
+  deadline,
   weighting,
   members,
   tasks,
@@ -66,15 +66,15 @@ const AssignmentDetailPanel: React.FC<AssignmentDetailsProps> = ({
   onExpand,
 }) => {
   const sortOptions:SortOption[] = [
-    { key: "dueDate", label: "Due Date", icon: <Calendar size={16} /> },
+    { key: "deadline", label: "Due Date", icon: <Calendar size={16} /> },
     { key: "createdAt", label: "Created Date", icon: <Clock size={16} /> },
-    { key: "weighting", label: "weighting", icon: <weighting size={16} /> },
+    { key: "weighting", label: "weighting", icon: <Weight size={16} /> },
     { key: "priority", label: "Priority", icon: <Flag size={16} /> },
   ] as const;
 
   const progress: number = calculateProgress(tasks);
-  const islate: boolean = isLate(dueDate);
-  const bgColor: string = getCardBgColor(tasks,dueDate)
+  const islate: boolean = isLate(deadline);
+  const bgColor: string = getCardBgColor(tasks,deadline)
   
   const [isEditing, setIsEditing] = useState(false)
   const [editedDescription, setEditedDescription] = useState(description)
@@ -170,7 +170,7 @@ const AssignmentDetailPanel: React.FC<AssignmentDetailsProps> = ({
       filteredTodos = filteredTodos.filter((todo) => filters.priority.includes(todo.priority || "medium"))
     }
 
-    // Filter by members
+    // Filter by members TODO:FIX FILTERS
     if (filters.members.length > 0) {
       filteredTodos = filteredTodos.filter((todo) => todo.assignee && filters.members.includes(todo.assignee))
     }
@@ -178,19 +178,19 @@ const AssignmentDetailPanel: React.FC<AssignmentDetailsProps> = ({
     // Filter by date range
     if (filters.dateRange.start || filters.dateRange.end) {
       filteredTodos = filteredTodos.filter((todo) => {
-        if (!todo.dueDate) return false
+        if (!todo.deadline) return false
 
-        const dueDate = new Date(todo.dueDate)
+        const deadline = new Date(todo.deadline)
         let isInRange = true
 
         if (filters.dateRange.start) {
           const startDate = new Date(filters.dateRange.start)
-          isInRange = isInRange && dueDate >= startDate
+          isInRange = isInRange && deadline >= startDate
         }
 
         if (filters.dateRange.end) {
           const endDate = new Date(filters.dateRange.end)
-          isInRange = isInRange && dueDate <= endDate
+          isInRange = isInRange && deadline <= endDate
         }
 
         return isInRange
@@ -199,12 +199,12 @@ const AssignmentDetailPanel: React.FC<AssignmentDetailsProps> = ({
 
     // Apply sorting
     return filteredTodos.sort((a, b) => {
-      if (sortBy.key === "dueDate") { // TODO: fix duedate +  createdAt
-        if (!a.dueDate) return sortDirection === "asc" ? 1 : -1
-        if (!b.dueDate) return sortDirection === "asc" ? -1 : 1
+      if (sortBy.key === "deadline") { // TODO: fix duedate +  createdAt
+        if (!a.deadline) return sortDirection === "asc" ? 1 : -1
+        if (!b.deadline) return sortDirection === "asc" ? -1 : 1
 
-        const dateA = new Date(a.dueDate).getTime()
-        const dateB = new Date(b.dueDate).getTime()
+        const dateA = new Date(a.deadline).getTime()
+        const dateB = new Date(b.deadline).getTime()
 
         return sortDirection === "asc" ? dateA - dateB : dateB - dateA
       } else if (sortBy.key === "weighting") {
@@ -244,7 +244,7 @@ const AssignmentDetailPanel: React.FC<AssignmentDetailsProps> = ({
           <h2 className="detailsTitle">{title}</h2>
           <div className="detailsMetaRow">
             <span className="detailsMeta">
-              Due: {formatDate(dueDate)} | Weighed: {weighting}%
+              Due: {formatDate(deadline)} | Weighed: {weighting}%
             </span>
             <div className="statusIndicator">
               <span>{islate ? "Overdue" : progress === 100 ? "Completed" : "In Progress"}</span>

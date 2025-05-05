@@ -5,7 +5,7 @@ import { formatDate } from "@/utils/utils";
 
 interface AssignmentCardProps {
   title: string;
-  dueDate: string;
+  deadline: string;
   weighting: number;
   description: string;
   progress: number;
@@ -16,7 +16,7 @@ interface AssignmentCardProps {
 
 const AssignmentCard: React.FC<AssignmentCardProps> = ({
   title,
-  dueDate,
+  deadline,
   weighting,
   description,
   progress,
@@ -36,7 +36,9 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({
       }
     }
   }
-    
+  
+
+  
   return (
     <div className="card-wrapper">
       <div
@@ -56,7 +58,7 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({
           </div>
           <div className="cardMeta">
             <span>
-              Due: {formatDate(dueDate)} | Weighed: {weighting}%
+              Due: {formatDate(deadline)} | Weighed: {weighting}%
             </span>
           </div>
           <p className="cardDescription">{description}</p>
