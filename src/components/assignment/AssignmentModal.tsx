@@ -53,7 +53,7 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
       expanded: false,
       assignee: newTask.assignee,
       dueDate: newTask.dueDate,
-      weight: newTask.weight,
+      weighting: newTask.weighting,
       priority: newTask.priority,
       status: newTask.status,
       createdAt: newTask.createdAt,
@@ -91,7 +91,7 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
           title={assignment.title}
           createdAt={assignment.createdAt}
           dueDate={assignment.dueDate}
-          weight={assignment.weight}
+          weighting={assignment.weighting}
           description={assignment.description}
           files={assignment.files || []}
 
@@ -110,8 +110,8 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
         onClose={() => setIsCreateTaskModalOpen(false)}
         onSave={handleCreateTask}
         members={assignment.members || []}
-        maxWeight={assignment.weight || 100}
-        currentWeight={assignment.tasks?.reduce((sum: number, todo: any) => sum + (todo.weight || 0), 0) || 0}
+        maxWeight={assignment.weighting || 100}
+        currentWeight={assignment.tasks?.reduce((sum: number, todo: any) => sum + (todo.weighting || 0), 0) || 0}
       />
     </div>
   )

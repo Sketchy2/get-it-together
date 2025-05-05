@@ -8,7 +8,7 @@ import {
   ChevronDown,
   Maximize2,
   Calendar,
-  Weight,
+  weighting,
   Flag,
   Clock,
   FileText,
@@ -32,7 +32,7 @@ interface AssignmentDetailsProps {
   title: string
   createdAt: string
   dueDate: string
-  weight: number
+  weighting: number
   description: string
   files?: FileAttachment[]
   links?: AssignmentLink[]
@@ -53,7 +53,7 @@ const AssignmentDetailPanel: React.FC<AssignmentDetailsProps> = ({
   description,
   createdAt,
   dueDate,
-  weight,
+  weighting,
   members,
   tasks,
   files = [],
@@ -68,7 +68,7 @@ const AssignmentDetailPanel: React.FC<AssignmentDetailsProps> = ({
   const sortOptions:SortOption[] = [
     { key: "dueDate", label: "Due Date", icon: <Calendar size={16} /> },
     { key: "createdAt", label: "Created Date", icon: <Clock size={16} /> },
-    { key: "weight", label: "Weight", icon: <Weight size={16} /> },
+    { key: "weighting", label: "weighting", icon: <weighting size={16} /> },
     { key: "priority", label: "Priority", icon: <Flag size={16} /> },
   ] as const;
 
@@ -207,9 +207,9 @@ const AssignmentDetailPanel: React.FC<AssignmentDetailsProps> = ({
         const dateB = new Date(b.dueDate).getTime()
 
         return sortDirection === "asc" ? dateA - dateB : dateB - dateA
-      } else if (sortBy.key === "weight") {
-        const weightA = a.weight || 1
-        const weightB = b.weight || 1
+      } else if (sortBy.key === "weighting") {
+        const weightA = a.weighting || 1
+        const weightB = b.weighting || 1
         return sortDirection === "asc" ? weightA - weightB : weightB - weightA
       } else if (sortBy.key === "priority") {
         // Modified priority sorting to ensure high priority is at the top
@@ -244,7 +244,7 @@ const AssignmentDetailPanel: React.FC<AssignmentDetailsProps> = ({
           <h2 className="detailsTitle">{title}</h2>
           <div className="detailsMetaRow">
             <span className="detailsMeta">
-              Due: {formatDate(dueDate)} | Weighed: {weight}%
+              Due: {formatDate(dueDate)} | Weighed: {weighting}%
             </span>
             <div className="statusIndicator">
               <span>{islate ? "Overdue" : progress === 100 ? "Completed" : "In Progress"}</span>

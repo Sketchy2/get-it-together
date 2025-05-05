@@ -125,10 +125,10 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onStatusChange }) => {
               {task.status === "In Progress" && "In Progress"}
               {task.status === "Completed" && "Completed"}
             </div>
-            {task.weight && task.weight > 1 && (
+            {task.weighting && task.weighting > 1 && (
               <div className="taskWeightBadge">
                 <Weight size={12} />
-                <span>{task.weight}x</span>
+                <span>{task.weighting}x</span>
               </div>
             )}
             {task.priority && (
@@ -196,9 +196,10 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onStatusChange }) => {
               </div>
               <div className="taskDetailValue">
                 {task.assignee ? (
+                  // TODO: SHOW MULTIPLE USERS
                   <div className="assigneeInfo">
-                    <div className="assigneeAvatar">{task.assignee.charAt(0).toUpperCase()}</div>
-                    <span>{task.assignee}</span>
+                    <div className="assigneeAvatar">{task.assignee[0].name.charAt(0).toUpperCase()}</div>
+                    <span>{task.assignee[0].name}</span>
                   </div>
                 ) : (
                   <span className="unassigned">Unassigned</span>
@@ -228,7 +229,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onStatusChange }) => {
             <div className="taskDetailItem">
               <div className="taskDetailLabel">
                 <Weight size={14} />
-                <span>Weight</span>
+                <span>weighting</span>
               </div>
               <div className="taskDetailValue">
                 <div className="weightInfo">
@@ -236,13 +237,13 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onStatusChange }) => {
                     {Array.from({ length: 5 }).map((_, i) => (
                       <div
                         key={i}
-                        className={`weightUnit ${i < (task.weight || 1) ? "active" : ""}`}
-                        style={{ opacity: i < (task.weight || 1) ? 1 : 0.3 }}
+                        className={`weightUnit ${i < (task.weighting || 1) ? "active" : ""}`}
+                        style={{ opacity: i < (task.weighting || 1) ? 1 : 0.3 }}
                       ></div>
                     ))}
                   </div>
                   <span>
-                    {task.weight || 1}x weight ({task.weight ? task.weight * 20 : 20}% of total)
+                    {task.weighting || 1}x weighting ({task.weighting ? task.weighting * 20 : 20}% of total)
                   </span>
                 </div>
               </div>

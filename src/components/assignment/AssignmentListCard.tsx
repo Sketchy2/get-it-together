@@ -48,7 +48,7 @@ export const AssignmentListCard = ({
           <div className="listItemMeta">
             <span>
               Due date: {formatDate(assignment.dueDate)} | Weighting:{" "}
-              {assignment.weight}%
+              {assignment.weighting}%
             </span>
           </div>
         </div>

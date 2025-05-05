@@ -19,12 +19,12 @@ const calculateDaysRemaining = (dueDate: string): number => {
   const calculateProgress = (tasks: Task[]): number => {
       if (!Array.isArray(tasks) || tasks.length === 0) return 0;
       
-    const totalWeight = tasks.reduce((sum, task) => sum + (task.weight?task.weight:1), 0);
+    const totalWeight = tasks.reduce((sum, task) => sum + (task.weighting?task.weighting:1), 0);
     if (totalWeight === 0) return 0;
 
     const completedWeight = tasks
       .filter((task) => task.status === "Completed")
-      .reduce((sum, task) => sum + (task.weight?task.weight:1), 0);
+      .reduce((sum, task) => sum + (task.weighting?task.weighting:1), 0);
 
     return Math.round((completedWeight / totalWeight) * 100);
   };

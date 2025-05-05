@@ -8,7 +8,7 @@ type Assignment = {
   description: string;
   createdAt: string;
   dueDate: string;
-  weight: number;
+  weighting: number;
   members: User[];
   tasks: Task[];
   files: FileAttachment[];
@@ -24,10 +24,12 @@ type FileAttachment = {
   uploadedAt: string;
 };
 
+
 type AssignmentLink = { title: string; url: string };
 
 type User = {
   id: string;
   name: string;
   email?: string;
+
 };

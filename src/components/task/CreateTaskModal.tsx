@@ -4,12 +4,13 @@ import type React from "react"
 import { useState } from "react"
 import { X, Calendar, User, AlignLeft, Weight, Flag, HelpCircle, Clock, AlertTriangle, CheckCircle } from "lucide-react"
 import "./CreateTaskModal.css"
+import { User as Member } from "@/types/assignment"
 
 interface CreateTaskModalProps {
   isOpen: boolean
   onClose: () => void
   onSave: (task: any) => void
-  members: string[]
+  members: Member[]
   maxWeight: number
   currentWeight: number
 }
@@ -26,11 +27,11 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
   const [description, setDescription] = useState("")
   const [assignee, setAssignee] = useState("")
   const [dueDate, setDueDate] = useState("")
-  const [weight, setWeight] = useState(1)
+  const [weighting, setWeight] = useState(1)
   const [status, setStatus] = useState<"unassigned" | "todo" | "inProgress" | "completed">("todo")
   const [priority, setPriority] = useState<"low" | "medium" | "high">("medium")
 
-  // Calculate remaining weight
+  // Calculate remaining weighting
   const remainingWeight = maxWeight - currentWeight
 
   if (!isOpen) return null
@@ -46,7 +47,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
       dueDate: dueDate || undefined,
       completed: status === "completed",
       status,
-      weight,
+      weighting,
       priority,
       createdAt: new Date().toISOString(),
     }
@@ -126,8 +127,8 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
               <select id="taskAssignee" value={assignee} onChange={(e) => setAssignee(e.target.value)}>
                 <option value="">Unassigned</option>
                 {members.map((member, index) => (
-                  <option key={index} value={member}>
-                    {member}
+                  <option key={index} value={member.name}>
+                    {member.name}
                   </option>
                 ))}
               </select>
@@ -146,25 +147,25 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
             <div className="formGroup">
               <label htmlFor="taskWeight" className="inputWithIcon">
                 <Weight size={16} />
-                <span>Task Weight (Remaining: {remainingWeight}%)</span>
+                <span>Task weighting (Remaining: {remainingWeight}%)</span>
               </label>
               <div className="weightInputContainer">
                 <input
                   type="range"
                   id="taskWeight"
                   min="1"
-                  max={Math.min(remainingWeight, 50)} // Limit to remaining weight or 50, whichever is smaller
-                  value={weight}
+                  max={Math.min(remainingWeight, 50)} // Limit to remaining weighting or 50, whichever is smaller
+                  value={weighting}
                   onChange={(e) => setWeight(Number.parseInt(e.target.value))}
                   className="weightSlider"
                 />
-                <span className="weightValue">{weight}%</span>
+                <span className="weightValue">{weighting}%</span>
               </div>
               <div className="weightDescription">
                 {remainingWeight <= 0 ? (
-                  <span className="weightWarning">No weight remaining for this assignment!</span>
+                  <span className="weightWarning">No weighting remaining for this assignment!</span>
                 ) : (
-                  "Higher weight means the task contributes more to overall progress"
+                  "Higher weighting means the task contributes more to overall progress"
                 )}
               </div>
             </div>

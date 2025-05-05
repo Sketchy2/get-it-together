@@ -70,7 +70,7 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
   const sortOptions: SortOption[] = [
     { key: "dueDate", label: "Due Date", icon: <Calendar size={16} /> },
     { key: "createdAt", label: "Created At", icon: <Clock size={16} /> },
-    { key: "weight", label: "Weight", icon: <BarChart size={16}  /> },
+    { key: "weighting", label: "weighting", icon: <BarChart size={16}  /> },
     { key: "priority", label: "Priority", icon: <Flag size={16}  /> },
   ] as const;
   const [sortBy, setSortBy] = useState<SortOption>(
@@ -115,7 +115,7 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
       }
 
       const totalWeight = memberTasks.reduce(
-        (sum, task) => sum + (task.weight ? task.weight : 1),
+        (sum, task) => sum + (task.weighting ? task.weighting : 1),
         0
       );
       if (totalWeight === 0) {
@@ -125,7 +125,7 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
 
       const completedWeight = memberTasks
         .filter((task) => task.status === "Completed")
-        .reduce((sum, task) => sum + (task.weight ? task.weight : 1), 0);
+        .reduce((sum, task) => sum + (task.weighting ? task.weighting : 1), 0);
 
       progressByMember[member] = Math.round(
         (completedWeight / totalWeight) * 100
@@ -361,10 +361,10 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
         const dateB = new Date(b.dueDate).getTime();
 
         return sortDirection === "asc" ? dateA - dateB : dateB - dateA;
-      } else if (sortBy.key === "weight") {
+      } else if (sortBy.key === "weighting") {
         return sortDirection === "asc"
-          ? (a.weight ? a.weight : 0) - (b.weight ? b.weight : 0)
-          : (b.weight ? b.weight : 0) - (a.weight ? a.weight : 0); //TODO: CONFIRM LOGIC
+          ? (a.weighting ? a.weighting : 0) - (b.weighting ? b.weighting : 0)
+          : (b.weighting ? b.weighting : 0) - (a.weighting ? a.weighting : 0); //TODO: CONFIRM LOGIC
       } else if (sortBy.key === "priority") {
         const priorityValues = { high: 3, medium: 2, low: 1 };
         const valueA = priorityValues[a.priority] || 0;
@@ -1063,8 +1063,8 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
         onClose={() => setIsCreateTaskModalOpen(false)}
         onSave={handleCreateTask}
         members={assignment.members || []}
-        maxWeight={assignment.weight || 100}
-        currentWeight={tasks.reduce((sum, task) => sum + (task.weight?task.weight:1), 0)}
+        maxWeight={assignment.weighting || 100}
+        currentWeight={tasks.reduce((sum, task) => sum + (task.weighting?task.weighting:1), 0)}
       />
     </div>
   );

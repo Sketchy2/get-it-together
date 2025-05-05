@@ -1,14 +1,15 @@
-
+import type {User} from "./assignment"
 export type {Task,TaskStatus}
 
-type Task = {
+
+type Task = {   
     id: string
     title: string
     description: string
-    assignee?: string
+    assignee?: User[]
     dueDate?: string
     status: TaskStatus
-    weight?: number
+    weighting?: number
     createdAt?: string
     priority?: "low" | "medium" | "high"  
 }

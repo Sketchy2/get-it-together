@@ -16,7 +16,7 @@ const CreateAssignmentModal: React.FC<CreateAssignmentModalProps> = ({ isOpen, o
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [dueDate, setDueDate] = useState("")
-  const [weight, setWeight] = useState(100) // Default to 100% for the total assignment
+  const [weighting, setWeight] = useState(100) // Default to 100% for the total assignment
   const [members, setMembers] = useState<string[]>([])
   const [newMember, setNewMember] = useState("")
   const [files, setFiles] = useState<File[]>([])
@@ -53,7 +53,7 @@ const CreateAssignmentModal: React.FC<CreateAssignmentModalProps> = ({ isOpen, o
       title,
       date: today.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
       dueDate: due.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-      weight,
+      weighting,
       description,
       progress: 0,
       daysRemaining,
@@ -147,21 +147,21 @@ const CreateAssignmentModal: React.FC<CreateAssignmentModalProps> = ({ isOpen, o
             </div>
 
             <div className="formGroup shared">
-              <label htmlFor="weight" className="inputWithIcon">
+              <label htmlFor="weighting" className="inputWithIcon">
                 <Percent size={16} />
-                <span>Total Weight (%)</span>
+                <span>Total weighting (%)</span>
               </label>
               <input
                 type="number"
-                id="weight"
-                value={weight || ""}
+                id="weighting"
+                value={weighting || ""}
                 onChange={(e) => setWeight(Number(e.target.value))}
                 min="1"
                 max="100"
                 required
               />
               <div className="weightDescription">
-                This is the total weight of the assignment. Tasks will be created with weights that add up to this
+                This is the total weighting of the assignment. Tasks will be created with weights that add up to this
                 total.
               </div>
             </div>
