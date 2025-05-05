@@ -5,6 +5,7 @@ import ProgressCircle from './ProgressCircle';
 import TaskCard from '../task/TaskCard';
 import { ArrowUpRightIcon, ChevronDownIcon, ChevronRightIcon, FilterIcon } from 'lucide-react';
 import { formatDate } from '@/utils/utils';
+import "./AssignmentListCard.css"
 
 // export default function
 interface AssignmentCardProps {

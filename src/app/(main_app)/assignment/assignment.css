@@ -1,30 +1,66 @@
 /* Enhanced assignments.css */
-.assignmentsContainer {
-  padding: 20px;
-  max-width: 1200px;
+.mainContainer{
+  /* background-color: #dd992b; */
+  padding: 3%;
+  max-width: 1200px;  
+  min-width: 600px;
   margin: 0 auto;
-  min-height: 100vh;
+  
+
+}
+
+.assignmentsContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+
+  height: 65vh;                  /* or 100vh, or any % of screen */
+  width: 100%;
+  max-width: 1200px;
+  min-width: 600px;
+  margin: 0 auto;
+  padding: 2%;
   background-color: #1e1e1e;
   color: white;
+
+
+  overflow-y: auto;              /* scroll this container */
+  overflow-x: hidden;              /* scroll this container */
+  border-radius: 5%;
 }
 
 .assignmentHeader {
+  max-width: 1200px;
+  margin: 0 auto;
+  color: white;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: center;
+  flex-direction: row;
+
   margin-bottom: 24px;
+  display: flex;
+
 }
 
+
+
 .title {
-  font-size: 1.8rem;
+  font-size: 3rem;
   font-weight: 600;
   margin: 0;
 }
 
 .actions {
-  display: flex;
-  align-items: center;
+  display: flex;               
+  align-items:end;
+  justify-content: end;
+  flex-direction: row;
+  flex-wrap: nowrap;
   gap: 12px;
+  margin-bottom: 15px;
+
 }
 
 .iconButton {
@@ -48,6 +84,7 @@
 
 
 .rowsContainer {
+  margin: auto 0;
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -76,10 +113,8 @@
 
 /* List View Styling */
 .listContainer {
-  flex: 1;
-  overflow-y: auto;
+  width: 100%;
   padding: 20px;
-  max-height: calc(100vh - 120px);
 }
 
 .listSection {
@@ -173,40 +208,7 @@
   dominant-baseline: middle;
 }
 
-.listItemDetails {
-  padding: 16px;
-  border-bottom-left-radius: 8px;
-  border-bottom-right-radius: 8px;
-  padding: 16px 20px 20px 60px;
-  background-color: rgba(0, 0, 0, 0.15) !important;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  height: auto;
-  overflow: visible;
-  display: none;
-}
 
-.expanded + .listItemDetails {
-  display: block;
-  animation: fadeIn 0.3s ease-out;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-5px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.listItemDescription {
-  margin-bottom: 16px;
-  margin-bottom: 20px;
-  color: rgba(255, 255, 255, 0.85);
-  line-height: 1.6;
-}
 
 .todoItems {
   background-color: rgba(0, 0, 0, 0.1);
@@ -273,16 +275,6 @@
   margin: 0 15px;
 }
 
-/* .miniProgressBar {
-  width: 4px;
-  height: 16px;
-  background-color: rgba(255, 255, 255, 0.3);
-  border-radius: 2px;
-  width: 6px;
-  height: 16px;
-  background-color: #ffd700;
-  border-radius: 3px;
-} */
 
 .todoItemAvatar {
   width: 24px;

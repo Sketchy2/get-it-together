@@ -2,23 +2,17 @@
 
 import { useState, useEffect, useMemo, useCallback } from "react";
 import "./assignment.css";
-import { formatDate, isLate } from "@/utils/utils";
+import {  isLate } from "@/utils/utils";
 import AssignmentRow from "@/components/assignment/AssignmentRow";
 import AssignmentCard from "@/components/assignment/AssignmentCard";
 import AssignmentModal from "@/components/assignment/AssignmentModal";
 import CreateAssignmentModal from "@/components/assignment/CreateAssignmentModal";
 import {
   PlusIcon,
-  FilterIcon,
-  ArrowUpRightIcon,
-  ChevronDownIcon,
-  ChevronRightIcon,
   Calendar,
   Clock,
 } from "lucide-react";
-import ProgressCircle from "@/components/assignment/ProgressCircle";
 import ViewToggle from "@/components/ViewToggle";
-import TaskCard from "@/components/task/TaskCard";
 import { SortOption, SortDirection } from "@/types/sort";
 import SortMenu from "@/components/SortMenu";
 import { Task, TaskStatus } from "@/types/task";
@@ -376,38 +370,6 @@ export default function Assignments() {
     [selectedAssignmentData]
   );
 
-  //might need for handling task status
-  // const handleTaskStatusChange = (taskId: string, newStatus: TaskStatus) => {
-  //   const updatedTasks = tasks.map((task) => {
-  //     if (task.id === taskId) {
-  //       const completed = newStatus === "Completed"
-  //       return { ...task, status: newStatus, completed }
-  //     }
-  //     return task
-  //   })
-
-  //   setTasks(updatedTasks)
-  //   calculateProgress(updatedTasks)
-  //   calculateMemberProgress(updatedTasks)
-
-  //   // Also update the todos in the assignment
-  //   const updatedTodos = (assignment.todos || []).map((todo: any) => {
-  //     if (todo.id === taskId) {
-  //       return { ...todo, status: newStatus }
-  //     }
-  //     return todo
-  //   })
-
-  //   const updatedAssignment = {
-  //     ...assignment,
-  //     todos: updatedTodos,
-  //     tasks: updatedTasks,
-  //   }
-
-  //   onUpdate(updatedAssignment)
-  // }
-  // update task status
-
   /**
    * Stable empty function for onAddTodo to prevent re-renders
    */
@@ -487,6 +449,7 @@ export default function Assignments() {
     [activeAssignments, completedAssignments]
   );
 
+  // TODO: make look cuter
   if (isLoading) {
     return (
       <div className="loadingContainer">
@@ -508,233 +471,232 @@ export default function Assignments() {
   }
 
   return (
-    <div className="assignmentsContainer">
-      <header className="assignmentHeader">
-        <h1 className="title">Assignments</h1>
-        <div className="actions">
-          <SortMenu
-            sortMenuOpen={sortMenuOpen}
-            setSortMenuOpen={() => setSortMenuOpen(!sortMenuOpen)}
-            sortBy={sortBy}
-            sortDirection={sortDirection}
-            handleSortChange={handleSortChange}
-            options={sortOptions}
-          />
+    <><header className="assignmentHeader">
+      <h1 className="title">Assignments</h1>
 
-          <ViewToggle viewMode={viewMode} onclick={switchViewMode} />
-        </div>
-      </header>
+    </header>
+      <div className="mainContainer">
+    <div className="actions">
+        <SortMenu
+          sortMenuOpen={sortMenuOpen}
+          setSortMenuOpen={() => setSortMenuOpen(!sortMenuOpen)}
+          sortBy={sortBy}
+          sortDirection={sortDirection}
+          handleSortChange={handleSortChange}
+          options={sortOptions} />
 
-      {viewMode === "kanban" ? (
-        // Kanban View
-        <div className="rowsContainer">
-          {rows.map((row) => (
-            <AssignmentRow key={row.id} title={row.title} color={row.color}>
-              {row.assignments.map((assignment) => {
-                return (
-                  <div
-                    key={assignment.id}
-                    onClick={() => handleCardClick(assignment)}
-                  >
-                    <AssignmentCard
-                      title={assignment.title}
-                      dueDate={assignment.dueDate}
-                      weight={assignment.weight}
-                      description={assignment.description}
-                      progress={calculateProgress(assignment.tasks)}
-                      daysRemaining={calculateDaysRemaining(assignment.dueDate)}
-                      isLate={isLate(assignment.dueDate)}
-                      bgColor={getCardBgColor(
-                        assignment.tasks,
-                        assignment.dueDate
-                      )}
-                    />
-                  </div>
-                );
-              })}
-              <div
-                className="addCard"
-                onClick={() => setIsCreateModalOpen(true)}
-              >
-                <PlusIcon size={24} />
-                <span>Add Assignment</span>
-              </div>
-            </AssignmentRow>
-          ))}
+        <ViewToggle viewMode={viewMode} onclick={switchViewMode} />
         </div>
-      ) : (
-        //list view
-        <div className="listContainer">
-          {rows.map((row) => {
-            return (
-              <AssignmentListSection
-                key={row.id}
-                title={row.title}
-                color={row.color}
-              >
+        
+
+        {/* todo: handle vert scroll on list view */}
+      <div className="assignmentsContainer">
+
+
+        {viewMode === "kanban" ? (
+          // Kanban View
+          <div className="rowsContainer">
+            {rows.map((row) => (
+              <AssignmentRow key={row.id} title={row.title} color={row.color}>
                 {row.assignments.map((assignment) => {
                   return (
                     <div
                       key={assignment.id}
+                      onClick={() => handleCardClick(assignment)}
                     >
-                      <AssignmentListCard
-                        assignment={assignment}
-                        isExpanded={expandedAssignment === assignment.id}
-                        onToggleExpand={() =>
-                          handleListClick(assignment.id)
-                        }
-                        onViewDetails={() => handleCardClick(assignment)}
-                        onStatusChange={handleTaskToggle}
-                      />
+                      <AssignmentCard
+                        title={assignment.title}
+                        dueDate={assignment.dueDate}
+                        weight={assignment.weight}
+                        description={assignment.description}
+                        progress={calculateProgress(assignment.tasks)}
+                        daysRemaining={calculateDaysRemaining(assignment.dueDate)}
+                        isLate={isLate(assignment.dueDate)}
+                        bgColor={getCardBgColor(
+                          assignment.tasks,
+                          assignment.dueDate
+                        )} />
                     </div>
                   );
                 })}
-
                 <div
-                  className="addListItem"
+                  className="addCard"
                   onClick={() => setIsCreateModalOpen(true)}
                 >
-                  <PlusIcon size={20} />
-                  <span>Add New Assignment</span>
+                  <PlusIcon size={24} />
+                  <span>Add Assignment</span>
                 </div>
-              </AssignmentListSection>
-            );
-          })}
-        </div>
-      )}
+              </AssignmentRow>
+            ))}
+          </div>
+        ) : (
+          //list view
+          <div className="listContainer">
+            {rows.map((row) => {
+              return (
+                <AssignmentListSection
+                  key={row.id}
+                  title={row.title}
+                  color={row.color}
+                >
+                  {row.assignments.map((assignment) => {
+                    return (
+                      <div
+                        key={assignment.id}
+                      >
+                        <AssignmentListCard
+                          assignment={assignment}
+                          isExpanded={expandedAssignment === assignment.id}
+                          onToggleExpand={() => handleListClick(assignment.id)}
+                          onViewDetails={() => handleCardClick(assignment)}
+                          onStatusChange={handleTaskToggle} />
+                      </div>
+                    );
+                  })}
 
-      {
-        /* //   // List View
-          //   <div className="listContainer">
-          //     {rows.map((row) => ( 
-          //       <div key={row.id} className="listSection">
-          //         <div
-          //           className="listSectionHeader"
-          //           style={{ backgroundColor: row.color }}
-          //         >
-          //           <h2 className="listSectionTitle">{row.title}</h2>
+                  <div
+                    className="addListItem"
+                    onClick={() => setIsCreateModalOpen(true)}
+                  >
+                    <PlusIcon size={20} />
+                    <span>Add New Assignment</span>
+                  </div>
+                </AssignmentListSection>
+              );
+            })}
+          </div>
+        )}</div>
+
+        {
+          /* //   // List View
+            //   <div className="listContainer">
+            //     {rows.map((row) => (
+            //       <div key={row.id} className="listSection">
+            //         <div
+            //           className="listSectionHeader"
+            //           style={{ backgroundColor: row.color }}
+            //         >
+            //           <h2 className="listSectionTitle">{row.title}</h2>
+            //         </div>
+            //         <div className="listItems">
+            //           {row.assignments.map((assignment) =>
+                  
+            //           {
+            //             const bgColor = getCardBgColor(assignment.tasks,assignment.dueDate)
+            //             const progress = calculateProgress(assignment.tasks)
+            //             return (
+            //               <div key={assignment.id}>
+            //                 <div
+            //                   className={`listItem ${
+            //                     expandedAssignment === assignment.id ? "expanded" : ""
+            //                   }`}
+            //                   style={{ backgroundColor: bgColor }}
+            //                   onClick={() => handleListClick(assignment.id)}
+            //                 >
+            //                   {/* list heading */
+          //                   <div className="listItemIcon">
+          //                     {expandedAssignment === assignment.id ? (
+          //                       <ChevronDownIcon size={20} />
+          //                     ) : (
+          //                       <ChevronRightIcon size={20} />
+          //                     )}
+          //                   </div>
+          //                   <div className="listItemContent">
+          //                     <h3 className="listItemTitle">{assignment.title}</h3>
+          //                     <div className="listItemMeta">
+          //                       <span>
+          //                         {assignment.createdAt} + day due | weightage{" "}
+          //                         {assignment.weight}%
+          //                       </span>
+          //                     </div>
+          //                   </div>
+          //                   <ProgressCircle percentage={progress} />
+          //                 </div>
+          //                 {expandedAssignment === assignment.id && (
+          //                   <div
+          //                     className="listItemDetails"
+          //                     style={{ backgroundColor: bgColor }}
+          //                   >
+          //                     <div className="listItemDescription">
+          //                       <p>{assignment.description}</p>
+          //                     </div>
+          //                     <div className="todoItems">
+          //                       <div className="todoItemHeader">
+          //                         <FilterIcon size={16} />
+          //                         <ArrowUpRightIcon size={16} />
+          //                       </div>
+          //                       {assignment.tasks && assignment.tasks.length > 0 ? (
+          //                         assignment.tasks.map((task) => (
+          //                           <TaskCard key={task.id} task={task} onStatusChange={handleTaskToggle} />
+          //                         ))
+          //                       ) : (
+          //                         <div className="emptyTodoState">
+          //                           <p>No tasks added yet</p>
+          //                         </div>
+          //                       )}
+          //                       {/* TODO fix so opens task creation module
+          //                       <div className="todoItem">
+          //                         <div
+          //                           className="addTodoButton"
+          //                           onClick={() => handleCardClick(assignment)}
+          //                         >
+          //                           <PlusIcon size={18} />
+          //                           <span>Add New Task</span>
+          //                         </div>
+          //                       </div>*/}
+          //                     </div>
+          //                     <div className="detailsFooter">
+          //                       <button
+          //                         className="viewFullButton"
+          //                         onClick={() => handleCardClick(assignment)}
+          //                       >
+          //                         View Full Details
+          //                       </button>
+          //                     </div>
+          //                   </div>
+          //                 )}
+          //               </div>
+          //             );
+          //           }
+          //           )}
+          //           <div
+          //             className="addListItem"
+          //             onClick={() => setIsCreateModalOpen(true)}
+          //           >
+          //             <PlusIcon size={20} />
+          //             <span>Add New Assignment</span>
+          //           </div>
           //         </div>
-          //         <div className="listItems">
-          //           {row.assignments.map((assignment) => 
-                
-          //           {
-          //             const bgColor = getCardBgColor(assignment.tasks,assignment.dueDate)
-          //             const progress = calculateProgress(assignment.tasks)
-          //             return (
-          //               <div key={assignment.id}>
-          //                 <div
-          //                   className={`listItem ${
-          //                     expandedAssignment === assignment.id ? "expanded" : ""
-          //                   }`}
-          //                   style={{ backgroundColor: bgColor }}
-          //                   onClick={() => handleListClick(assignment.id)}
-          //                 >
-          //                   {/* list heading */
-        //                   <div className="listItemIcon">
-        //                     {expandedAssignment === assignment.id ? (
-        //                       <ChevronDownIcon size={20} />
-        //                     ) : (
-        //                       <ChevronRightIcon size={20} />
-        //                     )}
-        //                   </div>
-        //                   <div className="listItemContent">
-        //                     <h3 className="listItemTitle">{assignment.title}</h3>
-        //                     <div className="listItemMeta">
-        //                       <span>
-        //                         {assignment.createdAt} + day due | weightage{" "}
-        //                         {assignment.weight}%
-        //                       </span>
-        //                     </div>
-        //                   </div>
-        //                   <ProgressCircle percentage={progress} />
-        //                 </div>
-        //                 {expandedAssignment === assignment.id && (
-        //                   <div
-        //                     className="listItemDetails"
-        //                     style={{ backgroundColor: bgColor }}
-        //                   >
-        //                     <div className="listItemDescription">
-        //                       <p>{assignment.description}</p>
-        //                     </div>
-        //                     <div className="todoItems">
-        //                       <div className="todoItemHeader">
-        //                         <FilterIcon size={16} />
-        //                         <ArrowUpRightIcon size={16} />
-        //                       </div>
-        //                       {assignment.tasks && assignment.tasks.length > 0 ? (
-        //                         assignment.tasks.map((task) => (
-        //                           <TaskCard key={task.id} task={task} onStatusChange={handleTaskToggle} />
-        //                         ))
-        //                       ) : (
-        //                         <div className="emptyTodoState">
-        //                           <p>No tasks added yet</p>
-        //                         </div>
-        //                       )}
-        //                       {/* TODO fix so opens task creation module
-        //                       <div className="todoItem">
-        //                         <div
-        //                           className="addTodoButton"
-        //                           onClick={() => handleCardClick(assignment)}
-        //                         >
-        //                           <PlusIcon size={18} />
-        //                           <span>Add New Task</span>
-        //                         </div>
-        //                       </div>*/}
-        //                     </div>
-        //                     <div className="detailsFooter">
-        //                       <button
-        //                         className="viewFullButton"
-        //                         onClick={() => handleCardClick(assignment)}
-        //                       >
-        //                         View Full Details
-        //                       </button>
-        //                     </div>
-        //                   </div>
-        //                 )}
-        //               </div>
-        //             );
-        //           }
-        //           )}
-        //           <div
-        //             className="addListItem"
-        //             onClick={() => setIsCreateModalOpen(true)}
-        //           >
-        //             <PlusIcon size={20} />
-        //             <span>Add New Assignment</span>
-        //           </div>
-        //         </div>
-        //       </div>
-        //     ))}
-        //   </div>
-        // )}
-      }
+          //       </div>
+          //     ))}
+          //   </div>
+          // )}
+        }
 
-      {/* create assignment button */}
-      <button
-        className="floatingAddButton"
-        onClick={() => setIsCreateModalOpen(true)}
-      >
-        <PlusIcon size={24} />
-      </button>
+        {/* create assignment button */}
+        <button
+          className="floatingAddButton"
+          onClick={() => setIsCreateModalOpen(true)}
+        >
+          <PlusIcon size={24} />
+        </button>
 
-      {/* /* TODO PROVIDE STATE OF ASSIGNMENT DETAILS USING USE CONTEXT */
-      /* Display modal */}
-      {selectedAssignmentData && (
-        <AssignmentModal
-          isOpen={isModalOpen}
-          assignment={selectedAssignmentData} // should just pass the assignment
-          onClose={handleCloseModal}
-          onTodoToggle={handleTaskToggle}
-          onAddTodo={handleAddTodo}
-          onUpdate={handleUpdateAssignment}
-        />
-      )}
+        {/* /* TODO PROVIDE STATE OF ASSIGNMENT DETAILS USING USE CONTEXT */
+    /* Display modal */}
+        {selectedAssignmentData && (
+          <AssignmentModal
+            isOpen={isModalOpen}
+            assignment={selectedAssignmentData} // should just pass the assignment
+            onClose={handleCloseModal}
+            onTodoToggle={handleTaskToggle}
+            onAddTodo={handleAddTodo}
+            onUpdate={handleUpdateAssignment} />
+        )}
 
-      <CreateAssignmentModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        onSave={handleCreateAssignment}
-      />
-    </div>
+        <CreateAssignmentModal
+          isOpen={isCreateModalOpen}
+          onClose={() => setIsCreateModalOpen(false)}
+          onSave={handleCreateAssignment} />
+      </div></>
   );
 }
