@@ -1,7 +1,8 @@
 import { Filters, FilterSection } from '@/types/filter';
 import { Filter } from 'lucide-react';
-import React from 'react'
+import React, { useRef } from 'react'
 import "./FilterMenu.css"
+import { useOnClickOutside } from '@/utils/utils';
 
 
 
@@ -10,20 +11,20 @@ interface FilterProps {
   onChange: (type: string, value: string) => void;
   isOpen: boolean;
   toggleOpen: () => void;
-  menuRef: React.RefObject<HTMLDivElement>|null;
   sections: FilterSection[];
 }
 
 export default function FilterMenu({
     filters,
-    menuRef,
     sections,
     onChange,
     isOpen,
     toggleOpen,
   }:FilterProps) {
+    const dropdownRef = useRef(null)
+    useOnClickOutside(dropdownRef,toggleOpen)// fix this error
   return (
-    <div className="filterContainer" ref={menuRef}>
+    <div className="filterContainer" >
     <button className="actionButton" onClick={toggleOpen}>
       <Filter size={18} />
       <span>Filter</span>

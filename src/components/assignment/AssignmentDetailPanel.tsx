@@ -4,18 +4,13 @@ import type React from "react"
 import "./AssignmentDetails.css"
 import {
   X,
-  ChevronRight,
-  ChevronDown,
   Maximize2,
   Calendar,
   Weight,
   Flag,
   Clock,
-  FileText,
   Edit,
   Filter,
-  Link,
-  Upload,
   Plus,
 } from "lucide-react"
 import { useState, useRef, useEffect } from "react"
@@ -25,7 +20,7 @@ import SortMenu from "../common/SortMenu"
 import TaskCard from "../task/TaskCard"
 import { Task } from "@/types/task"
 import {AssignmentLink, FileAttachment} from "@/types/assignment"
-import { formatDate, isLate } from "@/utils/utils"
+import { formatDate, isLate, useOnClickOutside } from "@/utils/utils"
 import {  calculateProgress, getCardBgColor } from "@/utils/assignmentUtils"
 import FilesLinksSection from "./FilesLinksSection"
 
@@ -235,10 +230,12 @@ const AssignmentDetailPanel: React.FC<AssignmentDetailsProps> = ({
   }
 
   const filteredAndSortedTodos = applyFiltersAndSort(tasks)
+  const mainPanelRef = useRef<HTMLDivElement>(null);
   
+  useOnClickOutside(mainPanelRef, onClose); // todo: fix typing error
 
   return (
-    <div className="assignmentDetails">
+    <div ref={mainPanelRef} className="assignmentDetails">
       <div className="detailsHeader" style={{ backgroundColor: bgColor }}>
         <div className="headerContent">
           <h2 className="detailsTitle">{title}</h2>

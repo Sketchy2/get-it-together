@@ -5,7 +5,6 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import {
   X,
   Plus,
-  ChevronLeft,
   User as UserIcon,
   Paperclip,
   Calendar,
@@ -16,22 +15,16 @@ import {
   AlertTriangle,
   HelpCircle,
   BarChart,
-  Filter,
-  FileText,
   Edit,
-  ChevronDown,
-  ChevronRight,
   Flag,
-  Link,
-  Upload,
+  Minimize2,
 } from "lucide-react";
 import "./ExpandedAssignmentView.css";
 import TaskCard from "../task/TaskCard";
-import CreateTaskModal from "../task/CreateTaskModal";
 import { DragDropContext } from "@hello-pangea/dnd";
 import ProgressCircle from "../common/ProgressCircle";
 import { TaskStatus, Task } from "@/types/task";
-import { Assignment, FileAttachment, User } from "@/types/assignment";
+import { Assignment, User } from "@/types/assignment";
 import { calculateProgress, getCardBgColor } from "@/utils/assignmentUtils";
 import { SortDirection, SortOption } from "@/types/sort";
 import SortMenu from "../common/SortMenu";
@@ -46,6 +39,7 @@ interface ExpandedAssignmentViewProps {
   onTaskAdd: () => void;
   isOpen: boolean;
   onClose: () => void;
+  onMinimise: ()=>void;
   onUpdate: (updatedAssignment: Assignment) => void;
 }
 
@@ -53,6 +47,7 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
   assignment,
   isOpen,
   onClose,
+  onMinimise,
   onUpdate,
   onTaskAdd,
 }) => {
@@ -82,9 +77,6 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
   const [isEditingDescription, setIsEditingDescription] = useState(false);
   const [editedDescription, setEditedDescription] = useState("");
   const [showFiles, setShowFiles] = useState(false);
-
-  const filterMenuRef = useRef<HTMLDivElement>(null);
-  const sortMenuRef = useRef<HTMLDivElement>(null);
 
   if (!isOpen || !assignment) return null;
 
@@ -569,8 +561,8 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
           className="expandedViewHeader"
           style={{ backgroundColor: bgColor || "#DD992B" }}
         >
-          <button className="backButton" onClick={onClose}>
-            <ChevronLeft size={24} />
+          <button className="backButton" onClick={onMinimise}>
+            <Minimize2 size={24} />
           </button>
           <div className="headerContent">
             <h2 className="assignmentTitle">{assignment.title}</h2>
@@ -690,10 +682,9 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
                 onChange={handleFilterChange}
                 isOpen={isFilterMenuOpen}
                 toggleOpen={toggleFilterMenu}
-                menuRef={filterMenuRef}
               />
               {/* sort */}
-              <div className="sortContainer" ref={sortMenuRef}>
+              <div className="sortContainer" >
                 <SortMenu
                   sortMenuOpen={isSortMenuOpen}
                   setSortMenuOpen={toggleSortMenu}

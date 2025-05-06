@@ -7,13 +7,10 @@ interface TaskFilterProps {
     onChange: (type: string, value: string) => void;
     isOpen: boolean;
     toggleOpen: () => void;
-    menuRef: React.RefObject<HTMLDivElement>|null;
-    sections: FilterSection[];
   }
 
 export default function TaskFilter({
     filters,
-    menuRef,
     onChange,
     isOpen,
     toggleOpen,
@@ -59,7 +56,6 @@ export default function TaskFilter({
                 onChange={onChange}
                 isOpen={isOpen}
                 toggleOpen={toggleOpen}
-                menuRef={menuRef}
                 sections={filterOptions}
               />
   )

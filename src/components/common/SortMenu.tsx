@@ -5,6 +5,8 @@ import {
 } from "lucide-react";
 import { SortOption, SortDirection } from "@/types/sort";
 import "./SortMenu.css";
+import { useOnClickOutside } from "@/utils/utils";
+import { useRef } from "react";
 
 interface SortMenuProps {
   sortMenuOpen: boolean;
@@ -23,6 +25,10 @@ export default function SortMenu({
   handleSortChange,
   options,
 }: SortMenuProps) {
+
+  const dropdownRef = useRef(null)
+  useOnClickOutside(dropdownRef,()=>setSortMenuOpen(false))
+
   return (
     <div className="sortDropdown">
       <button
@@ -35,7 +41,7 @@ export default function SortMenu({
 
       {
         sortMenuOpen && (
-          <div className="sortMenu">
+          <div ref={dropdownRef} className="sortMenu">
             {options.map((option) => (
               <button
                 key={option.key}

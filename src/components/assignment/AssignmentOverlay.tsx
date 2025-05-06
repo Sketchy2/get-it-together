@@ -18,13 +18,13 @@ interface AssignmentOverlayProps {
   onUpdate: (updatedAssignment: any) => void
 }
 
-const AssignmentOverlay: React.FC<AssignmentOverlayProps> = ({
+export default function AssignmentOverlay({
   isOpen,
   assignment,
   onClose,
   onTodoToggle,
   onUpdate,
-}) => {
+}:AssignmentOverlayProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const [isCreateTaskModalOpen, setIsCreateTaskModalOpen] = useState(false)
 
@@ -60,7 +60,8 @@ const AssignmentOverlay: React.FC<AssignmentOverlayProps> = ({
         <ExpandedAssignmentView
           assignment={assignment}
           isOpen={isExpanded}
-          onClose={handleCloseExpanded}
+          onClose={onClose}
+          onMinimise={handleCloseExpanded}
           onUpdate={onUpdate}
           onTaskAdd={handleAddAssignmentTask}
         />
@@ -96,4 +97,4 @@ const AssignmentOverlay: React.FC<AssignmentOverlayProps> = ({
     </>
   )}
 
-export default AssignmentOverlay
+ 
