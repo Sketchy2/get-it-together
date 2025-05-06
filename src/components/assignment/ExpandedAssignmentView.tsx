@@ -17,7 +17,6 @@ import {
   HelpCircle,
   BarChart,
   Filter,
-
   FileText,
   Edit,
   ChevronDown,
@@ -29,22 +28,22 @@ import {
 import "./ExpandedAssignmentView.css";
 import TaskCard from "../task/TaskCard";
 import CreateTaskModal from "../task/CreateTaskModal";
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import { DragDropContext } from "@hello-pangea/dnd";
 import ProgressCircle from "../common/ProgressCircle";
 import { TaskStatus, Task } from "@/types/task";
 import { Assignment, FileAttachment, User } from "@/types/assignment";
-import {  calculateProgress, getCardBgColor } from "@/utils/assignmentUtils";
+import { calculateProgress, getCardBgColor } from "@/utils/assignmentUtils";
 import { SortDirection, SortOption } from "@/types/sort";
 import SortMenu from "../common/SortMenu";
 import { formatDate } from "@/utils/utils";
 
 import TaskKanbanColumn from "../common/KanbanColumn";
-import FilterMenu from "../common/FilterMenu";
-import { FilterSection } from "@/types/filter";
 import TaskFilter from "../task/TaskFilter";
+import FilesLinksSection from "./FilesLinksSection";
 
 interface ExpandedAssignmentViewProps {
   assignment: Assignment;
+  onTaskAdd: () => void;
   isOpen: boolean;
   onClose: () => void;
   onUpdate: (updatedAssignment: Assignment) => void;
@@ -55,6 +54,7 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
   isOpen,
   onClose,
   onUpdate,
+  onTaskAdd,
 }) => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [progress, setProgress] = useState(0);
@@ -62,9 +62,6 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
   const [memberProgress, setMemberProgress] = useState<Record<string, number>>(
     {}
   );
-
-  const [isCreateTaskModalOpen, setIsCreateTaskModalOpen] = useState(false);
-
   const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
   const [filters, setFilters] = useState({
     status: [] as string[],
@@ -75,19 +72,12 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
   const sortOptions: SortOption[] = [
     { key: "deadline", label: "Due Date", icon: <Calendar size={16} /> },
     { key: "createdAt", label: "Created At", icon: <Clock size={16} /> },
-    { key: "weighting", label: "weighting", icon: <BarChart size={16}  /> },
-    { key: "priority", label: "Priority", icon: <Flag size={16}  /> },
+    { key: "weighting", label: "Weighting", icon: <BarChart size={16} /> },
+    { key: "priority", label: "Priority", icon: <Flag size={16} /> },
   ] as const;
 
-
-
-
-  const [sortBy, setSortBy] = useState<SortOption>(
-    sortOptions[0]
-  );
+  const [sortBy, setSortBy] = useState<SortOption>(sortOptions[0]);
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
-
-
 
   const [isEditingDescription, setIsEditingDescription] = useState(false);
   const [editedDescription, setEditedDescription] = useState("");
@@ -98,9 +88,9 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
 
   if (!isOpen || !assignment) return null;
 
-  const calcProgress = useCallback((taskList: Task[]) =>
-    {setProgress(calculateProgress(taskList))}
-,[]);
+  const calcProgress = useCallback((taskList: Task[]) => {
+    setProgress(calculateProgress(taskList));
+  }, []);
 
   // TODO: pls retrieve
   const members = useMemo(() => {
@@ -108,57 +98,46 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
     return [undefinedMember, ...(assignment.members ?? [])];
   }, [assignment.members]);
 
+  const calculateMemberProgress = useCallback(
+    (taskList: Task[]) => {
+      const progressByMember: Record<string, number> = {};
 
-  const calculateMemberProgress = useCallback((taskList: Task[]) => {
-    const progressByMember: Record<string, number> = {};
-  
-    members.forEach((member) => {
-      const memberTasks = taskList.filter((task) => {
-        if (!Array.isArray(task.assignee) || task.assignee.length === 0) {
-          return member.id === "undef";//undef member id
+      members.forEach((member) => {
+        const memberTasks = taskList.filter((task) => {
+          if (!Array.isArray(task.assignee) || task.assignee.length === 0) {
+            return member.id === "undef"; //undef member id
+          }
+          return task.assignee.some((assignee) => assignee.id === member.id);
+        });
+
+        if (memberTasks.length === 0) {
+          progressByMember[member.id] = 0;
+          return;
         }
-        return task.assignee.some((assignee) => assignee.id === member.id);
+
+        const totalWeight = memberTasks.reduce(
+          (sum, task) => sum + (task.weighting ?? 1),
+          0
+        );
+
+        if (totalWeight === 0) {
+          progressByMember[member.id] = 0;
+          return;
+        }
+
+        const completedWeight = memberTasks
+          .filter((task) => task.status === "Completed")
+          .reduce((sum, task) => sum + (task.weighting ?? 1), 0);
+
+        progressByMember[member.id] = Math.round(
+          (completedWeight / totalWeight) * 100
+        );
       });
-  
-      if (memberTasks.length === 0) {
-        progressByMember[member.id] = 0;
-        return;
-      }
-  
-      const totalWeight = memberTasks.reduce(
-        (sum, task) => sum + (task.weighting ?? 1),
-        0
-      );
-  
-      if (totalWeight === 0) {
-        progressByMember[member.id] = 0;
-        return;
-      }
-  
-      const completedWeight = memberTasks
-        .filter((task) => task.status === "Completed")
-        .reduce((sum, task) => sum + (task.weighting ?? 1), 0);
-  
-      progressByMember[member.id] = Math.round((completedWeight / totalWeight) * 100);
-    });
-  
-    setMemberProgress(progressByMember);
-  }, [members]);
 
-  const handleCreateTask = (newTask: Task) => {
-    const updatedTasks = [...tasks, newTask];
-    setTasks(updatedTasks);
-    calcProgress(updatedTasks);
-    calculateMemberProgress(updatedTasks);
-    setIsCreateTaskModalOpen(false);
-
-    const updatedAssignment = {
-      ...assignment,
-      tasks: updatedTasks,
-    };
-
-    onUpdate(updatedAssignment);
-  };
+      setMemberProgress(progressByMember);
+    },
+    [members]
+  );
 
   const handleTaskStatusChange = (taskId: string, newStatus: TaskStatus) => {
     const updatedTasks = tasks.map((task) => {
@@ -182,9 +161,9 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
 
   const handleDragEnd = (result: any) => {
     if (!result.destination) return;
-  
+
     const { source, destination, draggableId } = result;
-  
+
     // If dropped in the same place
     if (
       source.droppableId === destination.droppableId &&
@@ -192,24 +171,26 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
     ) {
       return;
     }
-  
+
     // Find the task that was dragged
-    const taskIndex = tasks.findIndex((task) => String(task.id) === draggableId);
+    const taskIndex = tasks.findIndex(
+      (task) => String(task.id) === draggableId
+    );
     if (taskIndex === -1) return;
-    
+
     const draggedTask = tasks[taskIndex];
-    
+
     // Create a new array without mutating the original
     const updatedTasks = [...tasks];
-    
+
     // Update status or assignee based on destination and view mode
     let updatedTask: Task;
-    
+
     if (viewMode === "status") {
       // Update the task status based on the destination column
-      updatedTask = { 
-        ...draggedTask, 
-        status: destination.droppableId as TaskStatus 
+      updatedTask = {
+        ...draggedTask,
+        status: destination.droppableId as TaskStatus,
       };
     } else {
       // In member view, we're updating the assignee
@@ -217,13 +198,13 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
         // Handling unassigned case
         updatedTask = {
           ...draggedTask,
-          assignee: [] // Empty array for unassigned
+          assignee: [], // Empty array for unassigned
         };
       } else {
         // Find the member by ID
-        const member = members.find(m => m.id === destination.droppableId);
+        const member = members.find((m) => m.id === destination.droppableId);
         if (!member) return;
-        
+
         // Determine if we need to create or update the assignee array
         let newAssignees;
         if (!Array.isArray(draggedTask.assignee)) {
@@ -232,36 +213,35 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
         } else {
           // Filter out any existing assignments to this member
           const existingAssignees = draggedTask.assignee.filter(
-            a => a.id !== destination.droppableId
+            (a) => a.id !== destination.droppableId
           );
           // Add this member to the assignees
           newAssignees = [...existingAssignees, member];
         }
-        
+
         updatedTask = {
           ...draggedTask,
-          assignee: newAssignees
+          assignee: newAssignees,
         };
       }
     }
-    
+
     // Replace the task in our array
     updatedTasks[taskIndex] = updatedTask;
-    
+
     // Update state
     setTasks(updatedTasks);
     calcProgress(updatedTasks);
     calculateMemberProgress(updatedTasks);
-  
+
     // Update the parent component
     const updatedAssignment = {
       ...assignment,
-      tasks: updatedTasks
+      tasks: updatedTasks,
     };
-  
-    onUpdate(updatedAssignment);
-  }
 
+    onUpdate(updatedAssignment);
+  };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -291,28 +271,30 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
 
   const handleFilterChange = (type: string, value: string) => {
     if (!["status", "priority", "deadline"].includes(type)) return;
-  
+
     const key = type as FilterKey;
-  
+
     setFilters((prevFilters) => {
       const newFilters = { ...prevFilters };
-  
+
       if (Array.isArray(newFilters[key])) {
         const currentArray = newFilters[key] as string[];
         if (currentArray.includes(value)) {
-          newFilters[key] = currentArray.filter((item) => item !== value) as any;
+          newFilters[key] = currentArray.filter(
+            (item) => item !== value
+          ) as any;
         } else {
           newFilters[key] = [...currentArray, value] as any;
         }
       } else {
         newFilters[key] = value as any;
       }
-  
+
       return newFilters;
     });
   };
-  
-  const handleSortChange = (sortType:SortOption) => {
+
+  const handleSortChange = (sortType: SortOption) => {
     if (sortBy.key === sortType.key) {
       // Toggle direction if same sort type
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
@@ -321,90 +303,101 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
       setSortDirection("asc");
     }
   };
-  const applyFiltersAndSort = useCallback((taskList: Task[]) => {
-    let filteredTasks = taskList;
-  
-    // Filter by status
-    if (filters.status.length > 0) {
-      filteredTasks = filteredTasks.filter((task) =>
-        filters.status.includes(task.status)
-      );
-    }
-  
-    // Filter by priority
-    if (filters.priority.length > 0) {
-      filteredTasks = filteredTasks.filter((task) => {
-        const priority = task.priority ?? "Unspecified";
-        return filters.priority.includes(priority);
-      });
-    }
-  
-    // Filter by due date
-    if (filters.deadline !== "all" && filteredTasks.some((task) => task.deadline)) {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-  
-      const weekLater = new Date(today);
-      weekLater.setDate(today.getDate() + 7);
-  
-      const monthLater = new Date(today);
-      monthLater.setMonth(today.getMonth() + 1);
-  
-      filteredTasks = filteredTasks.filter((task) => {
-        if (!task.deadline) return false;
-  
-        const deadline = new Date(task.deadline);
-        deadline.setHours(0, 0, 0, 0);
-  
-        if (filters.deadline === "today") {
-          return deadline.getTime() === today.getTime();
-        } else if (filters.deadline === "week") {
-          return deadline >= today && deadline <= weekLater;
-        } else if (filters.deadline === "month") {
-          return deadline >= today && deadline <= monthLater;
+  const applyFiltersAndSort = useCallback(
+    (taskList: Task[]) => {
+      let filteredTasks = taskList;
+
+      // Filter by status
+      if (filters.status.length > 0) {
+        filteredTasks = filteredTasks.filter((task) =>
+          filters.status.includes(task.status)
+        );
+      }
+
+      // Filter by priority
+      if (filters.priority.length > 0) {
+        filteredTasks = filteredTasks.filter((task) => {
+          const priority = task.priority ?? "Unspecified";
+          return filters.priority.includes(priority);
+        });
+      }
+
+      // Filter by due date
+      if (
+        filters.deadline !== "all" &&
+        filteredTasks.some((task) => task.deadline)
+      ) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const weekLater = new Date(today);
+        weekLater.setDate(today.getDate() + 7);
+
+        const monthLater = new Date(today);
+        monthLater.setMonth(today.getMonth() + 1);
+
+        filteredTasks = filteredTasks.filter((task) => {
+          if (!task.deadline) return false;
+
+          const deadline = new Date(task.deadline);
+          deadline.setHours(0, 0, 0, 0);
+
+          if (filters.deadline === "today") {
+            return deadline.getTime() === today.getTime();
+          } else if (filters.deadline === "week") {
+            return deadline >= today && deadline <= weekLater;
+          } else if (filters.deadline === "month") {
+            return deadline >= today && deadline <= monthLater;
+          }
+          return true;
+        });
+      }
+
+      // Sort tasks
+      return [...filteredTasks].sort((a, b) => {
+        const key = sortBy.key;
+        const dir = sortDirection === "asc" ? 1 : -1;
+
+        // Handle undefined values
+        if (key === "deadline") {
+          if (!a.deadline && !b.deadline) return 0;
+          if (!a.deadline) return dir;
+          if (!b.deadline) return -dir;
+          return (
+            dir *
+            (new Date(a.deadline).getTime() - new Date(b.deadline).getTime())
+          );
         }
-        return true;
+
+        if (key === "weighting") {
+          const aWeight = a.weighting ?? 0;
+          const bWeight = b.weighting ?? 0;
+          return dir * (aWeight - bWeight);
+        }
+
+        if (key === "priority") {
+          const priorityOrder = { high: 3, medium: 2, low: 1, undefined: 0 };
+          const aVal =
+            priorityOrder[a.priority as keyof typeof priorityOrder] || 0;
+          const bVal =
+            priorityOrder[b.priority as keyof typeof priorityOrder] || 0;
+          return dir * (aVal - bVal);
+        }
+
+        // Default sort for createdAt and other fields
+        const aVal = a[key as keyof Task] as any;
+        const bVal = b[key as keyof Task] as any;
+
+        if (!aVal && !bVal) return 0;
+        if (!aVal) return dir;
+        if (!bVal) return -dir;
+
+        return dir * (aVal > bVal ? 1 : aVal < bVal ? -1 : 0);
       });
-    }
-  
-    // Sort tasks
-    return [...filteredTasks].sort((a, b) => {
-      const key = sortBy.key;
-      const dir = sortDirection === "asc" ? 1 : -1;
-      
-      // Handle undefined values
-      if (key === "deadline") {
-        if (!a.deadline && !b.deadline) return 0;
-        if (!a.deadline) return dir;
-        if (!b.deadline) return -dir;
-        return dir * (new Date(a.deadline).getTime() - new Date(b.deadline).getTime());
-      }
-      
-      if (key === "weighting") {
-        const aWeight = a.weighting ?? 0;
-        const bWeight = b.weighting ?? 0;
-        return dir * (aWeight - bWeight);
-      }
-      
-      if (key === "priority") {
-        const priorityOrder = { high: 3, medium: 2, low: 1, undefined: 0 };
-        const aVal = priorityOrder[a.priority as keyof typeof priorityOrder] || 0;
-        const bVal = priorityOrder[b.priority as keyof typeof priorityOrder] || 0;
-        return dir * (aVal - bVal);
-      }
-      
-      // Default sort for createdAt and other fields
-      const aVal = a[key as keyof Task] as any;
-      const bVal = b[key as keyof Task] as any;
-      
-      if (!aVal && !bVal) return 0;
-      if (!aVal) return dir;
-      if (!bVal) return -dir;
-      
-      return dir * (aVal > bVal ? 1 : aVal < bVal ? -1 : 0);
-    });
-  }, [filters, sortBy, sortDirection]);
-  
+    },
+    [filters, sortBy, sortDirection]
+  );
+
   const handleSaveDescription = () => {
     const updatedAssignment = {
       ...assignment,
@@ -415,35 +408,49 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
   };
 
   // TASK GROUPING METHODS
-  const getTasksByStatus = useCallback((status: string) => {
-    return applyFiltersAndSort(tasks.filter((task) => task.status === status));
-  }, [tasks, applyFiltersAndSort]);
-
-  const getTasksByMember = useCallback((member: User | null) => {
-    if (member === null) {
+  const getTasksByStatus = useCallback(
+    (status: string) => {
       return applyFiltersAndSort(
-        tasks.filter((task) => !Array.isArray(task.assignee) || task.assignee.length === 0)
+        tasks.filter((task) => task.status === status)
       );
-    }
-  
-    return applyFiltersAndSort(
-      tasks.filter((task) => 
-        Array.isArray(task.assignee) && task.assignee.some((assignee) => assignee.id === member.id)
-      )
-    );
-  }, [tasks, applyFiltersAndSort]);
+    },
+    [tasks, applyFiltersAndSort]
+  );
 
+  const getTasksByMember = useCallback(
+    (member: User | null) => {
+      if (member === null) {
+        return applyFiltersAndSort(
+          tasks.filter(
+            (task) =>
+              !Array.isArray(task.assignee) || task.assignee.length === 0
+          )
+        );
+      }
 
-  const statusColumns = useMemo(() => 
-    ["To-Do", "In Progress", "Completed"].map((status) => {
-      const statusTasks = getTasksByStatus(status);
-      return {
-        status,
-        tasks: statusTasks,
-        icon: getStatusIcon(status)
-      };
-    }), 
-  [getTasksByStatus]);
+      return applyFiltersAndSort(
+        tasks.filter(
+          (task) =>
+            Array.isArray(task.assignee) &&
+            task.assignee.some((assignee) => assignee.id === member.id)
+        )
+      );
+    },
+    [tasks, applyFiltersAndSort]
+  );
+
+  const statusColumns = useMemo(
+    () =>
+      ["To-Do", "In Progress", "Completed"].map((status) => {
+        const statusTasks = getTasksByStatus(status);
+        return {
+          status,
+          tasks: statusTasks,
+          icon: getStatusIcon(status),
+        };
+      }),
+    [getTasksByStatus]
+  );
 
   const renderStatusView = () => (
     <div className="kanbanBoard">
@@ -463,24 +470,24 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
   );
 
   const memberColumns = useMemo(() => {
-    // Unassigned column    
+    // Unassigned column
     // Member columns
     const memberColumnsData = members.map((member) => {
       const memberTasks = getTasksByMember(member);
       const progress = memberProgress[member.id] || 0;
-      
+
       return {
         member,
         tasks: memberTasks,
-        progress
+        progress,
       };
     });
-    
+
     return {
-      members: memberColumnsData
+      members: memberColumnsData,
     };
   }, [getTasksByMember, assignment.members, memberProgress]);
-  
+
   const renderMemberView = () => (
     <div className="kanbanBoard">
       <TaskKanbanColumn
@@ -492,8 +499,8 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
           <TaskCard task={task} onStatusChange={handleTaskStatusChange} />
         )}
       />
-  
-      {memberColumns.members.map(({ member, tasks, progress }) => {  
+
+      {memberColumns.members.map(({ member, tasks, progress }) => {
         return (
           <TaskKanbanColumn
             key={member.id}
@@ -529,9 +536,9 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
       })}
     </div>
   );
-  
+
   // const daysRemaining: number = calculateDaysRemaining(assignment.deadline)
-  const bgColor: string = getCardBgColor(assignment.tasks,assignment.deadline)
+  const bgColor: string = getCardBgColor(assignment.tasks, assignment.deadline);
 
   // REVIEW
   useEffect(() => {
@@ -546,8 +553,14 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
     // if (assignment) {
     //   setEditedDescription(assignment.description || "");
     // }
-
-  }, [assignment,assignment.tasks,setTasks, calcProgress, calculateMemberProgress,setEditedDescription]);
+  }, [
+    assignment,
+    assignment.tasks,
+    setTasks,
+    calcProgress,
+    calculateMemberProgress,
+    setEditedDescription,
+  ]);
 
   return (
     <div className="expandedViewOverlay">
@@ -631,83 +644,14 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
               <p className="descriptionText">{assignment.description}</p>
             )}
           </div>
-
-          {assignment.files && assignment.files.length > 0 && (
-            <div className="filesSection">
-              <div className="sectionHeader">
-                <h3 className="sectionTitle">Files</h3>
-                <button
-                  className="toggleFilesButton"
-                  onClick={() => setShowFiles(!showFiles)}
-                >
-                  {showFiles ? (
-                    <ChevronDown size={18} />
-                  ) : (
-                    <ChevronRight size={18} />
-                  )}
-                </button>
-              </div>
-
-              {showFiles && (
-                <div className="filesContainer">
-                  {assignment.files && assignment.files.length > 0
-                    ? assignment.files.map(
-                        (file: FileAttachment, index: number) => (
-                          <div key={index} className="fileItem">
-                            <FileText size={16} />
-                            {/* TODO: allow for file download - should confirm */}
-                            <span className="fileName">{file.name}</span>
-                          </div>
-                        )
-                      )
-                    : null}
-
-                  {assignment.links && assignment.links.length > 0
-                    ? assignment.links.map(
-                        (
-                          link: { url: string; title: string },
-                          index: number
-                        ) => (
-                          <div
-                            key={`link-${index}`}
-                            className="fileItem linkItem"
-                          >
-                            <Link size={16} />
-                            <a
-                              href={link.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="fileName linkName"
-                            >
-                              {link.title}
-                            </a>
-                          </div>
-                        )
-                      )
-                    : null}
-
-                  {(!assignment.files || assignment.files.length === 0) &&
-                    (!assignment.links || assignment.links.length === 0) && (
-                      <div className="emptyFilesState">
-                        No files or links attached
-                      </div>
-                    )}
-
-                  <div className="fileActions">
-                    <button className="fileActionButton">
-                      <Upload size={16} />
-                      <span>Upload File</span>
-                    </button>
-                    <button className="fileActionButton">
-                      <Link size={16} />
-                      <span>Add Link</span>
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
+          <div className="filesSection">
+            <FilesLinksSection
+              showFiles={showFiles}
+              setShowFiles={setShowFiles}
+              files={assignment.files}
+              links={assignment.links}
+            />
+          </div>
           <div className="toolbarContainer">
             <div className="viewToggle">
               <button
@@ -738,17 +682,16 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
               )}
             </div>
 
+            {/* task actions */}
             <div className="taskActions">
-
-
               {/* filter  */}
               <TaskFilter
-            filters={filters}
-            onChange={handleFilterChange}
-            isOpen={isFilterMenuOpen}
-            toggleOpen={toggleFilterMenu}
-            menuRef={filterMenuRef}
-          />
+                filters={filters}
+                onChange={handleFilterChange}
+                isOpen={isFilterMenuOpen}
+                toggleOpen={toggleFilterMenu}
+                menuRef={filterMenuRef}
+              />
               {/* sort */}
               <div className="sortContainer" ref={sortMenuRef}>
                 <SortMenu
@@ -758,38 +701,23 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
                   sortDirection={sortDirection}
                   handleSortChange={handleSortChange}
                   options={sortOptions}
-                
                 />
-
               </div>
 
               {/* add task */}
-              <button
-                className="createTaskButton"
-                onClick={() => setIsCreateTaskModalOpen(true)}
-              >
+              <button className="createTaskButton" onClick={onTaskAdd}>
                 <Plus size={18} />
                 <span>New Task</span>
               </button>
             </div>
           </div>
 
+          {/* Kanban view */}
           <DragDropContext onDragEnd={handleDragEnd}>
             {viewMode === "status" ? renderStatusView() : renderMemberView()}
           </DragDropContext>
         </div>
       </div>
-
-      
-      {/* todo: fix */}
-      <CreateTaskModal
-        isOpen={isCreateTaskModalOpen}
-        onClose={() => setIsCreateTaskModalOpen(false)}
-        onSave={handleCreateTask}
-        members={assignment.members || []}
-        maxWeight={assignment.weighting || 100}
-        currentWeight={tasks.reduce((sum, task) => sum + (task.weighting?task.weighting:1), 0)}
-      />
     </div>
   );
 };

@@ -1,27 +1,30 @@
 import "./ViewToggle.css"
+
+
 interface ViewToggleProps {
-    onclick: () => void; // passed in function should switch the views 
-    viewMode: "kanban" | "list";
-  }
-  
-  export default function ViewToggle({ onclick, viewMode }: ViewToggleProps) {
-    return (
-      <div className="viewToggleContainer" onClick={onclick}>
-        <div className="viewToggle">
+  onViewChange: (viewId: string) => void; 
+  currentView: string; 
+  options: string[]; 
+}
+
+export default function ViewToggle({ 
+  onViewChange, 
+  currentView, 
+  options 
+}: ViewToggleProps) {
+  return (
+    <div className="viewToggleContainer">
+      <div className="viewToggle">
+        {options.map((option) => (
           <button
-            className={`viewButton ${viewMode === "kanban" ? "activeView" : ""}`}
-            
+            key={option}
+            className={`viewButton ${currentView === option ? "activeView" : ""}`}
+            onClick={() => onViewChange(option)}
           >
-            Kanban
+            {option}
           </button>
-  
-          <button
-            className={`viewButton ${viewMode === "list" ? "activeView" : ""}`}
-          >
-            List
-          </button>
-        </div>
+        ))}
       </div>
-    );
-  }
-  
+    </div>
+  );
+}

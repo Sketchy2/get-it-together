@@ -41,7 +41,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
     e.preventDefault()
 
     const newTask = {
-      id: `task-${Date.now()}`,
+      id: `${Date.now()}`,
       title,
       description,
       assignee: assignee || undefined,

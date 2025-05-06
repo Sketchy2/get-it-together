@@ -5,7 +5,7 @@ import "./assignment.css";
 import {  isLate } from "@/utils/utils";
 import AssignmentRow from "@/components/assignment/AssignmentRow";
 import AssignmentCard from "@/components/assignment/AssignmentCard";
-import AssignmentModal from "@/components/assignment/AssignmentModal";
+import AssignmentOverlay from "@/components/assignment/AssignmentOverlay";
 import CreateAssignmentModal from "@/components/assignment/CreateAssignmentModal";
 import {
   PlusIcon,
@@ -18,9 +18,6 @@ import SortMenu from "@/components/common/SortMenu";
 import { Task, TaskStatus } from "@/types/task";
 import {
   Assignment,
-  AssignmentLink,
-  FileAttachment,
-  User,
 } from "@/types/assignment";
 import {
   calculateDaysRemaining,
@@ -29,9 +26,6 @@ import {
 } from "@/utils/assignmentUtils";
 import { AssignmentListSection } from "@/components/assignment/AssignmentListSection";
 import { AssignmentListCard } from "@/components/assignment/AssignmentListCard";
-
-// View mode type
-type ViewMode = "kanban" | "list";
 
 // Define sort function outside the component to avoid hoisting issues
 // TODO: ADJUST BASED ON PROVIDED
@@ -59,7 +53,7 @@ export default function Assignments() {
     { key: "createdAt", label: "Created At", icon: <Clock size={16} /> },
   ] as const;
 
-  const [viewMode, setViewMode] = useState<ViewMode>("kanban");
+  const [viewMode, setViewMode] = useState<"Kanban" | "List">("Kanban");
   const [expandedAssignment, setExpandedAssignment] = useState<string | null>(
     null
   );
@@ -76,149 +70,15 @@ export default function Assignments() {
 
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
 
-  const switchViewMode = () => {
-    if (viewMode == "kanban") {
-      setViewMode("list");
+  const switchViewMode = (_:string) => {
+    //ignore input and just toggle
+    if (viewMode == "Kanban") {
+      setViewMode("List");
     } else {
-      setViewMode("kanban");
+      setViewMode("Kanban");
     }
   };
-  /**
-   * Sample data generator function
-   *
-   * This provides mock data for development.
-   * The structure matches what we expect from the backend API.
-   */
-  const getSampleAssignments = useCallback((): Assignment[] => {
-    const now = new Date();
-    const yesterday = new Date(now);
-    yesterday.setDate(yesterday.getDate() - 1);
 
-    const nextWeek = new Date(now);
-    nextWeek.setDate(nextWeek.getDate() + 7);
-
-    const lastWeek = new Date(now);
-    lastWeek.setDate(lastWeek.getDate() - 7);
-
-    const members: User[] = [
-      { id: "m1", name: "John Doe",email:"john@gmail.com" },
-      { id: "m2", name: "Jane Smith" ,email:"jane@gmail.com"},
-      { id: "m3", name: "Alex Johnson" ,email:"alex@gmail.com"},
-    ];
-
-    const files: FileAttachment[] = [
-      {
-        id: "f1",
-        name: "Research_Notes.pdf",
-        size: 2500000,
-        type: "application/pdf",
-        uploadedAt: lastWeek.toISOString(),
-      },
-      {
-        id: "f2",
-        name: "Assignment_Requirements.docx",
-        size: 1200000,
-        type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        uploadedAt: lastWeek.toISOString(),
-      },
-    ];
-
-    const tasks: Task[] = [
-      {
-        id: "t1",
-        title: "Research topic",
-        description: "Gather information from reliable sources",
-        status: "To-Do",
-        priority: "high",
-        weighting: 2,
-        assignee: [members[0]],
-        deadline: nextWeek.toISOString(),
-        createdAt: lastWeek.toISOString(),
-      },
-      {
-        id: "t2",
-        title: "Create outline",
-        description: "Structure the document with main points",
-        status: "Completed",
-        priority: "medium",
-        weighting: 1,
-        assignee:  [members[0], members[1]],
-        deadline: yesterday.toISOString(),
-        createdAt: lastWeek.toISOString(),
-      },
-      {
-        id: "t3",
-        title: "Write introduction",
-        description: "Provide context and thesis statement",
-        status: "In Progress",
-        priority: "medium",
-        weighting: 3,
-        assignee:  [members[2]],
-        deadline: nextWeek.toISOString(),
-        createdAt: lastWeek.toISOString(),
-      },
-    ];
-    const links: AssignmentLink[] = [
-      {
-        title: "js destructuing",
-        url: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring",
-      },
-    ];
-
-    return [
-      {
-        id: "a1",
-        title: "Research Paper on Climate Change",
-        description:
-          "A comprehensive analysis of climate change factors and their global impact.",
-        createdAt: lastWeek.toISOString(),
-        deadline: yesterday.toISOString(),
-        weighting: 40,
-        members: members,
-        tasks: tasks,
-        files: files,
-        links: links,
-      },
-      {
-        id: "a2",
-        title: "Literature Review",
-        description:
-          "Review of major works in the field with critical analysis.",
-        createdAt: lastWeek.toISOString(),
-        deadline: nextWeek.toISOString(),
-        weighting: 30,
-        members: [members[0], members[1]],
-        tasks: tasks.slice(0, 2),
-        files: files.slice(0, 1),
-        links: [],
-      },
-      {
-        id: "a3",
-        title: "Group Presentation",
-        description:
-          "Prepare slides and talking points for the final presentation.",
-        createdAt: lastWeek.toISOString(),
-        deadline: nextWeek.toISOString(),
-        weighting: 25,
-        members: [members[2]],
-        tasks: [tasks[0]],
-        files: [],
-        links: links,
-      },
-      {
-        id: "a4",
-        title: "Final Project Report",
-        description: "Comprehensive documentation of the project results.",
-        createdAt: yesterday.toISOString(),
-        deadline: lastWeek.toISOString(),
-        weighting: 50,
-        members: members,
-        tasks: tasks.map((task) => ({ ...task, status: "Completed" })),
-        files: files,
-        links: [],
-      },
-    ];
-  }, []);
 
   // Fetch all assignments 
 
@@ -288,10 +148,9 @@ export default function Assignments() {
    */
   const handleListClick = useCallback(
     (id: string) => {
-      if (viewMode === "list") {
+      if (viewMode === "List") {
         setExpandedAssignment((prevId) => (prevId === id ? null : id));
         setSelectedAssignmentData(assignments.find((as) => as.id == id) || selectedAssignmentData);
-        console.log("handlings adding selected assignment");
         console.log(isModalOpen)
       }
     },
@@ -368,14 +227,6 @@ export default function Assignments() {
     [selectedAssignmentData]
   );
 
-  /**
-   * Stable empty function for onAddTodo to prevent re-renders
-   */
-  const handleAddTodo = useCallback(() => {
-    // Will be implemented later
-    // should add todo to assignment and update view plus state
-    console.log("Add todo clicked");
-  }, []);
 
   /**
    * Handle creating new assignment
@@ -490,7 +341,7 @@ export default function Assignments() {
           handleSortChange={handleSortChange}
           options={sortOptions} />
 
-        <ViewToggle viewMode={viewMode} onclick={switchViewMode} />
+        <ViewToggle currentView={viewMode} onViewChange={switchViewMode} options={["Kanban","List"]} />
         </div>
         
 
@@ -498,7 +349,7 @@ export default function Assignments() {
       <div className="assignmentsContainer">
 
 
-        {viewMode === "kanban" ? (
+        {viewMode === "Kanban" ? (
           // Kanban View
           <div className="rowsContainer">
             {rows.map((row) => (
@@ -583,12 +434,11 @@ export default function Assignments() {
         {/* /* TODO PROVIDE STATE OF ASSIGNMENT DETAILS USING USE CONTEXT */
     /* Display modal */}
         {selectedAssignmentData && (
-          <AssignmentModal
+          <AssignmentOverlay
             isOpen={isModalOpen}
             assignment={selectedAssignmentData} // should just pass the assignment
             onClose={handleCloseModal}
             onTodoToggle={handleTaskToggle}
-            onAddTodo={handleAddTodo}
             onUpdate={handleUpdateAssignment} />
         )}
 
