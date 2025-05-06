@@ -1,6 +1,6 @@
 import type React from "react";
 import "./AssignmentCard.css";
-import ProgressCircle from "./ProgressCircle";
+import ProgressCircle from "../common/ProgressCircle";
 import { formatDate } from "@/utils/utils";
 
 interface AssignmentCardProps {

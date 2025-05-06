@@ -1,7 +1,7 @@
 import { Assignment } from '@/types/assignment';
 import { calculateProgress, getCardBgColor } from '@/utils/assignmentUtils';
 import React from 'react'
-import ProgressCircle from './ProgressCircle';
+import ProgressCircle from '../common/ProgressCircle';
 import TaskCard from '../task/TaskCard';
 import { ArrowUpRightIcon, ChevronDownIcon, ChevronRightIcon, FilterIcon } from 'lucide-react';
 import { formatDate } from '@/utils/utils';

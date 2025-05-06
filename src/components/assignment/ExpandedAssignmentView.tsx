@@ -30,7 +30,7 @@ import "./ExpandedAssignmentView.css";
 import TaskCard from "../task/TaskCard";
 import CreateTaskModal from "../task/CreateTaskModal";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import ProgressCircle from "./ProgressCircle";
+import ProgressCircle from "../common/ProgressCircle";
 import { TaskStatus, Task } from "@/types/task";
 import { Assignment, FileAttachment, User } from "@/types/assignment";
 import {  calculateProgress, getCardBgColor } from "@/utils/assignmentUtils";

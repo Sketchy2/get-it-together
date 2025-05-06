@@ -18,7 +18,7 @@ import {
   Upload,
 } from "lucide-react"
 import { useState, useRef, useEffect } from "react"
-import ProgressCircle from "./ProgressCircle"
+import ProgressCircle from "../common/ProgressCircle"
 import { SortDirection, SortOption } from "@/types/sort"
 import SortMenu from "../common/SortMenu"
 import TaskCard from "../task/TaskCard"
