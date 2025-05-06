@@ -1,13 +1,15 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { X, Calendar, User, AlignLeft, Weight, Flag, HelpCircle, Clock, AlertTriangle, CheckCircle } from "lucide-react"
 import "./CreateTaskModal.css"
-import { User as Member } from "@/types/assignment"
+import { Assignment, User as Member } from "@/types/assignment"
 import {TaskStatus} from "@/types/task"
+import { useOnClickOutside } from "@/utils/utils"
 
 interface CreateTaskModalProps {
+  assignment?:Assignment
   isOpen: boolean
   onClose: () => void
   onSave: (task: any) => void
@@ -32,6 +34,9 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
   const [status, setStatus] = useState<TaskStatus>("To-Do")
   const [priority, setPriority] = useState<"low" | "medium" | "high">("medium")
 
+  //manage opening
+  const menuRef = useRef<HTMLDivElement>(null);
+  useOnClickOutside(menuRef, onClose);
   // Calculate remaining weighting
   const remainingWeight = maxWeight - currentWeight
 
@@ -82,7 +87,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
 
   return (
     <div className="taskModalOverlay">
-      <div className="taskModalContent">
+      <div ref={menuRef} className="taskModalContent">
         <div className="taskModalHeader">
           <h3>Create New Task</h3>
           <button className="closeButton" onClick={onClose}>
