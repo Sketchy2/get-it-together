@@ -363,40 +363,7 @@
     overflow: hidden;
     animation: fadeIn 0.2s ease;
   }
-  
-  .filterSection {
-    padding: 12px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  }
-  
-  .filterSection:last-child {
-    border-bottom: none;
-  }
-  
-  .filterSection h4 {
-    margin: 0 0 8px 0;
-    font-size: 0.9rem;
-    color: rgba(255, 255, 255, 0.7);
-  }
-  
-  .filterOptions {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  
-  .filterOption {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    color: white;
-  }
-  
-  .filterOption input {
-    cursor: pointer;
-  }
+
   
   .sortMenu {
     display: flex;

@@ -41,6 +41,7 @@ import { formatDate } from "@/utils/utils";
 import TaskKanbanColumn from "../common/KanbanColumn";
 import FilterMenu from "../common/FilterMenu";
 import { FilterSection } from "@/types/filter";
+import TaskFilter from "../task/TaskFilter";
 
 interface ExpandedAssignmentViewProps {
   assignment: Assignment;
@@ -78,40 +79,7 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
     { key: "priority", label: "Priority", icon: <Flag size={16}  /> },
   ] as const;
 
-  const filterOptions:FilterSection[] = [
-    {
-      title: "Status",
-      type: "status",
-      inputType: "checkbox",
-      options: [
-        { label: "To Do", value: "To-Do" },
-        { label: "In Progress", value: "In Progress" },
-        { label: "Completed", value: "Completed" },
-        { label: "Unassigned", value: "unassigned" },
-      ],
-    },
-    {
-      title: "Priority",
-      type: "priority",
-      inputType: "checkbox",
-      options: [
-        { label: "High", value: "high" },
-        { label: "Medium", value: "medium" },
-        { label: "Low", value: "low" },
-      ],
-    },
-    {
-      title: "Due Date",
-      type: "deadline",
-      inputType: "radio",
-      options: [
-        { label: "All", value: "all" },
-        { label: "Today", value: "today" },
-        { label: "This Week", value: "week" },
-        { label: "This Month", value: "month" },
-      ],
-    },
-  ];
+
 
 
   const [sortBy, setSortBy] = useState<SortOption>(
@@ -774,13 +742,12 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
 
 
               {/* filter  */}
-              <FilterMenu
+              <TaskFilter
             filters={filters}
             onChange={handleFilterChange}
             isOpen={isFilterMenuOpen}
             toggleOpen={toggleFilterMenu}
             menuRef={filterMenuRef}
-            sections={filterOptions}
           />
               {/* sort */}
               <div className="sortContainer" ref={sortMenuRef}>
