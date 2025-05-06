@@ -1,8 +1,7 @@
-import { FilterSection } from '@/types/filter';
+import { Filters, FilterSection } from '@/types/filter';
 import { Filter } from 'lucide-react';
 import React from 'react'
-
-type Filters = Record<string, string[] | string>;
+import "./FilterMenu.css"
 
 
 
@@ -17,11 +16,11 @@ interface FilterProps {
 
 export default function FilterMenu({
     filters,
+    menuRef,
+    sections,
     onChange,
     isOpen,
     toggleOpen,
-    menuRef,
-    sections,
   }:FilterProps) {
   return (
     <div className="filterContainer" ref={menuRef}>

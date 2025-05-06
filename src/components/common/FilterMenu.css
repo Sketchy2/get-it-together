@@ -1,0 +1,76 @@
+.filterMenu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  background-color: #333333;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 10;
+  min-width: 200px;
+  overflow: hidden;
+  animation: fadeIn 0.2s ease;
+}
+
+
+  .filterSection {
+    padding: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .filterSection:last-child {
+    border-bottom: none;
+  }
+  
+  .filterSection h4 {
+    margin: 0 0 8px 0;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.7);
+  }
+  
+  .filterOptions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .filterOption {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: white;
+  }
+  
+  .filterOption input {
+    cursor: pointer;
+  }
+
+  
+.filterSection {
+    margin-bottom: 12px;
+  }
+  
+  .filterSection h4 {
+    margin: 0 0 8px 0;
+    font-size: 0.9rem;
+    opacity: 0.9;
+  }
+  
+  .filterOptions {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  
+  .filterOption {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+  }
+  
+  .filterOption input {
+    cursor: pointer;
+  }
