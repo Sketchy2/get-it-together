@@ -10,13 +10,12 @@
   }
 } */
 
-
-
 html,
 body {
   height: 100%;
   width: 100%;
   margin: 0;
+  /* Changed from overflow: hidden to allow scrolling in main content areas */
   overflow: hidden;
 }
 
@@ -35,12 +34,13 @@ body {
   font-family: Arial, Helvetica, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-
-
 }
 
-main{
+/* Add this new style for main content areas that need scrolling */
+main {
   padding: 10vh;
+  height: 100vh;
+  overflow-y: auto;
 }
 
 a {

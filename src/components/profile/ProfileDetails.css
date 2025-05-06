@@ -1,0 +1,70 @@
+.profileDetailsContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  
+  .profileSection {
+    background-color: #2a2a2a;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+  
+  .sectionTitle {
+    margin: 0 0 16px 0;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .sectionTitle::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background-color: rgba(255, 255, 255, 0.1);
+    margin-left: 8px;
+  }
+  
+  .bioText {
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.6;
+    font-size: 1rem;
+    margin: 0;
+  }
+  
+  .infoGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+  
+  .infoItem {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .infoLabel {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+  }
+  
+  .infoValue {
+    font-size: 1rem;
+    color: white;
+    font-weight: 500;
+  }
+  
+  @media (max-width: 768px) {
+    .infoGrid {
+      grid-template-columns: 1fr;
+    }
+  }
+  

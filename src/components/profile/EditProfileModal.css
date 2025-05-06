@@ -1,0 +1,225 @@
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 20px;
+    animation: fadeIn 0.3s ease;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  
+  .editProfileModal {
+    background-color: #2a2a2a;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    animation: slideUp 0.3s ease-out;
+  }
+  
+  @keyframes slideUp {
+    from {
+      transform: translateY(20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  
+  .modalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .modalHeader h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: white;
+    font-weight: 600;
+  }
+  
+  .closeButton {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: white;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .closeButton:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+  
+  .editProfileForm {
+    padding: 24px;
+  }
+  
+  .formSection {
+    margin-bottom: 24px;
+  }
+  
+  .formSectionTitle {
+    margin: 0 0 16px 0;
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.9);
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .formGroup {
+    margin-bottom: 16px;
+  }
+  
+  .formLabel {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.9);
+  }
+  
+  .formInput,
+  .formTextarea,
+  .formSelect {
+    width: 100%;
+    padding: 12px;
+    background-color: #333333;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: white;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+  }
+  
+  .formInput:focus,
+  .formTextarea:focus,
+  .formSelect:focus {
+    border-color: #4d5696;
+    outline: none;
+  }
+  
+  .checkboxGroup {
+    margin-bottom: 12px;
+  }
+  
+  .checkboxLabel {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.9);
+  }
+  
+  .checkboxInput {
+    width: 18px;
+    height: 18px;
+    accent-color: #4d5696;
+    cursor: pointer;
+  }
+  
+  .formActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 24px;
+  }
+  
+  .cancelButton,
+  .saveButton {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .cancelButton {
+    background-color: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+  }
+  
+  .cancelButton:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .saveButton {
+    background-color: #4d5696;
+    border: none;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .saveButton:hover {
+    background-color: #5a64a8;
+    transform: translateY(-2px);
+  }
+  
+  /* Scrollbar styling */
+  .editProfileModal::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .editProfileModal::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+  }
+  
+  .editProfileModal::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+  }
+  
+  .editProfileModal::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 600px) {
+    .editProfileModal {
+      max-height: 85vh;
+    }
+  
+    .formActions {
+      flex-direction: column-reverse;
+      gap: 8px;
+    }
+  
+    .cancelButton,
+    .saveButton {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+  

@@ -1,0 +1,36 @@
+.profilePageContainer {
+    padding: 32px;
+    max-width: 1200px;
+    margin: 0 auto;
+    color: white;
+  }
+  
+  .profileContent {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+  
+  .profileBody {
+    display: flex;
+    gap: 32px;
+  }
+  
+  .profileMainContent {
+    flex: 2;
+  }
+  
+  .profileSidebar {
+    flex: 1;
+  }
+  
+  @media (max-width: 768px) {
+    .profilePageContainer {
+      padding: 16px;
+    }
+  
+    .profileBody {
+      flex-direction: column;
+    }
+  }
+  
