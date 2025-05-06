@@ -13,9 +13,9 @@ import {
   Filter,
   Plus,
 } from "lucide-react"
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useCallback } from "react"
 import ProgressCircle from "../common/ProgressCircle"
-import { SortDirection, SortOption } from "@/types/sort"
+import { SortDirection, SortOption } from "@/types/auxilary"
 import SortMenu from "../common/SortMenu"
 import TaskCard from "../task/TaskCard"
 import { Task } from "@/types/task"
@@ -23,6 +23,7 @@ import {AssignmentLink, FileAttachment} from "@/types/assignment"
 import { formatDate, isLate, useOnClickOutside } from "@/utils/utils"
 import {  calculateProgress, getCardBgColor } from "@/utils/assignmentUtils"
 import FilesLinksSection from "./FilesLinksSection"
+import TaskFilter from "../task/TaskFilter"
 
 interface AssignmentDetailsProps {
   id: string
@@ -36,6 +37,7 @@ interface AssignmentDetailsProps {
   tasks: Task[]
   members?: string[] 
 
+  isTaskModalOpen:boolean
   onClose: () => void
   onTodoToggle: (id: string) => void
   onAddTodo: () => void
@@ -57,6 +59,7 @@ const AssignmentDetailPanel: React.FC<AssignmentDetailsProps> = ({
 
   onClose,
   onTodoToggle,
+  isTaskModalOpen,
   onAddTodo,
   onExpand,
 }) => {
@@ -66,6 +69,8 @@ const AssignmentDetailPanel: React.FC<AssignmentDetailsProps> = ({
     { key: "weighting", label: "weighting", icon: <Weight size={16} /> },
     { key: "priority", label: "Priority", icon: <Flag size={16} /> },
   ] as const;
+
+
 
   const progress: number = calculateProgress(tasks);
   const islate: boolean = isLate(deadline);
@@ -78,35 +83,29 @@ const AssignmentDetailPanel: React.FC<AssignmentDetailsProps> = ({
   const [isSortMenuOpen, setIsSortMenuOpen] = useState(false)
   const [sortBy, setSortBy] = useState<SortOption>(sortOptions[0])
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc")
+
+
+
+  const handleSortChange = (sortType: SortOption) => {
+    if (sortBy.key === sortType.key) {
+      // Toggle direction if same sort type
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortBy(sortType);
+      setSortDirection("asc");
+    }
+  };
+
+
   const [filters, setFilters] = useState({
     status: [] as string[],
     priority: [] as string[],
-    members: [] as string[],
-    dateRange: {
-      start: "",
-      end: "",
-    },
+    deadline: "all" as "all" | "today" | "week" | "month",
   })
 
   const filterMenuRef = useRef<HTMLDivElement>(null)
-  const sortMenuRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    // Add click outside listener for menus
-    const handleClickOutside = (event: MouseEvent) => {
-      if (filterMenuRef.current && !filterMenuRef.current.contains(event.target as Node)) {
-        setIsFilterMenuOpen(false)
-      }
-      if (sortMenuRef.current && !sortMenuRef.current.contains(event.target as Node)) {
-        setIsSortMenuOpen(false)
-      }
-    }
 
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
-    }
-  }, [])
 
 
   const handleSaveDescription = () => {
@@ -125,114 +124,133 @@ const AssignmentDetailPanel: React.FC<AssignmentDetailsProps> = ({
     setIsFilterMenuOpen(false)
   }
 
-  const handleFilterChange = (filterType: "status" | "priority" | "members", value: string) => {
-    const currentFilters = [...filters[filterType]]
-    const index = currentFilters.indexOf(value)
+  type FilterKey = keyof typeof filters;
 
-    if (index === -1) {
-      currentFilters.push(value)
-    } else {
-      currentFilters.splice(index, 1)
-    }
+  const handleFilterChange = (type: string, value: string) => {
+    if (!["status", "priority", "deadline"].includes(type)) return;
 
-    setFilters({
-      ...filters,
-      [filterType]: currentFilters,
-    })
-  }
+    const key = type as FilterKey;
 
-  const handleSortChange = (sortType: SortOption) => {
-    if (sortBy.key === sortType.key) {
-      // Toggle direction if same sort type
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc")
-    } else {
-      setSortBy(sortType)
-      setSortDirection("asc")
-    }
-  }
+    setFilters((prevFilters) => {
+      const newFilters = { ...prevFilters };
 
-  const applyFiltersAndSort = (todoList: Task[]) => {
-    // Apply filters
-    let filteredTodos = todoList
-
-    // Filter by status
-    if (filters.status.length > 0) {
-      filteredTodos = filteredTodos.filter((todo) => filters.status.includes(todo.status || "To-do"))
-    }
-
-    // Filter by priority
-    if (filters.priority.length > 0) {
-      filteredTodos = filteredTodos.filter((todo) => filters.priority.includes(todo.priority || "medium"))
-    }
-
-    // Filter by members TODO:FIX FILTERS
-    if (filters.members.length > 0) {
-      filteredTodos = filteredTodos.filter((todo) => todo.assignee && filters.members.includes(todo.assignee[0].name))
-    }
-
-    // Filter by date range
-    if (filters.dateRange.start || filters.dateRange.end) {
-      filteredTodos = filteredTodos.filter((todo) => {
-        if (!todo.deadline) return false
-
-        const deadline = new Date(todo.deadline)
-        let isInRange = true
-
-        if (filters.dateRange.start) {
-          const startDate = new Date(filters.dateRange.start)
-          isInRange = isInRange && deadline >= startDate
+      if (Array.isArray(newFilters[key])) {
+        const currentArray = newFilters[key] as string[];
+        if (currentArray.includes(value)) {
+          newFilters[key] = currentArray.filter(
+            (item) => item !== value
+          ) as any;
+        } else {
+          newFilters[key] = [...currentArray, value] as any;
         }
-
-        if (filters.dateRange.end) {
-          const endDate = new Date(filters.dateRange.end)
-          isInRange = isInRange && deadline <= endDate
-        }
-
-        return isInRange
-      })
-    }
-
-    // Apply sorting
-    return filteredTodos.sort((a, b) => {
-      if (sortBy.key === "deadline") { // TODO: fix duedate +  createdAt
-        if (!a.deadline) return sortDirection === "asc" ? 1 : -1
-        if (!b.deadline) return sortDirection === "asc" ? -1 : 1
-
-        const dateA = new Date(a.deadline).getTime()
-        const dateB = new Date(b.deadline).getTime()
-
-        return sortDirection === "asc" ? dateA - dateB : dateB - dateA
-      } else if (sortBy.key === "weighting") {
-        const weightA = a.weighting || 1
-        const weightB = b.weighting || 1
-        return sortDirection === "asc" ? weightA - weightB : weightB - weightA
-      } else if (sortBy.key === "priority") {
-        // Modified priority sorting to ensure high priority is at the top
-        const priorityValues = { high: 3, medium: 2, low: 1 }
-        const valueA = priorityValues[a.priority || "medium"] || 0
-        const valueB = priorityValues[b.priority || "medium"] || 0
-
-        // Always sort high priority first regardless of sort direction
-        return sortDirection === "asc" ? valueB - valueA : valueA - valueB
+      } else {
+        newFilters[key] = value as any;
       }
-      return 0
-    })
-  }
 
-  const handleDateRangeChange = (type: "start" | "end", value: string) => {
-    setFilters({
-      ...filters,
-      dateRange: {
-        ...filters.dateRange,
-        [type]: value,
-      },
-    })
-  }
+      return newFilters;
+    });
+  };
+
+  const applyFiltersAndSort = useCallback(
+    (taskList: Task[]) => {
+      let filteredTasks = taskList;
+
+      // Filter by status
+      if (filters.status.length > 0) {
+        filteredTasks = filteredTasks.filter((task) =>
+          filters.status.includes(task.status)
+        );
+      }
+
+      // Filter by priority
+      if (filters.priority.length > 0) {
+        filteredTasks = filteredTasks.filter((task) => {
+          const priority = task.priority ?? "Unspecified";
+          return filters.priority.includes(priority);
+        });
+      }
+
+      // Filter by due date
+      if (
+        filters.deadline !== "all" &&
+        filteredTasks.some((task) => task.deadline)
+      ) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const weekLater = new Date(today);
+        weekLater.setDate(today.getDate() + 7);
+
+        const monthLater = new Date(today);
+        monthLater.setMonth(today.getMonth() + 1);
+
+        filteredTasks = filteredTasks.filter((task) => {
+          if (!task.deadline) return false;
+
+          const deadline = new Date(task.deadline);
+          deadline.setHours(0, 0, 0, 0);
+
+          if (filters.deadline === "today") {
+            return deadline.getTime() === today.getTime();
+          } else if (filters.deadline === "week") {
+            return deadline >= today && deadline <= weekLater;
+          } else if (filters.deadline === "month") {
+            return deadline >= today && deadline <= monthLater;
+          }
+          return true;
+        });
+      }
+
+      // Sort tasks
+      return [...filteredTasks].sort((a, b) => {
+        const key = sortBy.key;
+        const dir = sortDirection === "asc" ? 1 : -1;
+
+        // Handle undefined values
+        if (key === "deadline") {
+          if (!a.deadline && !b.deadline) return 0;
+          if (!a.deadline) return dir;
+          if (!b.deadline) return -dir;
+          return (
+            dir *
+            (new Date(a.deadline).getTime() - new Date(b.deadline).getTime())
+          );
+        }
+
+        if (key === "weighting") {
+          const aWeight = a.weighting ?? 0;
+          const bWeight = b.weighting ?? 0;
+          return dir * (aWeight - bWeight);
+        }
+
+        if (key === "priority") {
+          const priorityOrder = { high: 3, medium: 2, low: 1, undefined: 0 };
+          const aVal =
+            priorityOrder[a.priority as keyof typeof priorityOrder] || 0;
+          const bVal =
+            priorityOrder[b.priority as keyof typeof priorityOrder] || 0;
+          return dir * (aVal - bVal);
+        }
+
+        // Default sort for createdAt and other fields
+        const aVal = a[key as keyof Task] as any;
+        const bVal = b[key as keyof Task] as any;
+
+        if (!aVal && !bVal) return 0;
+        if (!aVal) return dir;
+        if (!bVal) return -dir;
+
+        return dir * (aVal > bVal ? 1 : aVal < bVal ? -1 : 0);
+      });
+    },
+    [filters, sortBy, sortDirection]
+  );
+
 
   const filteredAndSortedTodos = applyFiltersAndSort(tasks)
   const mainPanelRef = useRef<HTMLDivElement>(null);
   
-  useOnClickOutside(mainPanelRef, onClose); // todo: fix typing error
+  useOnClickOutside(mainPanelRef, ()=>{if (!isTaskModalOpen){onClose()};}); // todo: fix typing error
 
   return (
     <div ref={mainPanelRef} className="assignmentDetails">
@@ -302,7 +320,13 @@ const AssignmentDetailPanel: React.FC<AssignmentDetailsProps> = ({
             <h3 className="sectionTitle">Tasks</h3>
             <div className="sectionActions">
               <div className="filterContainer" ref={filterMenuRef}>
-                <button className="actionButton" onClick={toggleFilterMenu}>
+                <TaskFilter 
+                filters={filters} 
+                onChange={handleFilterChange} 
+                isOpen={isFilterMenuOpen} 
+                toggleOpen={toggleFilterMenu}/>
+
+                {/* <button className="actionButton" onClick={toggleFilterMenu}>
                   <Filter size={18} />
                 </button>
                 {isFilterMenuOpen && (
@@ -418,7 +442,7 @@ const AssignmentDetailPanel: React.FC<AssignmentDetailsProps> = ({
                       )}
                     </div>
                   </div>
-                )}
+                )} */}
               </div>
                         <SortMenu
                           sortMenuOpen={isSortMenuOpen}

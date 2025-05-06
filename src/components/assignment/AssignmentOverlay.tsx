@@ -69,19 +69,19 @@ export default function AssignmentOverlay({
         <div className="modalOverlay">
           <div className="modalContent">
             <AssignmentDetailPanel
-              id={assignment.id}
-              title={assignment.title}
-              createdAt={assignment.createdAt}
-              deadline={assignment.deadline}
-              weighting={assignment.weighting}
-              description={assignment.description}
-              files={assignment.files || []}
-              tasks={assignment.tasks || []}
-              onClose={onClose}
-              onTodoToggle={onTodoToggle}
-              onAddTodo={handleAddAssignmentTask}
-              onExpand={handleExpandView}
-            />
+                id={assignment.id}
+                title={assignment.title}
+                createdAt={assignment.createdAt}
+                deadline={assignment.deadline}
+                weighting={assignment.weighting}
+                description={assignment.description}
+                files={assignment.files || []}
+                tasks={assignment.tasks || []}
+                onClose={onClose}
+                onTodoToggle={onTodoToggle}
+                onAddTodo={handleAddAssignmentTask}
+                onExpand={handleExpandView} 
+                isTaskModalOpen={isCreateTaskModalOpen}            />
           </div>
         </div>
       )}

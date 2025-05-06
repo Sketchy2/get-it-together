@@ -3,7 +3,7 @@ import {
   ArrowUp,
   ArrowUpDown,
 } from "lucide-react";
-import { SortOption, SortDirection } from "@/types/sort";
+import { SortOption, SortDirection } from "@/types/auxilary";
 import "./SortMenu.css";
 import { useOnClickOutside } from "@/utils/utils";
 import { useRef } from "react";

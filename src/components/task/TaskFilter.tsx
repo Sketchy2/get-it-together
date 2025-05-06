@@ -1,6 +1,6 @@
 import React from 'react'
 import FilterMenu from '../common/FilterMenu'
-import { FilterSection,Filters } from '@/types/filter';
+import { FilterSection,Filters } from '@/types/auxilary';
 
 interface TaskFilterProps {
     filters: Filters;

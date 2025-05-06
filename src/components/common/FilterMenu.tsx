@@ -1,4 +1,4 @@
-import { Filters, FilterSection } from '@/types/filter';
+import { Filters, FilterSection } from '@/types/auxilary';
 import { Filter } from 'lucide-react';
 import React, { useRef } from 'react'
 import "./FilterMenu.css"

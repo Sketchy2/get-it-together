@@ -1,10 +1,11 @@
+import { ViewMode } from "@/types/auxilary";
 import "./ViewToggle.css"
 
 
 interface ViewToggleProps {
-  onViewChange: (viewId: string) => void; 
-  currentView: string; 
-  options: string[]; 
+  onViewChange: (viewId: ViewMode) => void; 
+  currentView: ViewMode; 
+  options: ViewMode[]; 
 }
 
 export default function ViewToggle({ 
@@ -15,13 +16,14 @@ export default function ViewToggle({
   return (
     <div className="viewToggleContainer">
       <div className="viewToggle">
-        {options.map((option) => (
+        {options.map((option:ViewMode) => (
           <button
-            key={option}
-            className={`viewButton ${currentView === option ? "activeView" : ""}`}
+            key={option.label}
+            className={`viewButton ${currentView.label === option.label ? "activeView" : ""}`}
             onClick={() => onViewChange(option)}
           >
-            {option}
+            {currentView.icon?currentView.icon:""}
+            {option.label}
           </button>
         ))}
       </div>

@@ -13,7 +13,7 @@ import {
   Clock,
 } from "lucide-react";
 import ViewToggle from "@/components/common/ViewToggle";
-import { SortOption, SortDirection } from "@/types/sort";
+import { SortOption, SortDirection, ViewMode } from "@/types/auxilary";
 import SortMenu from "@/components/common/SortMenu";
 import { Task, TaskStatus } from "@/types/task";
 import {
@@ -48,37 +48,47 @@ function sortAssignmentsList(
 }
 
 export default function Assignments() {
-  const sortOptions: SortOption[] = [
-    { key: "deadline", label: "Due Date", icon: <Calendar size={16} /> },
-    { key: "createdAt", label: "Created At", icon: <Clock size={16} /> },
-  ] as const;
 
-  const [viewMode, setViewMode] = useState<"Kanban" | "List">("Kanban");
+
   const [expandedAssignment, setExpandedAssignment] = useState<string | null>(
     null
   );
   const [selectedAssignmentData, setSelectedAssignmentData] =
     useState<Assignment | null>(null);
+
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [sortMenuOpen, setSortMenuOpen] = useState(false);
 
-  const [sortBy, setSortBy] = useState<SortOption>(sortOptions[0]);
 
-  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
 
-  const switchViewMode = (_:string) => {
+  // Managing view
+  const viewOptions:ViewMode[] =[
+    {label:"Kanban"},{label:"List"},
+
+  ]
+  const [viewMode, setViewMode] = useState<ViewMode>(viewOptions[0]);
+  const switchViewMode = (_:ViewMode) => {
     //ignore input and just toggle
-    if (viewMode == "Kanban") {
-      setViewMode("List");
+    if (viewMode.label == viewOptions[0].label) {
+      setViewMode(viewOptions[1]);
     } else {
-      setViewMode("Kanban");
+      setViewMode(viewOptions[0]);
     }
   };
 
+  // Managing sort
+  const sortOptions: SortOption[] = [
+    { key: "deadline", label: "Due Date", icon: <Calendar size={16} /> },
+    { key: "createdAt", label: "Created At", icon: <Clock size={16} /> },
+  ] as const;
+  const [sortMenuOpen, setSortMenuOpen] = useState(false);
+  const [sortBy, setSortBy] = useState<SortOption>(sortOptions[0]);
+  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
 
   // Fetch all assignments 
 
@@ -148,10 +158,14 @@ export default function Assignments() {
    */
   const handleListClick = useCallback(
     (id: string) => {
-      if (viewMode === "List") {
+      console.log("waddup");
+      
+      if (viewMode.label == "List") {
         setExpandedAssignment((prevId) => (prevId === id ? null : id));
         setSelectedAssignmentData(assignments.find((as) => as.id == id) || selectedAssignmentData);
         console.log(isModalOpen)
+      }else{
+        console.log(viewMode)
       }
     },
     [assignments, selectedAssignmentData, viewMode]
@@ -180,23 +194,19 @@ export default function Assignments() {
   /**
    * Handle toggling task completion status
    */
-  const handleTaskToggle = useCallback(
-    (taskId: string) => {
+  const setTaskStatus = useCallback(
+    (taskId: string, newStatus: TaskStatus) => {
       if (!selectedAssignmentData) {
         return;
       }
-
+      
       setSelectedAssignmentData((prevData) => {
         if (!prevData) return null;
-
-        // Find the task to toggle
+        
+        // Find the task to update
         const task = prevData.tasks.find((t) => t.id === taskId);
         if (!task) return prevData;
-
-        // Toggle the task status with proper typing
-        const newStatus: TaskStatus =
-          task.status === "Completed" ? "In Progress" : "Completed";
-
+        
         // Update tasks array with explicit type
         const updatedTasks: Task[] = prevData.tasks.map((t) =>
           t.id === taskId
@@ -207,26 +217,27 @@ export default function Assignments() {
               }
             : t
         );
-
+        
         // Create updated assignment object
         const updatedAssignment: Assignment = {
           ...prevData,
           tasks: updatedTasks,
         };
-
+        
         // Also update the assignments list
         setAssignments((prev) =>
           prev.map((a) =>
             a.id === updatedAssignment.id ? updatedAssignment : a
           )
         );
-
+        
         return updatedAssignment;
       });
     },
     [selectedAssignmentData]
   );
 
+  
 
   /**
    * Handle creating new assignment
@@ -326,6 +337,24 @@ export default function Assignments() {
     );
   }
 
+
+  if (assignments.length == 0) {
+    //TODO: STYLE THIS
+    return (
+      <div className="loadingContainer">
+        <p>No assignments...</p>
+        <p>Time to get working!</p>
+        <div
+                  className="addCard"
+                  onClick={() => setIsCreateModalOpen(true)}
+                >
+                  <PlusIcon size={24} />
+                  <span>Add Assignment</span>
+                </div>
+      </div>
+    );
+  }
+
   return (
     <><header className="assignmentHeader">
       <h1 className="title">Assignments</h1>
@@ -341,7 +370,7 @@ export default function Assignments() {
           handleSortChange={handleSortChange}
           options={sortOptions} />
 
-        <ViewToggle currentView={viewMode} onViewChange={switchViewMode} options={["Kanban","List"]} />
+        <ViewToggle currentView={viewMode} onViewChange={switchViewMode} options={viewOptions} />
         </div>
         
 
@@ -349,7 +378,7 @@ export default function Assignments() {
       <div className="assignmentsContainer">
 
 
-        {viewMode === "Kanban" ? (
+        {viewMode.label === "Kanban" ? (
           // Kanban View
           <div className="rowsContainer">
             {rows.map((row) => (
@@ -375,13 +404,7 @@ export default function Assignments() {
                     </div>
                   );
                 })}
-                <div
-                  className="addCard"
-                  onClick={() => setIsCreateModalOpen(true)}
-                >
-                  <PlusIcon size={24} />
-                  <span>Add Assignment</span>
-                </div>
+
               </AssignmentRow>
             ))}
           </div>
@@ -405,7 +428,7 @@ export default function Assignments() {
                           isExpanded={expandedAssignment === assignment.id}
                           onToggleExpand={() => handleListClick(assignment.id)}
                           onViewDetails={() => handleCardClick(assignment)}
-                          onStatusChange={handleTaskToggle} />
+                          onStatusChange={setTaskStatus} />
                       </div>
                     );
                   })}
@@ -438,7 +461,7 @@ export default function Assignments() {
             isOpen={isModalOpen}
             assignment={selectedAssignmentData} // should just pass the assignment
             onClose={handleCloseModal}
-            onTodoToggle={handleTaskToggle}
+            onTodoToggle={setTaskStatus}
             onUpdate={handleUpdateAssignment} />
         )}
 

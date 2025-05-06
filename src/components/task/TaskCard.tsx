@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useRef, useState } from "react"
 import {
   CheckCircle,
   Circle,
@@ -19,6 +19,7 @@ import {
 } from "lucide-react"
 import "./TaskCard.css"
 import { Task, TaskStatus } from "@/types/task"
+import { useOnClickOutside } from "@/utils/utils"
 
 
 
@@ -30,7 +31,10 @@ interface TaskCardProps {
 const TaskCard: React.FC<TaskCardProps> = ({ task, onStatusChange }) => {
   const [isExpanded, setIsExpanded] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [newComment, setNewComment] = useState("")
+  const menuRef = useRef<HTMLDivElement>(null);
+  useOnClickOutside(menuRef, () => {
+    setIsMenuOpen(false);
+  });
 
   const toggleExpanded = () => {
     setIsExpanded(!isExpanded)
@@ -41,7 +45,9 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onStatusChange }) => {
     onStatusChange(task.id, newStatus)
   }
 
+
   const handleStatusChange = (newStatus:TaskStatus) => {
+    console.log(newStatus)
     onStatusChange(task.id, newStatus)
     setIsMenuOpen(false)
   }
@@ -77,7 +83,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onStatusChange }) => {
 
   const priorityInfo = getPriorityInfo()
 
-  // Calculate days remaining or overdue
+  // Calculate days remaining or overdue TODO: make util func
   const getDaysInfo = () => {
     if (!task.deadline) return null
 
@@ -98,7 +104,6 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onStatusChange }) => {
   }
 
   const daysInfo = getDaysInfo()
-
   return (
     <div className={`taskCard ${task.status == "Completed" ? "completed" : ""} ${task.status} ${isExpanded ? "expanded" : ""} `}
           style={{borderLeftColor:getStatusColor()}}
@@ -155,7 +160,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onStatusChange }) => {
             </button>
 
             {isMenuOpen && (
-              <div className="menuDropdown">
+              <div ref={menuRef}className="menuDropdown">
                 <button className="menuItem" onClick={() => handleStatusChange("To-Do")}>
                   <Clock size={14} />
                   <span>Move to To Do</span>
@@ -260,42 +265,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onStatusChange }) => {
             </div>
           </div>
 
-          {/* mb keep if want to add commenting functionality
-           {task.comments && task.comments.length > 0 && (
-            <div className="taskComments">
-              <div className="taskCommentsHeader">
-                <MessageSquare size={14} />
-                <span>Comments ({task.comments.length})</span>
-              </div>
-              <div className="commentsList">
-                {task.comments.map((comment, index) => (
-                  <div key={index} className="commentItem">
-                    <div className="commentHeader">
-                      <div className="commentAuthor">
-                        <div className="commentAvatar">{comment.author.charAt(0).toUpperCase()}</div>
-                        <span>{comment.author}</span>
-                      </div>
-                      <span className="commentDate">{formatDate(comment.date)}</span>
-                    </div>
-                    <p className="commentText">{comment.text}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )} */}
 
-          <div className="addCommentForm">
-            <input
-              type="text"
-              placeholder="Add a comment..."
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              className="commentInput"
-            />
-            <button className="commentButton" disabled={!newComment.trim()}>
-              Add
-            </button>
-          </div>
         </div>
       )}
     </div>

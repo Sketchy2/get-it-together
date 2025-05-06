@@ -26,7 +26,7 @@ import ProgressCircle from "../common/ProgressCircle";
 import { TaskStatus, Task } from "@/types/task";
 import { Assignment, User } from "@/types/assignment";
 import { calculateProgress, getCardBgColor } from "@/utils/assignmentUtils";
-import { SortDirection, SortOption } from "@/types/sort";
+import { SortDirection, SortOption } from "@/types/auxilary";
 import SortMenu from "../common/SortMenu";
 import { formatDate } from "@/utils/utils";
 
