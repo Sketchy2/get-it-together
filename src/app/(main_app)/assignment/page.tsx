@@ -12,9 +12,9 @@ import {
   Calendar,
   Clock,
 } from "lucide-react";
-import ViewToggle from "@/components/ViewToggle";
+import ViewToggle from "@/components/common/ViewToggle";
 import { SortOption, SortDirection } from "@/types/sort";
-import SortMenu from "@/components/SortMenu";
+import SortMenu from "@/components/common/SortMenu";
 import { Task, TaskStatus } from "@/types/task";
 import {
   Assignment,

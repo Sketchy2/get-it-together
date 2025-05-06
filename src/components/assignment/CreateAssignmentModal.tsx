@@ -5,19 +5,23 @@ import type React from "react"
 import { useState } from "react"
 import { X, Upload, Plus, User, Calendar, Percent, FileText, Link } from "lucide-react"
 import "./CreateAssignmentModal.css"
+import { Assignment } from "@/types/assignment"
 
+
+// TODO: Have so can accept props with assignment details to modify
 interface CreateAssignmentModalProps {
   isOpen: boolean
   onClose: () => void
-  onSave: (assignment: any) => void
+  onSave: (assignment: any) => void // basically accept assignment but allow for usage of email
+  prefill?: Assignment
 }
 
 const CreateAssignmentModal: React.FC<CreateAssignmentModalProps> = ({ isOpen, onClose, onSave }) => {
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [deadline, setDueDate] = useState("")
-  const [weighting, setWeight] = useState(100) // Default to 100% for the total assignment
-  const [members, setMembers] = useState<string[]>([])
+  const [weighting, setWeight] = useState(100) // Default to 100% for the total assignment 
+  const [members, setMembers] = useState<string[]>([]) // have so accepts 
   const [newMember, setNewMember] = useState("")
   const [files, setFiles] = useState<File[]>([])
   const [links, setLinks] = useState<{ url: string; title: string }[]>([])
@@ -49,7 +53,7 @@ const CreateAssignmentModal: React.FC<CreateAssignmentModalProps> = ({ isOpen, o
     const daysRemaining = Math.ceil((due.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
 
     const newAssignment = {
-      id: `assignment-${Date.now()}`,
+      id: `assignment-${Date.now()}`, // assignment id == prefill if needed
       title,
       date: today.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
       deadline: due.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
@@ -58,7 +62,8 @@ const CreateAssignmentModal: React.FC<CreateAssignmentModalProps> = ({ isOpen, o
       progress: 0,
       daysRemaining,
       isLate: daysRemaining < 0,
-      members,
+      members, // TODO: ENSURE create assignment API can accept emails
+              // TODO: ensure that
       files: files.map((file) => file.name),
       links: links,
       todos: [],

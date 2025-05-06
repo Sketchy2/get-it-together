@@ -20,7 +20,7 @@ import {
 import { useState, useRef, useEffect } from "react"
 import ProgressCircle from "./ProgressCircle"
 import { SortDirection, SortOption } from "@/types/sort"
-import SortMenu from "../SortMenu"
+import SortMenu from "../common/SortMenu"
 import TaskCard from "../task/TaskCard"
 import { Task } from "@/types/task"
 import {AssignmentLink, FileAttachment} from "@/types/assignment"
