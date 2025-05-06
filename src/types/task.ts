@@ -11,7 +11,7 @@ type Task = {
     status: TaskStatus
     weighting?: number
     createdAt?: string
-    priority?: "low" | "medium" | "high" |null
+    priority?: "low" | "medium" | "high" 
 }
 
 
