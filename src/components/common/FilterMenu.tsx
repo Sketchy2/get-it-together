@@ -1,0 +1,65 @@
+import { FilterSection } from '@/types/filter';
+import { Filter } from 'lucide-react';
+import React from 'react'
+
+type Filters = Record<string, string[] | string>;
+
+
+
+interface FilterProps {
+  filters: Filters;
+  onChange: (type: string, value: string) => void;
+  isOpen: boolean;
+  toggleOpen: () => void;
+  menuRef: React.RefObject<HTMLDivElement>|null;
+  sections: FilterSection[];
+}
+
+export default function FilterMenu({
+    filters,
+    onChange,
+    isOpen,
+    toggleOpen,
+    menuRef,
+    sections,
+  }:FilterProps) {
+  return (
+    <div className="filterContainer" ref={menuRef}>
+    <button className="actionButton" onClick={toggleOpen}>
+      <Filter size={18} />
+      <span>Filter</span>
+    </button>
+
+    {isOpen && (
+      <div className="filterMenu">
+        {sections.map(({ title, type, inputType, options }) => (
+          <div className="filterSection" key={type}>
+            <h4>{title}</h4>
+            <div className="filterOptions">
+              {options.map(({ label, value }) => {
+                const isChecked =
+                  inputType === "checkbox"
+                    ? (filters[type] as string[]).includes(value)
+                    : filters[type] === value;
+
+                return (
+                  <label className="filterOption" key={value}>
+                    <input
+                      type={inputType}
+                      name={type}
+                      checked={isChecked}
+                      onChange={() => onChange(type, value)}
+                    />
+                    <span>{label}</span>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+);
+//   
+}

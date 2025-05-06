@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import ToolTip from "@/components/ToolTip";
+import ToolTip from "@/components/common/ToolTip";
 import { MdOutlineMenu } from "react-icons/md";
 import { IoHome } from "react-icons/io5";
 import { IoDocumentTextOutline } from "react-icons/io5";
