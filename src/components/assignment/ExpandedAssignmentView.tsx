@@ -26,13 +26,14 @@ import ProgressCircle from "../common/ProgressCircle";
 import { TaskStatus, Task } from "@/types/task";
 import { Assignment, User } from "@/types/assignment";
 import { calculateProgress, getCardBgColor } from "@/utils/assignmentUtils";
-import { SortDirection, SortOption } from "@/types/auxilary";
+import { SortDirection, SortOption, ViewMode } from "@/types/auxilary";
 import SortMenu from "../common/SortMenu";
 import { formatDate } from "@/utils/utils";
 
 import TaskKanbanColumn from "../common/KanbanColumn";
 import TaskFilter from "../task/TaskFilter";
 import FilesLinksSection from "./FilesLinksSection";
+import ViewToggle from "../common/ViewToggle";
 
 interface ExpandedAssignmentViewProps {
   isOpen: boolean;
@@ -61,16 +62,20 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
 }) => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [progress, setProgress] = useState(0);
-  const [viewMode, setViewMode] = useState<"status" | "member">("status");
   const [memberProgress, setMemberProgress] = useState<Record<string, number>>(
     {}
   );
+
+
+  // managing filters
   const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
   const [filters, setFilters] = useState({
     status: [] as string[],
     priority: [] as string[],
     deadline: "all" as "all" | "today" | "week" | "month",
   });
+
+  // Managin sorting
   const [isSortMenuOpen, setIsSortMenuOpen] = useState(false);
   const sortOptions: SortOption[] = [
     { key: "deadline", label: "Due Date", icon: <Calendar size={16} /> },
@@ -81,6 +86,25 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
 
   const [sortBy, setSortBy] = useState<SortOption>(sortOptions[0]);
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+
+
+  // Managing viewmmode
+
+  // Managing view
+  const viewOptions: ViewMode[] = [{ icon:<LayoutGrid size={18} />,label: "Status View" }, { icon:<Users size={18} />,label: "Member View" }];
+  const [viewMode, setViewMode] = useState<ViewMode>(viewOptions[0]);
+  const switchViewMode = (_: ViewMode) => {
+    //ignore input and just toggle
+    if (viewMode.label == viewOptions[0].label) {
+      setViewMode(viewOptions[1]);
+    } else {
+      setViewMode(viewOptions[0]);
+    }
+  };
+
+
+
+  //Editing assih
 
   const [isEditingDescription, setIsEditingDescription] = useState(false);
   const [editedDescription, setEditedDescription] = useState("");
@@ -169,7 +193,7 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
     // Update status or assignee based on destination and view mode
     let updatedTask: Task;
 
-    if (viewMode === "status") {
+    if (viewMode.label === "Status View") {
       // Update the task status based on the destination column
       updatedTask = {
         ...draggedTask,
@@ -655,29 +679,15 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
             />
           </div>
           <div className="toolbarContainer">
-            <div className="viewToggle">
-              <button
-                className={`viewToggleButton ${
-                  viewMode === "status" ? "active" : ""
-                }`}
-                onClick={() => setViewMode("status")}
-              >
-                <LayoutGrid size={18} />
-                <span>Status View</span>
-              </button>
-              <button
-                className={`viewToggleButton ${
-                  viewMode === "member" ? "active" : ""
-                }`}
-                onClick={() => setViewMode("member")}
-              >
-                <Users size={18} />
-                <span>Member View</span>
-              </button>
-            </div>
+
+          <ViewToggle
+            currentView={viewMode}
+            onViewChange={switchViewMode}
+            options={viewOptions}
+          />
 
             <div className="viewDescription">
-              {viewMode === "status" ? (
+              {viewMode.label === "Status View" ? (
                 <p>Organize tasks by their current status</p>
               ) : (
                 <p>View tasks assigned to each team member</p>
@@ -718,7 +728,7 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
 
           {/* Kanban view */}
           <DragDropContext onDragEnd={handleDragEnd}>
-            {viewMode === "status" ? renderStatusView() : renderMemberView()}
+            {viewMode.label === "Status View" ? renderStatusView() : renderMemberView()}
           </DragDropContext>
         </div>
       </div>

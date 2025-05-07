@@ -276,42 +276,12 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
-    background-color: rgba(0, 0, 0, 0.2);
+    background-color: rgba(0, 0, 0, 0.15);
     border-radius: 12px;
     padding: 12px 16px;
   }
   
-  .viewToggle {
-    display: flex;
-    background-color: rgba(0, 0, 0, 0.2);
-    border-radius: 10px;
-    padding: 4px;
-  }
-  
-  .viewToggleButton {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
-    border-radius: 8px;
-    background: none;
-    border: none;
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 0.9rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-  
-  .viewToggleButton.active {
-    background-color: #4d5696;
-    color: white;
-  }
-  
-  .viewToggleButton:hover:not(.active) {
-    background-color: rgba(255, 255, 255, 0.1);
-    color: white;
-  }
+
   
   .viewDescription {
     color: rgba(255, 255, 255, 0.7);

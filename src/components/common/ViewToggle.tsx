@@ -22,7 +22,7 @@ export default function ViewToggle({
             className={`viewButton ${currentView.label === option.label ? "activeView" : ""}`}
             onClick={() => onViewChange(option)}
           >
-            {currentView.icon?currentView.icon:""}
+            {option.icon?option.icon:""}
             {option.label}
           </button>
         ))}
