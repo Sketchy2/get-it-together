@@ -1,12 +1,11 @@
 "use client";
 
 import type React from "react";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import {
   X,
   Plus,
-  ChevronLeft,
-  User,
+  User as UserIcon,
   Paperclip,
   Calendar,
   LayoutGrid,
@@ -16,158 +15,155 @@ import {
   AlertTriangle,
   HelpCircle,
   BarChart,
-  Filter,
-
-  FileText,
   Edit,
-  ChevronDown,
-  ChevronRight,
   Flag,
-  Link,
-  Upload,
+  Minimize2,
 } from "lucide-react";
 import "./ExpandedAssignmentView.css";
 import TaskCard from "../task/TaskCard";
-import CreateTaskModal from "../task/CreateTaskModal";
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import ProgressCircle from "./ProgressCircle";
+import { DragDropContext } from "@hello-pangea/dnd";
+import ProgressCircle from "../common/ProgressCircle";
 import { TaskStatus, Task } from "@/types/task";
-import { Assignment, FileAttachment } from "@/types/assignment";
-import {  calculateProgress, getCardBgColor } from "@/utils/assignmentUtils";
-import { SortDirection, SortOption } from "@/types/sort";
-import SortMenu from "../SortMenu";
+import { Assignment, User } from "@/types/assignment";
+import { calculateProgress, getCardBgColor } from "@/utils/assignmentUtils";
+import { SortDirection, SortOption, ViewMode } from "@/types/auxilary";
+import SortMenu from "../common/SortMenu";
 import { formatDate } from "@/utils/utils";
 
+import TaskKanbanColumn from "../common/KanbanColumn";
+import TaskFilter from "../task/TaskFilter";
+import FilesLinksSection from "./FilesLinksSection";
+import ViewToggle from "../common/ViewToggle";
+
 interface ExpandedAssignmentViewProps {
-  assignment: Assignment;
   isOpen: boolean;
   onClose: () => void;
-  onUpdate: (updatedAssignment: Assignment) => void;
+  onMinimise: () => void;
+
+  assignment: Assignment;
+  onTaskDelete: (taskId: string) => void;
+  onTaskUpdate: (taskId: string, updates: Partial<Task>) => void;
+  openTaskForm: (task?: Task) => void;
+  onAssignmentUpdate: (
+    assignmentId: string,
+    updates: Partial<Assignment>
+  ) => void;
 }
 
 const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
-  assignment,
   isOpen,
   onClose,
-  onUpdate,
+  onMinimise,
+  assignment,
+  onTaskDelete,
+  onTaskUpdate,
+  openTaskForm,
+  onAssignmentUpdate,
 }) => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [progress, setProgress] = useState(0);
-  const [viewMode, setViewMode] = useState<"status" | "member">("status");
   const [memberProgress, setMemberProgress] = useState<Record<string, number>>(
     {}
   );
 
-  const [isCreateTaskModalOpen, setIsCreateTaskModalOpen] = useState(false);
 
+  // managing filters
   const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
   const [filters, setFilters] = useState({
     status: [] as string[],
     priority: [] as string[],
     deadline: "all" as "all" | "today" | "week" | "month",
   });
+
+  // Managin sorting
   const [isSortMenuOpen, setIsSortMenuOpen] = useState(false);
   const sortOptions: SortOption[] = [
     { key: "deadline", label: "Due Date", icon: <Calendar size={16} /> },
     { key: "createdAt", label: "Created At", icon: <Clock size={16} /> },
-    { key: "weight", label: "Weight", icon: <BarChart size={16}  /> },
-    { key: "priority", label: "Priority", icon: <Flag size={16}  /> },
+    { key: "weighting", label: "Weighting", icon: <BarChart size={16} /> },
+    { key: "priority", label: "Priority", icon: <Flag size={16} /> },
   ] as const;
-  const [sortBy, setSortBy] = useState<SortOption>(
-    sortOptions[0]
-  );
+
+  const [sortBy, setSortBy] = useState<SortOption>(sortOptions[0]);
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
 
 
+  // Managing viewmmode
+
+  // Managing view
+  const viewOptions: ViewMode[] = [{ icon:<LayoutGrid size={18} />,label: "Status View" }, { icon:<Users size={18} />,label: "Member View" }];
+  const [viewMode, setViewMode] = useState<ViewMode>(viewOptions[0]);
+  const switchViewMode = (_: ViewMode) => {
+    //ignore input and just toggle
+    if (viewMode.label == viewOptions[0].label) {
+      setViewMode(viewOptions[1]);
+    } else {
+      setViewMode(viewOptions[0]);
+    }
+  };
+
+
+
+  //Editing assih
 
   const [isEditingDescription, setIsEditingDescription] = useState(false);
   const [editedDescription, setEditedDescription] = useState("");
   const [showFiles, setShowFiles] = useState(false);
 
-  const filterMenuRef = useRef<HTMLDivElement>(null);
-  const sortMenuRef = useRef<HTMLDivElement>(null);
-
   if (!isOpen || !assignment) return null;
 
-  const calcProgress = (taskList: Task[]) =>
+  const calcProgress = useCallback((taskList: Task[]) => {
     setProgress(calculateProgress(taskList));
+  }, []);
 
-  // create utils from this
-  const getUniqueAssignees = useCallback(() => {
-    const assignees = tasks
-      .map((task) => task.assignee)
-      .filter((assignee): assignee is string => !!assignee);
+  const members = useMemo(() => {
+    return assignment.members ?? []
+  }, [assignment.members]);
 
-    return [...new Set(assignees)];
-  },[tasks]);
+  const calculateMemberProgress = useCallback(
+    (taskList: Task[]) => {
+      const progressByMember: Record<string, number> = {};
+
+      members.forEach((member) => {
+        const memberTasks = taskList.filter((task) => {
+          if (!Array.isArray(task.assignee) || task.assignee.length === 0) {
+            return member.id === "undef"; //undef member id
+          }
+          return task.assignee.some((assignee) => assignee.id === member.id);
+        });
+
+        if (memberTasks.length === 0) {
+          progressByMember[member.id] = 0;
+          return;
+        }
+
+        const totalWeight = memberTasks.reduce(
+          (sum, task) => sum + (task.weighting ?? 1),
+          0
+        );
+
+        if (totalWeight === 0) {
+          progressByMember[member.id] = 0;
+          return;
+        }
+
+        const completedWeight = memberTasks
+          .filter((task) => task.status === "Completed")
+          .reduce((sum, task) => sum + (task.weighting ?? 1), 0);
+
+        progressByMember[member.id] = Math.round(
+          (completedWeight / totalWeight) * 100
+        );
+      });
+
+      setMemberProgress(progressByMember);
+    },
+    [members]
+  );
 
 
-
-  const calculateMemberProgress = useCallback((taskList: Task[]) => {
-    const members = getUniqueAssignees();
-    const progressByMember: Record<string, number> = {};
-
-    members.forEach((member) => {
-      const memberTasks = taskList.filter((task) => task.assignee === member);
-      if (memberTasks.length === 0) {
-        progressByMember[member] = 0;
-        return;
-      }
-
-      const totalWeight = memberTasks.reduce(
-        (sum, task) => sum + (task.weight ? task.weight : 1),
-        0
-      );
-      if (totalWeight === 0) {
-        progressByMember[member] = 0;
-        return;
-      }
-
-      const completedWeight = memberTasks
-        .filter((task) => task.status === "Completed")
-        .reduce((sum, task) => sum + (task.weight ? task.weight : 1), 0);
-
-      progressByMember[member] = Math.round(
-        (completedWeight / totalWeight) * 100
-      );
-    });
-
-    setMemberProgress(progressByMember);
-  },[getUniqueAssignees]);
-
-  const handleCreateTask = (newTask: Task) => {
-    const updatedTasks = [...tasks, newTask];
-    setTasks(updatedTasks);
-    calcProgress(updatedTasks);
-    calculateMemberProgress(updatedTasks);
-    setIsCreateTaskModalOpen(false);
-
-    const updatedAssignment = {
-      ...assignment,
-      tasks: updatedTasks,
-    };
-
-    onUpdate(updatedAssignment);
-  };
-
-  const handleTaskStatusChange = (taskId: string, newStatus: TaskStatus) => {
-    const updatedTasks = tasks.map((task) => {
-      if (task.id === taskId) {
-        return { ...task, status: newStatus };
-      }
-      return task;
-    });
-
-    setTasks(updatedTasks);
-    calcProgress(updatedTasks);
-    calculateMemberProgress(updatedTasks);
-
-    const updatedAssignment = {
-      ...assignment,
-      tasks: updatedTasks,
-    };
-
-    onUpdate(updatedAssignment);
+  const taskStatusChange = (taskId: string, newStatus: TaskStatus) => {
+    onTaskUpdate(taskId, { status: newStatus });
   };
 
   const handleDragEnd = (result: any) => {
@@ -184,63 +180,75 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
     }
 
     // Find the task that was dragged
-    const updatedTasks = [...tasks];
-    const draggedTask = updatedTasks.find((task) => task.id === draggableId);
-
-    if (!draggedTask) return;
-
-    // Remove from source
-    const filteredTasks = updatedTasks.filter(
-      (task) => task.id !== draggableId
+    const taskIndex = tasks.findIndex(
+      (task) => String(task.id) === draggableId
     );
+    if (taskIndex === -1) return;
+
+    const draggedTask = tasks[taskIndex];
+
+    // Create a new array without mutating the original
+    const updatedTasks = [...tasks];
 
     // Update status or assignee based on destination and view mode
     let updatedTask: Task;
 
-    if (viewMode === "status") {
-      const newStatus = destination.droppableId as TaskStatus;
-      updatedTask = { ...draggedTask, status: newStatus };
-    } else {
-      // In member view, we're changing the assignee but keeping the status
+    if (viewMode.label === "Status View") {
+      // Update the task status based on the destination column
       updatedTask = {
         ...draggedTask,
-        assignee:
-          destination.droppableId === "unassigned"
-            ? undefined
-            : destination.droppableId,
+        status: destination.droppableId as TaskStatus,
       };
+    } else {
+      // In member view, we're updating the assignee
+      if (destination.droppableId === "unassigned") {
+        // Handling unassigned case
+        updatedTask = {
+          ...draggedTask,
+          assignee: [], // Empty array for unassigned
+        };
+      } else {
+        // Find the member by ID
+        const member = members.find((m) => m.id === destination.droppableId);
+        if (!member) return;
+
+        // Determine if we need to create or update the assignee array
+        let newAssignees;
+        if (!Array.isArray(draggedTask.assignee)) {
+          // Create new assignee array with just this member
+          newAssignees = [member];
+        } else {
+          // Filter out any existing assignments to this member
+          const existingAssignees = draggedTask.assignee.filter(
+            (a) => a.id !== destination.droppableId
+          );
+          // Add this member to the assignees
+          newAssignees = [...existingAssignees, member];
+        }
+
+        updatedTask = {
+          ...draggedTask,
+          assignee: newAssignees,
+        };
+      }
     }
 
-    // Insert at destination
-    filteredTasks.splice(destination.index, 0, updatedTask);
+    // Replace the task in our array
+    updatedTasks[taskIndex] = updatedTask;
 
-    setTasks(filteredTasks);
-    calculateProgress(filteredTasks);
-    calculateMemberProgress(filteredTasks);
+    // Update state
+    setTasks(updatedTasks);
+    calcProgress(updatedTasks);
+    calculateMemberProgress(updatedTasks);
 
-
+    // Update the parent component
     const updatedAssignment = {
       ...assignment,
-      // todos: updatedTodos,
-      tasks: filteredTasks,
+      tasks: updatedTasks,
     };
 
-    onUpdate(updatedAssignment);
+    onAssignmentUpdate(updatedAssignment.id,updatedAssignment);
   };
-
-  const getTasksByStatus = (status: TaskStatus) => {
-    return applyFiltersAndSort(tasks.filter((task) => task.status === status));
-  };
-
-  const getTasksByMember = (member: string | null) => {
-    if (member === null) {
-      return applyFiltersAndSort(tasks.filter((task) => !task.assignee));
-    }
-    return applyFiltersAndSort(
-      tasks.filter((task) => task.assignee === member)
-    );
-  };
-
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -266,33 +274,34 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
   };
 
   // TODO FIX FILTER
-  const handleFilterChange = (
-    filterType: "status" | "priority" | "deadline",
-    value: string
-  ) => {
-    if (filterType === "deadline") {
-      setFilters({
-        ...filters,
-        deadline: value as "all" | "today" | "week" | "month",
-      });
-    } else {
-      const currentFilters = [...filters[filterType]];
-      const index = currentFilters.indexOf(value);
+  type FilterKey = keyof typeof filters;
 
-      if (index === -1) {
-        currentFilters.push(value);
+  const handleFilterChange = (type: string, value: string) => {
+    if (!["status", "priority", "deadline"].includes(type)) return;
+
+    const key = type as FilterKey;
+
+    setFilters((prevFilters) => {
+      const newFilters = { ...prevFilters };
+
+      if (Array.isArray(newFilters[key])) {
+        const currentArray = newFilters[key] as string[];
+        if (currentArray.includes(value)) {
+          newFilters[key] = currentArray.filter(
+            (item) => item !== value
+          ) as any;
+        } else {
+          newFilters[key] = [...currentArray, value] as any;
+        }
       } else {
-        currentFilters.splice(index, 1);
+        newFilters[key] = value as any;
       }
 
-      setFilters({
-        ...filters,
-        [filterType]: currentFilters,
-      });
-    }
+      return newFilters;
+    });
   };
 
-  const handleSortChange = (sortType:SortOption) => {
+  const handleSortChange = (sortType: SortOption) => {
     if (sortBy.key === sortType.key) {
       // Toggle direction if same sort type
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
@@ -301,395 +310,283 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
       setSortDirection("asc");
     }
   };
+  const applyFiltersAndSort = useCallback(
+    (taskList: Task[]) => {
+      let filteredTasks = taskList;
 
-  const applyFiltersAndSort = (taskList: Task[]) => {
-    // Apply filters
-    let filteredTasks = taskList;
-
-    // Filter by status
-    if (filters.status.length > 0) {
-      filteredTasks = filteredTasks.filter((task) =>
-        filters.status.includes(task.status)
-      );
-    }
-
-    // Filter by priority
-    if (filters.priority.length > 0) {
-      filteredTasks = filteredTasks.filter((task) =>
-        filters.priority.includes(task.priority)
-      );
-    }
-
-    // Filter by due date
-    if (
-      filters.deadline !== "all" &&
-      filteredTasks.some((task) => task.deadline)
-    ) {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-
-      const weekLater = new Date(today);
-      weekLater.setDate(today.getDate() + 7);
-
-      const monthLater = new Date(today);
-      monthLater.setMonth(today.getMonth() + 1);
-
-      filteredTasks = filteredTasks.filter((task) => {
-        if (!task.deadline) return false;
-
-        const deadline = new Date(task.deadline);
-        deadline.setHours(0, 0, 0, 0);
-
-        if (filters.deadline === "today") {
-          return deadline.getTime() === today.getTime();
-        } else if (filters.deadline === "week") {
-          return deadline >= today && deadline <= weekLater;
-        } else if (filters.deadline === "month") {
-          return deadline >= today && deadline <= monthLater;
-        }
-        return true;
-      });
-    }
-
-    // TODO: provide a general sorting function
-    return filteredTasks.sort((a, b) => {
-      if (sortBy.key === "deadline") {
-        if (!a.deadline) return sortDirection === "asc" ? 1 : -1;
-        if (!b.deadline) return sortDirection === "asc" ? -1 : 1;
-
-        const dateA = new Date(a.deadline).getTime();
-        const dateB = new Date(b.deadline).getTime();
-
-        return sortDirection === "asc" ? dateA - dateB : dateB - dateA;
-      } else if (sortBy.key === "weight") {
-        return sortDirection === "asc"
-          ? (a.weight ? a.weight : 0) - (b.weight ? b.weight : 0)
-          : (b.weight ? b.weight : 0) - (a.weight ? a.weight : 0); //TODO: CONFIRM LOGIC
-      } else if (sortBy.key === "priority") {
-        const priorityValues = { high: 3, medium: 2, low: 1 };
-        const valueA = priorityValues[a.priority] || 0;
-        const valueB = priorityValues[b.priority] || 0;
-
-        return sortDirection === "asc" ? valueA - valueB : valueB - valueA;
+      // Filter by status
+      if (filters.status.length > 0) {
+        filteredTasks = filteredTasks.filter((task) =>
+          filters.status.includes(task.status)
+        );
       }
-      return 0;
-    });
-  };
 
+      // Filter by priority
+      if (filters.priority.length > 0) {
+        filteredTasks = filteredTasks.filter((task) => {
+          const priority = task.priority ?? "Unspecified";
+          return filters.priority.includes(priority);
+        });
+      }
+
+      // Filter by due date
+      if (
+        filters.deadline !== "all" &&
+        filteredTasks.some((task) => task.deadline)
+      ) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const weekLater = new Date(today);
+        weekLater.setDate(today.getDate() + 7);
+
+        const monthLater = new Date(today);
+        monthLater.setMonth(today.getMonth() + 1);
+
+        filteredTasks = filteredTasks.filter((task) => {
+          if (!task.deadline) return false;
+
+          const deadline = new Date(task.deadline);
+          deadline.setHours(0, 0, 0, 0);
+
+          if (filters.deadline === "today") {
+            return deadline.getTime() === today.getTime();
+          } else if (filters.deadline === "week") {
+            return deadline >= today && deadline <= weekLater;
+          } else if (filters.deadline === "month") {
+            return deadline >= today && deadline <= monthLater;
+          }
+          return true;
+        });
+      }
+
+      // Sort tasks
+      return [...filteredTasks].sort((a, b) => {
+        const key = sortBy.key;
+        const dir = sortDirection === "asc" ? 1 : -1;
+
+        // Handle undefined values
+        if (key === "deadline") {
+          if (!a.deadline && !b.deadline) return 0;
+          if (!a.deadline) return dir;
+          if (!b.deadline) return -dir;
+          return (
+            dir *
+            (new Date(a.deadline).getTime() - new Date(b.deadline).getTime())
+          );
+        }
+
+        if (key === "weighting") {
+          const aWeight = a.weighting ?? 0;
+          const bWeight = b.weighting ?? 0;
+          return dir * (aWeight - bWeight);
+        }
+
+        if (key === "priority") {
+          const priorityOrder = { high: 3, medium: 2, low: 1, undefined: 0 };
+          const aVal =
+            priorityOrder[a.priority as keyof typeof priorityOrder] || 0;
+          const bVal =
+            priorityOrder[b.priority as keyof typeof priorityOrder] || 0;
+          return dir * (aVal - bVal);
+        }
+
+        // Default sort for createdAt and other fields
+        const aVal = a[key as keyof Task] as any;
+        const bVal = b[key as keyof Task] as any;
+
+        if (!aVal && !bVal) return 0;
+        if (!aVal) return dir;
+        if (!bVal) return -dir;
+
+        return dir * (aVal > bVal ? 1 : aVal < bVal ? -1 : 0);
+      });
+    },
+    [filters, sortBy, sortDirection]
+  );
+
+
+
+
+  // UPDATE LOGIC
   const handleSaveDescription = () => {
-    const updatedAssignment = {
-      ...assignment,
-      description: editedDescription,
-    };
-    onUpdate(updatedAssignment);
+
+    onAssignmentUpdate(assignment.id,{description: editedDescription});
     setIsEditingDescription(false);
   };
 
+  //DISPLAY METHODS
+    const bgColor: string = getCardBgColor(assignment.tasks, assignment.deadline);
 
+  const getTasksByStatus = useCallback(
+    (status: string) => {
+      return applyFiltersAndSort(
+        tasks.filter((task) => task.status === status)
+      );
+    },
+    [tasks, applyFiltersAndSort]
+  );
 
-  // Update the kanban board rendering to ensure proper scrolling
-  const renderStatusView = () => {
-  return (<div className="kanbanBoard">
-      <div className="kanbanColumn">
-        <div className="columnHeader">
-          <div className="columnHeaderTitle">
-            {getStatusIcon("To-Do")}
-            <h3>To Do</h3>
-          </div>
-          <span className="taskCount">{getTasksByStatus("To-Do").length}</span>
-        </div>
-        <Droppable droppableId="To-Do">
-          {(provided) => (
-            <div
-              className="columnContent"
-              {...provided.droppableProps}
-              ref={provided.innerRef}
-            >
-              {getTasksByStatus("To-Do").map((task, index) => (
-                <Draggable key={task.id} draggableId={task.id} index={index}>
-                  {(provided) => (
-                    <div
-                      ref={provided.innerRef}
-                      {...provided.draggableProps}
-                      {...provided.dragHandleProps}
-                    >
-                      <TaskCard
-                        task={task}
-                        onStatusChange={handleTaskStatusChange}
-                      />
-                    </div>
-                  )}
-                </Draggable>
-              ))}
-              {provided.placeholder}
-            </div>
+  const getTasksByMember = useCallback(
+    (member: User | null) => {
+      if (member === null) {
+        return applyFiltersAndSort(
+          tasks.filter(
+            (task) =>
+              !Array.isArray(task.assignee) || task.assignee.length === 0
+          )
+        );
+      }
+
+      return applyFiltersAndSort(
+        tasks.filter(
+          (task) =>
+            Array.isArray(task.assignee) &&
+            task.assignee.some((assignee) => assignee.id === member.id)
+        )
+      );
+    },
+    [tasks, applyFiltersAndSort]
+  );
+
+  const statusColumns = useMemo(
+    () =>
+      ["To-Do", "In Progress", "Completed"].map((status) => {
+        const statusTasks = getTasksByStatus(status);
+        return {
+          status,
+          tasks: statusTasks,
+          icon: getStatusIcon(status),
+        };
+      }),
+    [getTasksByStatus]
+  );
+
+  const renderStatusView = () => (
+    <div className="kanbanBoard">
+      {statusColumns.map(({ status, tasks, icon }) => (
+        <TaskKanbanColumn
+          key={status}
+          title={status}
+          droppableId={status}
+          items={tasks}
+          headerContent={icon}
+          renderItem={(task) => (
+            <TaskCard
+            key={task.id}
+            task={task}
+            onDelete={onTaskDelete}
+            onEdit={() => openTaskForm(task)}
+            onStatusChange={taskStatusChange}
+          />
           )}
-        </Droppable>
-      </div>
+        />
+      ))}
+    </div>
+  );
 
-      <div className="kanbanColumn">
-        <div className="columnHeader">
-          <div className="columnHeaderTitle">
-            {getStatusIcon("In Progress")}
-            <h3>In Progress</h3>
-          </div>
-          <span className="taskCount">
-            {getTasksByStatus("In Progress").length}
-          </span>
-        </div>
-        <Droppable droppableId="In Progress">
-          {(provided) => (
-            <div
-              className="columnContent"
-              {...provided.droppableProps}
-              ref={provided.innerRef}
-            >
-              {getTasksByStatus("In Progress").map((task, index) => (
-                <Draggable key={task.id} draggableId={task.id} index={index}>
-                  {(provided) => (
-                    <div
-                      ref={provided.innerRef}
-                      {...provided.draggableProps}
-                      {...provided.dragHandleProps}
-                    >
-                      <TaskCard
-                        task={task}
-                        onStatusChange={handleTaskStatusChange}
-                      />
-                    </div>
-                  )}
-                </Draggable>
-              ))}
-              {provided.placeholder}
-            </div>
-          )}
-        </Droppable>
-      </div>
+  const memberColumns = useMemo(() => {
+    // Unassigned column
+    // Member columns
+    const memberColumnsData = members.map((member) => {
+      const memberTasks = getTasksByMember(member);
+      const progress = memberProgress[member.id] || 0;
 
-      <div className="kanbanColumn">
-        <div className="columnHeader">
-          <div className="columnHeaderTitle">
-            {getStatusIcon("Completed")}
-            <h3>Completed</h3>
-          </div>
-          <span className="taskCount">
-            {getTasksByStatus("Completed").length}
-          </span>
-        </div>
-        <Droppable droppableId="Completed">
-          {(provided) => (
-            <div
-              className="columnContent"
-              {...provided.droppableProps}
-              ref={provided.innerRef}
-            >
-              {getTasksByStatus("Completed").map((task, index) => (
-                <Draggable key={task.id} draggableId={task.id} index={index}>
-                  {(provided) => (
-                    <div
-                      ref={provided.innerRef}
-                      {...provided.draggableProps}
-                      {...provided.dragHandleProps}
-                    >
-                      <TaskCard
-                        task={task}
-                        onStatusChange={handleTaskStatusChange}
-                      />
-                    </div>
-                  )}
-                </Draggable>
-              ))}
-              {provided.placeholder}
-            </div>
-          )}
-        </Droppable>
-      </div>
-    </div>)
-  };
+      return {
+        member,
+        tasks: memberTasks,
+        progress,
+      };
+    });
 
-  // render members
-  const renderMemberView = () => {
-    const members = getUniqueAssignees();
+    return {
+      members: memberColumnsData,
+    };
+  }, [getTasksByMember, assignment.members, memberProgress]);
 
-    return (
-      <div className="kanbanBoard">
-        <div className="kanbanColumn">
-          <div className="columnHeader memberHeader">
-            <div className="memberHeaderInfo">
-              <div className="memberAvatar unassigned">
-                <HelpCircle size={16} />
-              </div>
-              <h3>Unassigned</h3>
-            </div>
-            <span className="taskCount">{getTasksByMember(null).length}</span>
-          </div>
-          <Droppable droppableId="unassigned">
-            {(provided) => (
-              <div
-                className="columnContent"
-                {...provided.droppableProps}
-                ref={provided.innerRef}
-              >
-                {getTasksByMember(null).map((task, index) => (
-                  <Draggable key={task.id} draggableId={task.id} index={index}>
-                    {(provided) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                      >
-                        <TaskCard
-                          task={task}
-                          onStatusChange={handleTaskStatusChange}
-                        />
-                      </div>
-                    )}
-                  </Draggable>
+  const renderMemberView = () => (
+    <div className="kanbanBoard">
+      <TaskKanbanColumn
+        title="Unassigned"
+        droppableId="unassigned"
+        items={getTasksByMember(null)}
+        headerContent={<HelpCircle size={16} />}
+        renderItem={(task) => (
+          <TaskCard
+          key={task.id}
+          task={task}
+          onDelete={onTaskDelete}
+          onEdit={() => openTaskForm(task)}
+          onStatusChange={taskStatusChange}
+        />
+        )}
+      />
+
+      {memberColumns.members.map(({ member, tasks, progress }) => {
+        return (
+          <TaskKanbanColumn
+            key={member.id}
+            title={member.name}
+            droppableId={member.id}
+            items={tasks}
+            headerContent={<div className="memberAvatar">{member.name[0]}</div>}
+            footerContent={
+              <div className="memberTaskStats">
+                {["To-Do", "In Progress", "Completed"].map((status) => (
+                  <div className="taskStatItem" key={status}>
+                    <span className={`taskStatDot ${status}`}></span>
+                    <span className="taskStatLabel">{status}:</span>
+                    <span className="taskStatValue">
+                      {tasks.filter((t) => t.status === status).length}
+                    </span>
+                  </div>
                 ))}
-                {provided.placeholder}
-              </div>
-            )}
-          </Droppable>
-        </div>
-
-        {/* todo: create member column */}
-        {members.map((member) => (
-          <div className="kanbanColumn" key={member}>
-            <div className="columnHeader memberHeader">
-              <div className="memberHeaderInfo">
-                <div className="memberAvatar">
-                  {member.charAt(0).toUpperCase()}
-                </div>
-                <h3>{member}</h3>
-              </div>
-              <div className="memberStats">
                 <div className="memberProgress">
                   <div
                     className="memberProgressBar"
-                    style={{ width: `${memberProgress[member] || 0}%` }}
+                    style={{ width: `${progress}%` }}
                   ></div>
-                  <span className="memberProgressText">
-                    {memberProgress[member] || 0}%
-                  </span>
+                  <span className="memberProgressText">{progress}%</span>
                 </div>
-                <span className="taskCount">
-                  {getTasksByMember(member).length}
-                </span>
               </div>
-            </div>
-            <div className="memberTaskStats">
-              <div className="taskStatItem">
-                <span className="taskStatDot todo"></span>
-                <span className="taskStatLabel">To Do:</span>
-                <span className="taskStatValue">
-                  {
-                    getTasksByMember(member).filter((t) => t.status === "To-Do")
-                      .length
-                  }
-                </span>
-              </div>
-              <div className="taskStatItem">
-                <span className="taskStatDot In Progress"></span>
-                <span className="taskStatLabel">In Progress:</span>
-                <span className="taskStatValue">
-                  {
-                    getTasksByMember(member).filter(
-                      (t) => t.status === "In Progress"
-                    ).length
-                  }
-                </span>
-              </div>
-              <div className="taskStatItem">
-                <span className="taskStatDot completed"></span>
-                <span className="taskStatLabel">Completed:</span>
-                <span className="taskStatValue">
-                  {
-                    getTasksByMember(member).filter(
-                      (t) => t.status === "Completed"
-                    ).length
-                  }
-                </span>
-              </div>
-            </div>
-            <Droppable droppableId={member}>
-              {(provided) => (
-                <div
-                  className="columnContent memberTasks"
-                  {...provided.droppableProps}
-                  ref={provided.innerRef}
-                >
-                  {getTasksByMember(member).map((task, index) => (
-                    <Draggable
-                      key={task.id}
-                      draggableId={task.id}
-                      index={index}
-                    >
-                      {(provided) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                        >
-                          <TaskCard
-                            task={task}
-                            onStatusChange={handleTaskStatusChange}
-                          />
-                        </div>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
-          </div>
-        ))}
-      </div>
-    );
-  };
+            }
+            renderItem={(task) => (
+              <TaskCard
+                key={task.id}
+                task={task}
+                onDelete={onTaskDelete}
+                onEdit={() => openTaskForm(task)}
+                onStatusChange={taskStatusChange}
+              />
+            )}
+          />
+        );
+      })}
+    </div>
+  );
 
-  // const daysRemaining: number = calculateDaysRemaining(assignment.deadline)
-  const bgColor: string = getCardBgColor(assignment.tasks,assignment.deadline)
 
+  // REVIEW
   useEffect(() => {
     if (assignment && assignment.tasks) {
-      // Convert todos to tasks format if needed
-      // WHY DO WE NEED TODOS
-
       setTasks(assignment.tasks);
-      calculateMemberProgress(assignment.tasks);
-
-      calcProgress(assignment.tasks);
+      // calcProgress(assignment.tasks);
+      // calculateMemberProgress(assignment.tasks);
     } else {
       setTasks([]);
     }
 
-    if (assignment) {
-      setEditedDescription(assignment.description);
-    }
-
-    // Add click outside listener for menus TODO: MOVE LOGIC INTO MENUS?
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        filterMenuRef.current &&
-        !filterMenuRef.current.contains(event.target as Node)
-      ) {
-        setIsFilterMenuOpen(false);
-      }
-      if (
-        sortMenuRef.current &&
-        !sortMenuRef.current.contains(event.target as Node)
-      ) {
-        setIsSortMenuOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [assignment, calculateMemberProgress]);
-
+    // if (assignment) {
+    //   setEditedDescription(assignment.description || "");
+    // }
+  }, [
+    assignment,
+    assignment.tasks,
+    setTasks,
+    calcProgress,
+    calculateMemberProgress,
+    setEditedDescription,
+  ]);
 
   return (
     <div className="expandedViewOverlay">
@@ -698,8 +595,8 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
           className="expandedViewHeader"
           style={{ backgroundColor: bgColor || "#DD992B" }}
         >
-          <button className="backButton" onClick={onClose}>
-            <ChevronLeft size={24} />
+          <button className="backButton" onClick={onMinimise}>
+            <Minimize2 size={24} />
           </button>
           <div className="headerContent">
             <h2 className="assignmentTitle">{assignment.title}</h2>
@@ -714,7 +611,7 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
                 <span>{assignment.files?.length || 0} files</span>
               </div>
               <div className="metaItem">
-                <User size={16} />
+                <UserIcon size={16} />
                 <span>{assignment.members?.length || 0} members</span>
               </div>
               <div className="metaItem">
@@ -738,12 +635,13 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
           <div className="descriptionSection">
             <div className="sectionHeader">
               <h3 className="sectionTitle">Description</h3>
-              <button
+
+              {/* <button
                 className="editButton"
                 onClick={() => setIsEditingDescription(!isEditingDescription)}
               >
                 <Edit size={16} />
-              </button>
+              </button> */}
             </div>
 
             {isEditingDescription ? (
@@ -773,260 +671,41 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
               <p className="descriptionText">{assignment.description}</p>
             )}
           </div>
-
-          {assignment.files && assignment.files.length > 0 && (
-            <div className="filesSection">
-              <div className="sectionHeader">
-                <h3 className="sectionTitle">Files</h3>
-                <button
-                  className="toggleFilesButton"
-                  onClick={() => setShowFiles(!showFiles)}
-                >
-                  {showFiles ? (
-                    <ChevronDown size={18} />
-                  ) : (
-                    <ChevronRight size={18} />
-                  )}
-                </button>
-              </div>
-
-              {showFiles && (
-                <div className="filesContainer">
-                  {assignment.files && assignment.files.length > 0
-                    ? assignment.files.map(
-                        (file: FileAttachment, index: number) => (
-                          <div key={index} className="fileItem">
-                            <FileText size={16} />
-                            {/* TODO: allow for file download - should confirm */}
-                            <span className="fileName">{file.name}</span>
-                          </div>
-                        )
-                      )
-                    : null}
-
-                  {assignment.links && assignment.links.length > 0
-                    ? assignment.links.map(
-                        (
-                          link: { url: string; title: string },
-                          index: number
-                        ) => (
-                          <div
-                            key={`link-${index}`}
-                            className="fileItem linkItem"
-                          >
-                            <Link size={16} />
-                            <a
-                              href={link.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="fileName linkName"
-                            >
-                              {link.title}
-                            </a>
-                          </div>
-                        )
-                      )
-                    : null}
-
-                  {(!assignment.files || assignment.files.length === 0) &&
-                    (!assignment.links || assignment.links.length === 0) && (
-                      <div className="emptyFilesState">
-                        No files or links attached
-                      </div>
-                    )}
-
-                  <div className="fileActions">
-                    <button className="fileActionButton">
-                      <Upload size={16} />
-                      <span>Upload File</span>
-                    </button>
-                    <button className="fileActionButton">
-                      <Link size={16} />
-                      <span>Add Link</span>
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
+          <div className="filesSection">
+            <FilesLinksSection
+              showFiles={showFiles}
+              setShowFiles={setShowFiles}
+              files={assignment.files}
+              links={assignment.links}
+            />
+          </div>
           <div className="toolbarContainer">
-            <div className="viewToggle">
-              <button
-                className={`viewToggleButton ${
-                  viewMode === "status" ? "active" : ""
-                }`}
-                onClick={() => setViewMode("status")}
-              >
-                <LayoutGrid size={18} />
-                <span>Status View</span>
-              </button>
-              <button
-                className={`viewToggleButton ${
-                  viewMode === "member" ? "active" : ""
-                }`}
-                onClick={() => setViewMode("member")}
-              >
-                <Users size={18} />
-                <span>Member View</span>
-              </button>
-            </div>
+
+          <ViewToggle
+            currentView={viewMode}
+            onViewChange={switchViewMode}
+            options={viewOptions}
+          />
 
             <div className="viewDescription">
-              {viewMode === "status" ? (
+              {viewMode.label === "Status View" ? (
                 <p>Organize tasks by their current status</p>
               ) : (
                 <p>View tasks assigned to each team member</p>
               )}
             </div>
 
+            {/* task actions */}
             <div className="taskActions">
               {/* filter  */}
-              <div className="filterContainer" ref={filterMenuRef}>
-                <button className="actionButton" onClick={toggleFilterMenu}>
-                  <Filter size={18} />
-                  <span>Filter</span>
-                </button>
-
-                {isFilterMenuOpen && (
-                  <div className="filterMenu">
-                    <div className="filterSection">
-                      <h4>Status</h4>
-                      <div className="filterOptions">
-                        <label className="filterOption">
-                          <input
-                            type="checkbox"
-                            checked={filters.status.includes("To-Do")}
-                            onChange={() =>
-                              handleFilterChange("status", "To-Do")
-                            }
-                          />
-                          <span>To Do</span>
-                        </label>
-                        <label className="filterOption">
-                          <input
-                            type="checkbox"
-                            checked={filters.status.includes("In Progress")}
-                            onChange={() =>
-                              handleFilterChange("status", "In Progress")
-                            }
-                          />
-                          <span>In Progress</span>
-                        </label>
-                        <label className="filterOption">
-                          <input
-                            type="checkbox"
-                            checked={filters.status.includes("Completed")}
-                            onChange={() =>
-                              handleFilterChange("status", "Completed")
-                            }
-                          />
-                          <span>Completed</span>
-                        </label>
-                        <label className="filterOption">
-                          <input
-                            type="checkbox"
-                            checked={filters.status.includes("unassigned")}
-                            onChange={() =>
-                              handleFilterChange("status", "unassigned")
-                            }
-                          />
-                          <span>Unassigned</span>
-                        </label>
-                      </div>
-                    </div>
-
-                    <div className="filterSection">
-                      <h4>Priority</h4>
-                      <div className="filterOptions">
-                        <label className="filterOption">
-                          <input
-                            type="checkbox"
-                            checked={filters.priority.includes("high")}
-                            onChange={() =>
-                              handleFilterChange("priority", "high")
-                            }
-                          />
-                          <span>High</span>
-                        </label>
-                        <label className="filterOption">
-                          <input
-                            type="checkbox"
-                            checked={filters.priority.includes("medium")}
-                            onChange={() =>
-                              handleFilterChange("priority", "medium")
-                            }
-                          />
-                          <span>Medium</span>
-                        </label>
-                        <label className="filterOption">
-                          <input
-                            type="checkbox"
-                            checked={filters.priority.includes("low")}
-                            onChange={() =>
-                              handleFilterChange("priority", "low")
-                            }
-                          />
-                          <span>Low</span>
-                        </label>
-                      </div>
-                    </div>
-
-                    <div className="filterSection">
-                      <h4>Due Date</h4>
-                      <div className="filterOptions">
-                        <label className="filterOption">
-                          <input
-                            type="radio"
-                            name="deadline"
-                            checked={filters.deadline === "all"}
-                            onChange={() =>
-                              handleFilterChange("deadline", "all")
-                            }
-                          />
-                          <span>All</span>
-                        </label>
-                        <label className="filterOption">
-                          <input
-                            type="radio"
-                            name="deadline"
-                            checked={filters.deadline === "today"}
-                            onChange={() =>
-                              handleFilterChange("deadline", "today")
-                            }
-                          />
-                          <span>Today</span>
-                        </label>
-                        <label className="filterOption">
-                          <input
-                            type="radio"
-                            name="deadline"
-                            checked={filters.deadline === "week"}
-                            onChange={() =>
-                              handleFilterChange("deadline", "week")
-                            }
-                          />
-                          <span>This Week</span>
-                        </label>
-                        <label className="filterOption">
-                          <input
-                            type="radio"
-                            name="deadline"
-                            checked={filters.deadline === "month"}
-                            onChange={() =>
-                              handleFilterChange("deadline", "month")
-                            }
-                          />
-                          <span>This Month</span>
-                        </label>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
+              <TaskFilter
+                filters={filters}
+                onChange={handleFilterChange}
+                isOpen={isFilterMenuOpen}
+                toggleOpen={toggleFilterMenu}
+              />
               {/* sort */}
-              <div className="sortContainer" ref={sortMenuRef}>
+              <div className="sortContainer">
                 <SortMenu
                   sortMenuOpen={isSortMenuOpen}
                   setSortMenuOpen={toggleSortMenu}
@@ -1034,15 +713,13 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
                   sortDirection={sortDirection}
                   handleSortChange={handleSortChange}
                   options={sortOptions}
-                
                 />
-
               </div>
 
               {/* add task */}
               <button
                 className="createTaskButton"
-                onClick={() => setIsCreateTaskModalOpen(true)}
+                onClick={() => openTaskForm()}
               >
                 <Plus size={18} />
                 <span>New Task</span>
@@ -1050,24 +727,14 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
             </div>
           </div>
 
+          {/* Kanban view */}
           <DragDropContext onDragEnd={handleDragEnd}>
-            {viewMode === "status" ? renderStatusView() : renderMemberView()}
+            {viewMode.label === "Status View" ? renderStatusView() : renderMemberView()}
           </DragDropContext>
         </div>
       </div>
-
-      
-      {/* todo: fix */}
-      <CreateTaskModal
-        isOpen={isCreateTaskModalOpen}
-        onClose={() => setIsCreateTaskModalOpen(false)}
-        onSave={handleCreateTask}
-        members={assignment.members || []}
-        maxWeight={assignment.weight || 100}
-        currentWeight={tasks.reduce((sum, task) => sum + (task.weight?task.weight:1), 0)}
-      />
-    </div>
-  );
+      </div>
+    );
 };
 
 export default ExpandedAssignmentView;

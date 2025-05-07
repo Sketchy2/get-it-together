@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useRef, useState } from "react"
 import {
   CheckCircle,
   Circle,
@@ -19,18 +19,24 @@ import {
 } from "lucide-react"
 import "./TaskCard.css"
 import { Task, TaskStatus } from "@/types/task"
+import { useOnClickOutside } from "@/utils/utils"
 
 
 
 interface TaskCardProps {
   task: Task
+  onEdit:(task:Task)=>void
+  onDelete:(taskId: string)=>void
   onStatusChange: (taskId: string, newStatus: TaskStatus) => void
 }
 
-const TaskCard: React.FC<TaskCardProps> = ({ task, onStatusChange }) => {
+const TaskCard: React.FC<TaskCardProps> = ({ task,onEdit,onDelete, onStatusChange }) => {
   const [isExpanded, setIsExpanded] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [newComment, setNewComment] = useState("")
+  const menuRef = useRef<HTMLDivElement>(null);
+  useOnClickOutside(menuRef, () => {
+    setIsMenuOpen(false);
+  });
 
   const toggleExpanded = () => {
     setIsExpanded(!isExpanded)
@@ -41,7 +47,9 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onStatusChange }) => {
     onStatusChange(task.id, newStatus)
   }
 
+
   const handleStatusChange = (newStatus:TaskStatus) => {
+    console.log(newStatus)
     onStatusChange(task.id, newStatus)
     setIsMenuOpen(false)
   }
@@ -77,7 +85,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onStatusChange }) => {
 
   const priorityInfo = getPriorityInfo()
 
-  // Calculate days remaining or overdue
+  // Calculate days remaining or overdue TODO: make util func
   const getDaysInfo = () => {
     if (!task.deadline) return null
 
@@ -98,7 +106,6 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onStatusChange }) => {
   }
 
   const daysInfo = getDaysInfo()
-
   return (
     <div className={`taskCard ${task.status == "Completed" ? "completed" : ""} ${task.status} ${isExpanded ? "expanded" : ""} `}
           style={{borderLeftColor:getStatusColor()}}
@@ -125,10 +132,10 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onStatusChange }) => {
               {task.status === "In Progress" && "In Progress"}
               {task.status === "Completed" && "Completed"}
             </div>
-            {task.weight && task.weight > 1 && (
+            {task.weighting && task.weighting > 1 && (
               <div className="taskWeightBadge">
                 <Weight size={12} />
-                <span>{task.weight}x</span>
+                <span>{task.weighting}x</span>
               </div>
             )}
             {task.priority && (
@@ -155,7 +162,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onStatusChange }) => {
             </button>
 
             {isMenuOpen && (
-              <div className="menuDropdown">
+              <div ref={menuRef}className="menuDropdown">
                 <button className="menuItem" onClick={() => handleStatusChange("To-Do")}>
                   <Clock size={14} />
                   <span>Move to To Do</span>
@@ -169,11 +176,11 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onStatusChange }) => {
                   <span>Mark as Completed</span>
                 </button>
                 <div className="menuDivider"></div>
-                <button className="menuItem">
+                <button className="menuItem" onClick={()=>onEdit(task)}>
                   <Edit size={14} />
                   <span>Edit Task</span>
                 </button>
-                <button className="menuItem delete">
+                <button className="menuItem delete" onClick={()=>onDelete(task.id)}>
                   <Trash size={14} />
                   <span>Delete Task</span>
                 </button>
@@ -184,6 +191,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onStatusChange }) => {
       </div>
 
 
+{/* EXTENDED DETAILS */}
       {isExpanded && (
         <div className="taskCardContent">
           {task.description && <p className="taskDescription">{task.description}</p>}
@@ -196,9 +204,10 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onStatusChange }) => {
               </div>
               <div className="taskDetailValue">
                 {task.assignee ? (
+                  // TODO: SHOW MULTIPLE USERS
                   <div className="assigneeInfo">
-                    <div className="assigneeAvatar">{task.assignee.charAt(0).toUpperCase()}</div>
-                    <span>{task.assignee}</span>
+                    <div className="assigneeAvatar">{task.assignee[0].name.charAt(0).toUpperCase()}</div>
+                    <span>{task.assignee[0].name}</span>
                   </div>
                 ) : (
                   <span className="unassigned">Unassigned</span>
@@ -228,7 +237,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onStatusChange }) => {
             <div className="taskDetailItem">
               <div className="taskDetailLabel">
                 <Weight size={14} />
-                <span>Weight</span>
+                <span>weighting</span>
               </div>
               <div className="taskDetailValue">
                 <div className="weightInfo">
@@ -236,13 +245,13 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onStatusChange }) => {
                     {Array.from({ length: 5 }).map((_, i) => (
                       <div
                         key={i}
-                        className={`weightUnit ${i < (task.weight || 1) ? "active" : ""}`}
-                        style={{ opacity: i < (task.weight || 1) ? 1 : 0.3 }}
+                        className={`weightUnit ${i < (task.weighting || 1) ? "active" : ""}`}
+                        style={{ opacity: i < (task.weighting || 1) ? 1 : 0.3 }}
                       ></div>
                     ))}
                   </div>
                   <span>
-                    {task.weight || 1}x weight ({task.weight ? task.weight * 20 : 20}% of total)
+                    {task.weighting || 1}x weighting ({task.weighting ? task.weighting * 20 : 20}% of total)
                   </span>
                 </div>
               </div>
@@ -259,42 +268,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onStatusChange }) => {
             </div>
           </div>
 
-          {/* mb keep if want to add commenting functionality
-           {task.comments && task.comments.length > 0 && (
-            <div className="taskComments">
-              <div className="taskCommentsHeader">
-                <MessageSquare size={14} />
-                <span>Comments ({task.comments.length})</span>
-              </div>
-              <div className="commentsList">
-                {task.comments.map((comment, index) => (
-                  <div key={index} className="commentItem">
-                    <div className="commentHeader">
-                      <div className="commentAuthor">
-                        <div className="commentAvatar">{comment.author.charAt(0).toUpperCase()}</div>
-                        <span>{comment.author}</span>
-                      </div>
-                      <span className="commentDate">{formatDate(comment.date)}</span>
-                    </div>
-                    <p className="commentText">{comment.text}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )} */}
 
-          <div className="addCommentForm">
-            <input
-              type="text"
-              placeholder="Add a comment..."
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              className="commentInput"
-            />
-            <button className="commentButton" disabled={!newComment.trim()}>
-              Add
-            </button>
-          </div>
         </div>
       )}
     </div>
