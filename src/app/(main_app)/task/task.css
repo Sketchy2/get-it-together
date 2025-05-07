@@ -1,276 +1,327 @@
-/* Enhanced tasks.css with improved aesthetics */
 .tasksPageContainer {
-    padding: 32px;
-    max-width: 1200px;
-    margin: 0 auto;
-    color: white;
+  max-width: 1200px;
+  min-width: 600px;
+  margin: 0 auto;
+  padding: 3%;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.assignmentHeader {
+  max-width: 1200px;
+  margin: 0 auto;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  margin-bottom: 50px; /* Increased spacing between header and filters */
+}
+
+.title {
+  font-size: 3rem;
+  font-weight: 600;
+  margin: 0;
+  color: white;
+}
+
+.tasksToolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px; /* Reduced to accommodate the divider */
+  flex-wrap: nowrap;
+  gap: 20px;
+}
+
+.tasksToolbarLeft {
+  flex: 1; /* Take up available space */
+  display: flex;
+  align-items: center;
+}
+
+.tasksToolbarRight {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  align-self: flex-start;
+}
+
+/* Added divider line below filters */
+.filterDividerLine {
+  height: 1px;
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.1);
+  margin-bottom: 20px;
+}
+
+/* Remove the container background */
+.assignmentsContainer {
+  display: block;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  height: auto; /* Changed from fixed height to auto */
+  min-height: 200px; /* Minimum height to prevent it from collapsing completely */
+  width: 100%;
+  max-width: 1200px;
+  min-width: 600px;
+  margin: 0 auto;
+  padding: 2%;
+  padding-bottom: 100px; /* Add bottom padding */
+  color: white;
+  overflow-y: visible; /* Changed from auto to visible */
+  overflow-x: hidden;
+  position: relative;
+  /* Removed background-color and border-radius */
+}
+
+.tasksContent {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  overflow-y: visible;
+  padding-bottom: 60px;
+  margin-bottom: 60px; /* Add bottom margin */
+}
+
+.emptyTasksMessage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  text-align: center;
+  color: #888;
+}
+
+.emptyTasksMessage h3 {
+  margin: 16px 0 8px;
+  font-size: 1.5rem;
+}
+
+.emptyTasksMessage p {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 60vh;
+  color: white;
+}
+
+.loadingSpinner {
+  border: 4px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  border-top: 4px solid white;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
   }
-  
-  .tasksHeader {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 32px;
+  100% {
+    transform: rotate(360deg);
   }
-  
-  .tasksTitle {
-    font-size: 2.5rem;
-    font-weight: 600;
-    margin: 0;
-    background: linear-gradient(90deg, #fff, #a3b1ff);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-shadow: 0 2px 10px rgba(163, 177, 255, 0.2);
-  }
-  
-  .tasksSummary {
-    display: flex;
-    gap: 16px;
-  }
-  
-  .tasksSummaryItem {
-    background: #3e4578;
+}
+
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 60vh;
+  color: white;
+  text-align: center;
+}
+
+.errorIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: #ff5555;
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 16px;
+}
+
+.errorContainer button {
+  margin-top: 16px;
+  padding: 8px 16px;
+  background-color: #333;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.errorContainer button:hover {
+  background-color: #444;
+}
+
+.addCard {
+  min-width: 230px;
+  height: 150px;
+  background-color: #2a2a2a;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-top: 20px;
+}
+
+.addCard:hover {
+  background-color: #3e3e3e;
+}
+
+/* Task Group Styling */
+.taskGroup {
+  background-color: #2a2a2a;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease; /* Add transition for smooth height changes */
+}
+
+.taskGroup.kanban {
+  width: 300px;
+  flex-shrink: 0;
+}
+
+.taskGroup.list {
+  width: 100%;
+}
+
+.taskGroupHeader {
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.taskGroupHeaderContent {
+  display: flex;
+  align-items: center;
+}
+
+.taskGroupHeaderIcon {
+  margin-right: 8px;
+}
+
+.taskGroupTitle {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  flex-grow: 1;
+}
+
+.taskGroupCount {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 2px 8px;
+  font-size: 0.8rem;
+}
+
+.taskGroupContent {
+  padding: 12px;
+  transition: max-height 0.3s ease; /* Add transition for smooth height changes */
+}
+
+.taskCardWrapper {
+  position: relative;
+  margin-bottom: 12px;
+}
+
+.taskAssignmentBadge {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: white;
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  max-width: 120px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.addTaskButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.addTaskButton:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Ensure proper scrolling */
+.assignmentsContainer::-webkit-scrollbar {
+  width: 12px !important;
+  height: 12px !important;
+}
+
+.assignmentsContainer::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.3) !important;
+  border-radius: 6px !important;
+  border: 2px solid transparent !important;
+}
+
+.assignmentsContainer::-webkit-scrollbar-track {
+  background-color: transparent !important;
+  border-radius: 6px !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .tasksPageContainer {
     padding: 16px;
-    border-radius: 16px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-width: 120px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    min-width: auto;
   }
-  
-  .tasksSummaryItem:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-  }
-  
-  .tasksSummaryLabel {
-    font-size: 0.9rem;
-    color: rgba(255, 255, 255, 0.7);
-    margin-bottom: 8px;
-    font-weight: 500;
-  }
-  
-  .tasksSummaryValue {
-    font-size: 2rem;
-    font-weight: 700;
-    background: linear-gradient(135deg, #fff, #a3b1ff);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-  
-  .tasksToolbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 32px;
-    background: #1e1e1e;
-    border-radius: 20px;
-    padding: 16px 24px;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-  }
-  
-  .tasksToolbarLeft,
-  .tasksToolbarRight {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-  
-  .tasksContent {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-  }
-  
-  .tasksContent.kanbanView {
-    flex-direction: row;
-    overflow-x: auto;
-    padding-bottom: 24px;
-    align-items: flex-start;
-    gap: 20px;
-  }
-  
-  .emptyTasksMessage {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 64px;
-    background: #232323;
-    border-radius: 20px;
-    text-align: center;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-  }
-  
-  .emptyTasksMessage svg {
-    opacity: 0.6;
-    margin-bottom: 16px;
-  }
-  
-  .emptyTasksMessage h3 {
-    margin: 16px 0 8px;
+
+  .title {
     font-size: 1.8rem;
-    font-weight: 600;
-    background: linear-gradient(90deg, #fff, #a3b1ff);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
   }
-  
-  .emptyTasksMessage p {
-    color: rgba(255, 255, 255, 0.7);
-    max-width: 400px;
-    font-size: 1.1rem;
-    line-height: 1.6;
-  }
-  
-  .loadingContainer {
-    display: flex;
+
+  .tasksToolbar {
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 60vh;
+    align-items: flex-start;
   }
-  
-  .loadingSpinner {
-    width: 60px;
-    height: 60px;
-    border: 4px solid rgba(77, 86, 150, 0.2);
-    border-radius: 50%;
-    border-top-color: #a3b1ff;
-    animation: spin 1s linear infinite;
-    margin-bottom: 24px;
-    box-shadow: 0 0 20px rgba(163, 177, 255, 0.3);
+
+  .tasksToolbarRight {
+    width: 100%;
+    justify-content: space-between;
   }
-  
-  @keyframes spin {
-    0% {
-      transform: rotate(0deg);
-    }
-    100% {
-      transform: rotate(360deg);
-    }
-  }
-  
-  .errorContainer {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 60vh;
-    text-align: center;
-  }
-  
-  .errorIcon {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #e74c3c, #c0392b);
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2.5rem;
-    font-weight: bold;
-    margin-bottom: 24px;
-    box-shadow: 0 8px 16px rgba(231, 76, 60, 0.3);
-  }
-  
-  .errorContainer h2 {
-    font-size: 2rem;
-    margin-bottom: 16px;
-    background: linear-gradient(90deg, #fff, #ffaaaa);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-  
-  .errorContainer p {
-    color: rgba(255, 255, 255, 0.8);
-    font-size: 1.1rem;
-    margin-bottom: 24px;
-  }
-  
-  .errorContainer button {
-    margin-top: 16px;
-    background: linear-gradient(135deg, #4d5696, #3e4578);
-    color: white;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-size: 1rem;
-    font-weight: 500;
-    box-shadow: 0 4px 12px rgba(77, 86, 150, 0.4);
-  }
-  
-  .errorContainer button:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(77, 86, 150, 0.6);
-  }
-  
-  /* Custom scrollbar styling */
-  .tasksContent.kanbanView::-webkit-scrollbar {
-    height: 8px;
-  }
-  
-  .tasksContent.kanbanView::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 4px;
-  }
-  
-  .tasksContent.kanbanView::-webkit-scrollbar-thumb {
-    background: rgba(77, 86, 150, 0.5);
-    border-radius: 4px;
-    border: 2px solid rgba(0, 0, 0, 0.2);
-  }
-  
-  .tasksContent.kanbanView::-webkit-scrollbar-thumb:hover {
-    background: rgba(77, 86, 150, 0.7);
-  }
-  
-  /* Responsive adjustments */
-  @media (max-width: 768px) {
-    .tasksPageContainer {
-      padding: 24px 16px;
-    }
-  
-    .tasksHeader {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 24px;
-    }
-  
-    .tasksSummary {
-      width: 100%;
-      justify-content: space-between;
-    }
-  
-    .tasksSummaryItem {
-      flex: 1;
-      min-width: 0;
-    }
-  
-    .tasksToolbar {
-      flex-direction: column;
-      gap: 20px;
-      padding: 16px;
-    }
-  
-    .tasksToolbarLeft,
-    .tasksToolbarRight {
-      width: 100%;
-      justify-content: space-between;
-    }
-  
-    .tasksContent.kanbanView {
-      flex-direction: column;
-      overflow-x: visible;
-    }
-  }
-  
+}
+
+/* Add this at the end of the file */
+.taskContainer {
+  padding-bottom: 40px; /* Add space at the bottom of the task container */
+  margin-bottom: 40px;
+}

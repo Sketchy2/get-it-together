@@ -1,23 +1,40 @@
 "use client"
 
+import type React from "react"
 import { useState } from "react"
-import { ChevronDown, ChevronRight } from "lucide-react"
+import { ChevronDown, ChevronRight, PlusIcon } from "lucide-react"
 import TaskCard from "@/components/task/TaskCard"
 import type { Task, TaskStatus } from "@/types/task"
+import { getCardBgColor } from "@/utils/assignmentUtils"
 import "./TaskGroup.css"
 
 interface TaskGroupProps {
   title: string
-  tasks: (Task & { assignmentId: string; assignmentTitle: string })[]
+  tasks: Task[]
   viewMode: "kanban" | "list"
-  onStatusChange: (taskId: string, newStatus: TaskStatus) => void
+  onStatusChange: (taskId: string, newStatus: TaskStatus) => void | Promise<void>
+  onCreateTask?: () => void
+  assignmentDeadline?: string
 }
 
-export default function TaskGroup({ title, tasks, viewMode, onStatusChange }: TaskGroupProps) {
+const TaskGroup: React.FC<TaskGroupProps> = ({
+  title,
+  tasks,
+  viewMode,
+  onStatusChange,
+  onCreateTask,
+  assignmentDeadline,
+}) => {
   const [isCollapsed, setIsCollapsed] = useState(false)
 
-  // Get color based on group title
+  // Get color based on group title or assignment status
   const getGroupColor = () => {
+    // If we have an assignment deadline, use the assignment color scheme
+    if (assignmentDeadline) {
+      return getCardBgColor(tasks, assignmentDeadline)
+    }
+
+    // Otherwise use the default color scheme
     if (title === "high" || title === "Overdue") return "#B55629"
     if (title === "medium" || title === "Today" || title === "This Week") return "#DD992B"
     if (title === "low" || title === "Next Week" || title === "Later") return "#647A67"
@@ -34,7 +51,7 @@ export default function TaskGroup({ title, tasks, viewMode, onStatusChange }: Ta
   }
 
   return (
-    <div className={`taskGroup ${viewMode === "kanban" ? "kanbanGroup" : "listGroup"}`}>
+    <div className={`taskGroup ${viewMode}`}>
       <div
         className="taskGroupHeader"
         style={{ backgroundColor: getGroupColor() }}
@@ -53,12 +70,20 @@ export default function TaskGroup({ title, tasks, viewMode, onStatusChange }: Ta
         <div className={`taskGroupContent ${viewMode === "kanban" ? "kanbanContent" : "listContent"}`}>
           {tasks.map((task) => (
             <div key={task.id} className="taskCardWrapper">
-              <TaskCard task={task} onStatusChange={onStatusChange} />
-              <div className="taskAssignmentBadge">{task.assignmentTitle}</div>
+              <TaskCard task={task} onStatusChange={(newStatus) => onStatusChange(task.id, newStatus)} />
             </div>
           ))}
+
+          {onCreateTask && (
+            <div className="addTaskButton" onClick={onCreateTask}>
+              <PlusIcon size={16} />
+              <span>Add Task</span>
+            </div>
+          )}
         </div>
       )}
     </div>
   )
 }
+
+export default TaskGroup

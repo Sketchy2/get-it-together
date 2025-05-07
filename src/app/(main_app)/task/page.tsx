@@ -1,140 +1,31 @@
 "use client"
 
 import { useState, useEffect, useMemo, useCallback } from "react"
-import { Calendar, Clock, Flag, CheckCircle, Layers, AlertTriangle, CheckSquare } from "lucide-react"
-import SortMenu from "@/components/SortMenu"
-import ViewToggle from "@/components/ViewToggle"
+import { Calendar, Clock, Flag, CheckCircle, PlusIcon } from "lucide-react"
+import SortMenu from "@/components/common/SortMenu"
 import type { Task, TaskStatus } from "@/types/task"
 import type { Assignment } from "@/types/assignment"
-import type { SortOption, SortDirection } from "@/types/sort"
+import type { SortOption, SortDirection, ViewMode } from "@/types/auxilary"
 import TaskGroup from "@/components/task/TaskGroup"
 import TaskFilterBar from "@/components/task/TaskFilterBar"
+import ActionButton from "@/components/common/ActionButton"
+import CreateTaskModal from "@/components/task/CreateTaskModal"
 import "./task.css"
-
-// Sample data generator function (would be replaced with API calls in production)
-const getSampleData = (): { assignments: Assignment[] } => {
-  const now = new Date()
-  const yesterday = new Date(now)
-  yesterday.setDate(yesterday.getDate() - 1)
-
-  const nextWeek = new Date(now)
-  nextWeek.setDate(nextWeek.getDate() + 7)
-
-  const lastWeek = new Date(now)
-  lastWeek.setDate(lastWeek.getDate() - 7)
-
-  const assignments: Assignment[] = [
-    {
-      id: "a1",
-      title: "Research Paper on Climate Change",
-      description: "A comprehensive analysis of climate change factors and their global impact.",
-      createdAt: lastWeek.toISOString(),
-      deadline: yesterday.toISOString(),
-      weighting: 40,
-      members: [{ id: "m1", name: "John Doe" }],
-      tasks: [
-        {
-          id: "t1",
-          title: "Research topic",
-          description: "Gather information from reliable sources",
-          status: "To-Do",
-          priority: "high",
-          weight: 2,
-          assignee: "John Doe",
-          deadline: nextWeek.toISOString(),
-          createdAt: lastWeek.toISOString(),
-        },
-        {
-          id: "t2",
-          title: "Create outline",
-          description: "Structure the document with main points",
-          status: "Completed",
-          priority: "medium",
-          weight: 1,
-          assignee: "John Doe",
-          deadline: yesterday.toISOString(),
-          createdAt: lastWeek.toISOString(),
-        },
-      ],
-      files: [],
-      links: [],
-    },
-    {
-      id: "a2",
-      title: "Literature Review",
-      description: "Review of major works in the field with critical analysis.",
-      createdAt: lastWeek.toISOString(),
-      deadline: nextWeek.toISOString(),
-      weighting: 30,
-      members: [{ id: "m1", name: "John Doe" }],
-      tasks: [
-        {
-          id: "t3",
-          title: "Write introduction",
-          description: "Provide context and thesis statement",
-          status: "In Progress",
-          priority: "medium",
-          weight: 3,
-          assignee: "John Doe",
-          deadline: nextWeek.toISOString(),
-          createdAt: lastWeek.toISOString(),
-        },
-        {
-          id: "t4",
-          title: "Analyze key papers",
-          description: "Critical analysis of 5 key papers in the field",
-          status: "To-Do",
-          priority: "high",
-          weight: 2,
-          assignee: "John Doe",
-          deadline: nextWeek.toISOString(),
-          createdAt: lastWeek.toISOString(),
-        },
-      ],
-      files: [],
-      links: [],
-    },
-    {
-      id: "a3",
-      title: "Group Presentation",
-      description: "Prepare slides and talking points for the final presentation.",
-      createdAt: lastWeek.toISOString(),
-      deadline: nextWeek.toISOString(),
-      weighting: 25,
-      members: [{ id: "m1", name: "John Doe" }],
-      tasks: [
-        {
-          id: "t5",
-          title: "Create slides",
-          description: "Design presentation slides with key points",
-          status: "To-Do",
-          priority: "low",
-          weight: 1,
-          assignee: "John Doe",
-          deadline: nextWeek.toISOString(),
-          createdAt: lastWeek.toISOString(),
-        },
-      ],
-      files: [],
-      links: [],
-    },
-  ]
-
-  return { assignments }
-}
 
 // Define grouping types
 type GroupBy = "assignment" | "priority" | "dueDate"
-type FilterStatus = "all" | "active" | "completed"
+type FilterStatus = "all" | "active" | "completed" | "To-Do" | "In Progress" | "Completed"
 
 export default function TasksPage() {
-  // State for tasks data
+  // State for tasks and assignments data
   const [assignments, setAssignments] = useState<Assignment[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const [selectedAssignmentId, setSelectedAssignmentId] = useState<string | null>(null)
 
-  // State for view options
-  const [viewMode, setViewMode] = useState<"kanban" | "list">("list")
+  // State for view options - removed ViewToggle
+  const [viewMode] = useState<ViewMode>({ label: "List" })
   const [groupBy, setGroupBy] = useState<GroupBy>("assignment")
   const [filterStatus, setFilterStatus] = useState<FilterStatus>("all")
   const [sortMenuOpen, setSortMenuOpen] = useState(false)
@@ -148,43 +39,42 @@ export default function TasksPage() {
   const [sortBy, setSortBy] = useState<SortOption>(sortOptions[0])
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc")
 
-  // Load data on component mount
+  // Load assignments data on component mount
   useEffect(() => {
-    setIsLoading(true)
-
-    // Simulate API call with timeout
-    const timer = setTimeout(() => {
+    const fetchAssignments = async () => {
       try {
-        const { assignments } = getSampleData()
-        setAssignments(assignments)
+        setIsLoading(true)
+        const res = await fetch("/api/assignments")
+        if (!res.ok) throw new Error("Failed to fetch assignments")
+
+        const data = await res.json()
+        setAssignments(data)
         setError(null)
       } catch (err) {
-        console.error("Error loading tasks:", err)
+        console.error("Error loading assignments:", err)
         setError("Failed to load tasks. Please try again.")
       } finally {
         setIsLoading(false)
       }
-    }, 1000)
+    }
 
-    return () => clearTimeout(timer)
+    fetchAssignments()
   }, [])
 
-  // Extract all tasks assigned to the current user
+  // Extract all tasks from assignments with assignment info
   const allTasks = useMemo(() => {
-    const tasks: (Task & { assignmentId: string; assignmentTitle: string })[] = []
+    const tasks: (Task & { assignmentTitle: string; assignmentDeadline: string })[] = []
 
     assignments.forEach((assignment) => {
-      assignment.tasks.forEach((task) => {
-        // Only include tasks assigned to the current user
-        // In a real app, you would check against the logged-in user
-        if (task.assignee === "John Doe") {
+      if (Array.isArray(assignment.tasks)) {
+        assignment.tasks.forEach((task) => {
           tasks.push({
             ...task,
-            assignmentId: assignment.id,
             assignmentTitle: assignment.title,
+            assignmentDeadline: assignment.deadline,
           })
-        }
-      })
+        })
+      }
     })
 
     return tasks
@@ -196,8 +86,11 @@ export default function TasksPage() {
       return allTasks
     } else if (filterStatus === "active") {
       return allTasks.filter((task) => task.status !== "Completed")
-    } else {
+    } else if (filterStatus === "completed") {
       return allTasks.filter((task) => task.status === "Completed")
+    } else {
+      // Filter by specific status
+      return allTasks.filter((task) => task.status === filterStatus)
     }
   }, [allTasks, filterStatus])
 
@@ -233,11 +126,12 @@ export default function TasksPage() {
 
   // Group tasks based on grouping option
   const groupedTasks = useMemo(() => {
-    const groups: Record<string, (Task & { assignmentId: string; assignmentTitle: string })[]> = {}
+    const groups: Record<string, (Task & { assignmentTitle: string; assignmentDeadline: string })[]> = {}
 
     if (groupBy === "assignment") {
+      // Group by assignment title
       sortedTasks.forEach((task) => {
-        const key = task.assignmentTitle
+        const key = task.assignmentTitle || "Unassigned"
         if (!groups[key]) {
           groups[key] = []
         }
@@ -302,30 +196,69 @@ export default function TasksPage() {
         setSortBy(sortOption)
         setSortDirection("asc")
       }
+      setSortMenuOpen(false)
     },
     [sortBy],
   )
 
+  // Find assignment by task
+  const findAssignmentByTask = useCallback(
+    (taskId: string) => {
+      for (const assignment of assignments) {
+        const task = assignment.tasks.find((t) => t.id === taskId)
+        if (task) {
+          return assignment
+        }
+      }
+      return null
+    },
+    [assignments],
+  )
+
   // Handle task status change
-  const handleTaskStatusChange = useCallback((taskId: string, newStatus: TaskStatus) => {
-    setAssignments((prevAssignments) => {
-      return prevAssignments.map((assignment) => {
-        const updatedTasks = assignment.tasks.map((task) => {
-          if (task.id === taskId) {
-            return { ...task, status: newStatus }
-          }
-          return task
+  const handleTaskStatusChange = useCallback(
+    async (taskId: string, newStatus: TaskStatus) => {
+      try {
+        // Find the assignment containing this task
+        const assignment = findAssignmentByTask(taskId)
+        if (!assignment) return
+
+        // Prepare the update data
+        const updateData = {
+          status: newStatus,
+        }
+
+        // Send the update to the API
+        const res = await fetch(`/api/tasks/${taskId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updateData),
         })
 
-        return { ...assignment, tasks: updatedTasks }
-      })
-    })
-  }, [])
+        if (!res.ok) throw new Error("Failed to update task status")
 
-  // Handle view mode toggle
-  const handleViewModeToggle = useCallback(() => {
-    setViewMode((prev) => (prev === "kanban" ? "list" : "kanban"))
-  }, [])
+        // Update the local state
+        setAssignments((prevAssignments) => {
+          return prevAssignments.map((a) => {
+            if (a.id === assignment.id) {
+              const updatedTasks = a.tasks.map((t) => {
+                if (t.id === taskId) {
+                  return { ...t, status: newStatus }
+                }
+                return t
+              })
+              return { ...a, tasks: updatedTasks }
+            }
+            return a
+          })
+        })
+      } catch (err) {
+        console.error("Error updating task status:", err)
+        // Optionally show an error toast/notification here
+      }
+    },
+    [findAssignmentByTask],
+  )
 
   // Handle group by change
   const handleGroupByChange = useCallback((newGroupBy: GroupBy) => {
@@ -336,6 +269,66 @@ export default function TasksPage() {
   const handleFilterStatusChange = useCallback((newStatus: FilterStatus) => {
     setFilterStatus(newStatus)
   }, [])
+
+  // Handle creating a new task
+  const handleCreateTask = useCallback(
+    async (newTaskData: any) => {
+      try {
+        if (!newTaskData.assignmentId && selectedAssignmentId) {
+          newTaskData.assignmentId = selectedAssignmentId
+        }
+
+        const res = await fetch("/api/tasks", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title: newTaskData.title,
+            description: newTaskData.description,
+            status: newTaskData.status,
+            priority: newTaskData.priority,
+            deadline: newTaskData.deadline,
+            assignmentId: newTaskData.assignmentId || selectedAssignmentId,
+          }),
+        })
+
+        if (!res.ok) throw new Error("Failed to create task")
+
+        const createdTask = await res.json()
+
+        // Update the local state
+        setAssignments((prevAssignments) => {
+          return prevAssignments.map((assignment) => {
+            if (assignment.id === createdTask.assignment.id) {
+              return {
+                ...assignment,
+                tasks: [...assignment.tasks, createdTask],
+              }
+            }
+            return assignment
+          })
+        })
+
+        setIsCreateModalOpen(false)
+      } catch (err) {
+        console.error("Error creating task:", err)
+        // Optionally show an error toast/notification here
+      }
+    },
+    [selectedAssignmentId],
+  )
+
+  // Handle opening the create task modal for a specific assignment
+  const handleOpenCreateTaskModal = useCallback(
+    (assignmentTitle: string) => {
+      // Find the assignment by title
+      const assignment = assignments.find((a) => a.title === assignmentTitle)
+      if (assignment) {
+        setSelectedAssignmentId(assignment.id)
+        setIsCreateModalOpen(true)
+      }
+    },
+    [assignments],
+  )
 
   // Loading state
   if (isLoading) {
@@ -359,33 +352,24 @@ export default function TasksPage() {
     )
   }
 
+  // Empty state
+  if (allTasks.length === 0) {
+    return (
+      <div className="loadingContainer">
+        <p>No tasks found...</p>
+        <p>Time to create your first task!</p>
+        <div className="addCard" onClick={() => setIsCreateModalOpen(true)}>
+          <PlusIcon size={24} />
+          <span>Add Task</span>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="tasksPageContainer">
-      <header className="tasksHeader">
-        <h1 className="tasksTitle">My Tasks</h1>
-        <div className="tasksSummary">
-          <div className="tasksSummaryItem">
-            <span className="tasksSummaryLabel">Total Tasks</span>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <Layers size={24} style={{ opacity: 0.7 }} />
-              <span className="tasksSummaryValue">{allTasks.length}</span>
-            </div>
-          </div>
-          <div className="tasksSummaryItem">
-            <span className="tasksSummaryLabel">Completed</span>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <CheckSquare size={24} style={{ opacity: 0.7 }} />
-              <span className="tasksSummaryValue">{allTasks.filter((task) => task.status === "Completed").length}</span>
-            </div>
-          </div>
-          <div className="tasksSummaryItem">
-            <span className="tasksSummaryLabel">Pending</span>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <AlertTriangle size={24} style={{ opacity: 0.7 }} />
-              <span className="tasksSummaryValue">{allTasks.filter((task) => task.status !== "Completed").length}</span>
-            </div>
-          </div>
-        </div>
+      <header className="assignmentHeader">
+        <h1 className="title">My Tasks</h1>
       </header>
 
       <div className="tasksToolbar">
@@ -406,35 +390,69 @@ export default function TasksPage() {
             handleSortChange={handleSortChange}
             options={sortOptions}
           />
-          <ViewToggle viewMode={viewMode} onclick={handleViewModeToggle} />
+          {/* Removed ViewToggle component */}
         </div>
       </div>
 
-      <div className={`tasksContent ${viewMode === "kanban" ? "kanbanView" : "listView"}`}>
-        {Object.entries(groupedTasks).length > 0 ? (
-          Object.entries(groupedTasks).map(([groupName, tasks]) => (
-            <TaskGroup
-              key={groupName}
-              title={groupName}
-              tasks={tasks}
-              viewMode={viewMode}
-              onStatusChange={handleTaskStatusChange}
-            />
-          ))
-        ) : (
-          <div className="emptyTasksMessage">
-            <CheckCircle size={48} />
-            <h3>No tasks found</h3>
-            <p>
-              {filterStatus === "all"
-                ? "You don't have any tasks assigned to you yet."
-                : filterStatus === "active"
-                  ? "You don't have any active tasks."
-                  : "You don't have any completed tasks."}
-            </p>
-          </div>
-        )}
+      {/* Added divider line */}
+      <div className="filterDividerLine"></div>
+
+      <div className="assignmentsContainer">
+        <div className="tasksContent listView">
+          {Object.entries(groupedTasks).length > 0 ? (
+            Object.entries(groupedTasks).map(([groupName, tasks]) => {
+              // Get the assignment deadline for color if grouping by assignment
+              const assignmentDeadline = groupBy === "assignment" && tasks.length > 0 ? tasks[0].assignmentDeadline : ""
+
+              return (
+                <TaskGroup
+                  key={groupName}
+                  title={groupName}
+                  tasks={tasks}
+                  viewMode="list"
+                  onStatusChange={handleTaskStatusChange}
+                  onCreateTask={groupBy === "assignment" ? () => handleOpenCreateTaskModal(groupName) : undefined}
+                  assignmentDeadline={assignmentDeadline}
+                />
+              )
+            })
+          ) : (
+            <div className="emptyTasksMessage">
+              <CheckCircle size={48} />
+              <h3>No tasks found</h3>
+              <p>
+                {filterStatus === "all"
+                  ? "You don't have any tasks assigned to you yet."
+                  : filterStatus === "active"
+                    ? "You don't have any active tasks."
+                    : "You don't have any completed tasks."}
+              </p>
+            </div>
+          )}
+        </div>
       </div>
+
+      <ActionButton
+        icon={<PlusIcon size={24} />}
+        onclick={() => setIsCreateModalOpen(true)}
+        tooltip="Create a New Task"
+      />
+
+      {/* Create Task Modal */}
+      {isCreateModalOpen && (
+        <CreateTaskModal
+          isOpen={isCreateModalOpen}
+          onClose={() => {
+            setIsCreateModalOpen(false)
+            setSelectedAssignmentId(null)
+          }}
+          onSave={handleCreateTask}
+          members={[]}
+          maxWeight={100}
+          currentWeight={0}
+          task={null}
+        />
+      )}
     </div>
   )
 }

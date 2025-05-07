@@ -484,6 +484,31 @@
   cursor: not-allowed;
 }
 
+/* Add styles for the add task button */
+.addTaskButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  margin-top: 8px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.addTaskButton:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.addTaskButton span {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .taskDetailGrid {

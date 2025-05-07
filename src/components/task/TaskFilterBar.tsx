@@ -1,10 +1,10 @@
 "use client"
 
-import { ListFilter, Layers, Flag, Calendar } from "lucide-react"
+import { Layers, Flag, Calendar } from "lucide-react"
 import "./TaskFilterBar.css"
 
 type GroupBy = "assignment" | "priority" | "dueDate"
-type FilterStatus = "all" | "active" | "completed"
+type FilterStatus = "all" | "active" | "completed" | "To-Do" | "In Progress" | "Completed"
 
 interface TaskFilterBarProps {
   currentFilter: FilterStatus
@@ -20,62 +20,70 @@ export default function TaskFilterBar({
   onGroupingChange,
 }: TaskFilterBarProps) {
   return (
-    <div className="taskFilterBar">
-      <div className="filterSection">
+    <div className="taskFilterBar single-line">
+      {/* Status section with label */}
+      <div className="statusSection">
         <div className="filterLabel">
-          <ListFilter size={16} />
           <span>Status:</span>
         </div>
-        <div className="filterOptions">
-          <button
-            className={`filterButton ${currentFilter === "all" ? "active" : ""}`}
-            onClick={() => onFilterChange("all")}
-          >
-            All
-          </button>
-          <button
-            className={`filterButton ${currentFilter === "active" ? "active" : ""}`}
-            onClick={() => onFilterChange("active")}
-          >
-            Active
-          </button>
-          <button
-            className={`filterButton ${currentFilter === "completed" ? "active" : ""}`}
-            onClick={() => onFilterChange("completed")}
-          >
-            Completed
-          </button>
-        </div>
+
+        <button
+          className={`filterButton ${currentFilter === "all" ? "active" : ""}`}
+          onClick={() => onFilterChange("all")}
+        >
+          All
+        </button>
+        <button
+          className={`filterButton ${currentFilter === "To-Do" ? "active" : ""}`}
+          onClick={() => onFilterChange("To-Do")}
+        >
+          To Do
+        </button>
+        <button
+          className={`filterButton ${currentFilter === "In Progress" ? "active" : ""}`}
+          onClick={() => onFilterChange("In Progress")}
+        >
+          In Progress
+        </button>
+        <button
+          className={`filterButton ${currentFilter === "Completed" ? "active" : ""}`}
+          onClick={() => onFilterChange("Completed")}
+        >
+          Completed
+        </button>
       </div>
 
-      <div className="filterSection">
+      {/* Divider */}
+      <div className="filterDivider"></div>
+
+      {/* Group by section with label */}
+      <div className="groupSection">
         <div className="filterLabel">
           <Layers size={16} />
           <span>Group by:</span>
         </div>
-        <div className="filterOptions">
-          <button
-            className={`filterButton ${currentGrouping === "assignment" ? "active" : ""}`}
-            onClick={() => onGroupingChange("assignment")}
-          >
-            <Layers size={14} />
-            <span>Assignment</span>
-          </button>
-          <button
-            className={`filterButton ${currentGrouping === "priority" ? "active" : ""}`}
-            onClick={() => onGroupingChange("priority")}
-          >
-            <Flag size={14} />
-            <span>Priority</span>
-          </button>
-          <button
-            className={`filterButton ${currentGrouping === "dueDate" ? "active" : ""}`}
-            onClick={() => onGroupingChange("dueDate")}
-          >
-            <Calendar size={14} />
-            <span>Due Date</span>
-          </button>
-        </div>
+
+        <button
+          className={`filterButton ${currentGrouping === "assignment" ? "active" : ""}`}
+          onClick={() => onGroupingChange("assignment")}
+        >
+          <Layers size={14} />
+          <span>Assignment</span>
+        </button>
+        <button
+          className={`filterButton ${currentGrouping === "priority" ? "active" : ""}`}
+          onClick={() => onGroupingChange("priority")}
+        >
+          <Flag size={14} />
+          <span>Priority</span>
+        </button>
+        <button
+          className={`filterButton ${currentGrouping === "dueDate" ? "active" : ""}`}
+          onClick={() => onGroupingChange("dueDate")}
+        >
+          <Calendar size={14} />
+          <span>Due Date</span>
+        </button>
       </div>
     </div>
   )

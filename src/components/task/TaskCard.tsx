@@ -18,47 +18,43 @@ import {
   Trash,
 } from "lucide-react"
 import "./TaskCard.css"
-import { Task, TaskStatus } from "@/types/task"
+import type { Task, TaskStatus } from "@/types/task"
 import { useOnClickOutside } from "@/utils/utils"
-
-
 
 interface TaskCardProps {
   task: Task
-  onEdit:(task:Task)=>void
-  onDelete:(taskId: string)=>void
-  onStatusChange: (taskId: string, newStatus: TaskStatus) => void
+  onStatusChange: (newStatus: TaskStatus) => void | Promise<void>
+  onEdit?: (task: Task) => void
+  onDelete?: (taskId: string) => void
 }
 
-const TaskCard: React.FC<TaskCardProps> = ({ task,onEdit,onDelete, onStatusChange }) => {
+const TaskCard: React.FC<TaskCardProps> = ({ task, onStatusChange, onEdit, onDelete }) => {
   const [isExpanded, setIsExpanded] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const menuRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null)
   useOnClickOutside(menuRef, () => {
-    setIsMenuOpen(false);
-  });
+    setIsMenuOpen(false)
+  })
 
   const toggleExpanded = () => {
     setIsExpanded(!isExpanded)
   }
 
   const toggleCompleted = () => {
-    const newStatus = task.status == "Completed" ? "To-Do" : "Completed"
-    onStatusChange(task.id, newStatus)
+    const newStatus = task.status === "Completed" ? "To-Do" : "Completed"
+    onStatusChange(newStatus)
   }
 
-
-  const handleStatusChange = (newStatus:TaskStatus) => {
-    console.log(newStatus)
-    onStatusChange(task.id, newStatus)
+  const handleStatusChange = (newStatus: TaskStatus) => {
+    onStatusChange(newStatus)
     setIsMenuOpen(false)
   }
 
   // Determine the status color
   const getStatusColor = () => {
     if (task.status === "Completed") return "#647a67" // Green for completed
-    if (task.status ===  "In Progress") return "#4d5696" // Purple for in progress
-    if (task.status === "To-Do" ) return "#DD992B" // Gold for todo
+    if (task.status === "In Progress") return "#4d5696" // Purple for in progress
+    if (task.status === "To-Do") return "#DD992B" // Gold for todo
     return "#777777" // Gray for unassigned
   }
 
@@ -85,7 +81,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task,onEdit,onDelete, onStatusChang
 
   const priorityInfo = getPriorityInfo()
 
-  // Calculate days remaining or overdue TODO: make util func
+  // Calculate days remaining or overdue
   const getDaysInfo = () => {
     if (!task.deadline) return null
 
@@ -107,17 +103,18 @@ const TaskCard: React.FC<TaskCardProps> = ({ task,onEdit,onDelete, onStatusChang
 
   const daysInfo = getDaysInfo()
   return (
-    <div className={`taskCard ${task.status == "Completed" ? "completed" : ""} ${task.status} ${isExpanded ? "expanded" : ""} `}
-          style={{borderLeftColor:getStatusColor()}}
+    <div
+      className={`taskCard ${task.status === "Completed" ? "completed" : ""} ${task.status} ${isExpanded ? "expanded" : ""} `}
+      style={{ borderLeftColor: getStatusColor() }}
     >
       {/* Main task infomation */}
       <div className="taskCardHeader">
         <button
           className="checkButton"
           onClick={toggleCompleted}
-          aria-label={task.status == "Completed" ? "Mark as incomplete" : "Mark as complete"}
+          aria-label={task.status === "Completed" ? "Mark as incomplete" : "Mark as complete"}
         >
-          {task.status == "Completed" ? (
+          {task.status === "Completed" ? (
             <CheckCircle size={20} className="checkIcon completed" />
           ) : (
             <Circle size={20} className="checkIcon" />
@@ -125,7 +122,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task,onEdit,onDelete, onStatusChang
         </button>
 
         <div className="taskTitleContainer">
-          <h4 className={`taskTitle ${task.status == "Completed" ? "completed" : ""}`}>  {task.title}</h4>
+          <h4 className={`taskTitle ${task.status === "Completed" ? "completed" : ""}`}> {task.title}</h4>
           <div className="taskBadges">
             <div className="taskStatusIndicator" style={{ backgroundColor: getStatusColor() }}>
               {task.status === "To-Do" && "To Do"}
@@ -162,7 +159,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task,onEdit,onDelete, onStatusChang
             </button>
 
             {isMenuOpen && (
-              <div ref={menuRef}className="menuDropdown">
+              <div ref={menuRef} className="menuDropdown">
                 <button className="menuItem" onClick={() => handleStatusChange("To-Do")}>
                   <Clock size={14} />
                   <span>Move to To Do</span>
@@ -175,23 +172,28 @@ const TaskCard: React.FC<TaskCardProps> = ({ task,onEdit,onDelete, onStatusChang
                   <CheckCircle size={14} />
                   <span>Mark as Completed</span>
                 </button>
-                <div className="menuDivider"></div>
-                <button className="menuItem" onClick={()=>onEdit(task)}>
-                  <Edit size={14} />
-                  <span>Edit Task</span>
-                </button>
-                <button className="menuItem delete" onClick={()=>onDelete(task.id)}>
-                  <Trash size={14} />
-                  <span>Delete Task</span>
-                </button>
+                {onEdit && (
+                  <>
+                    <div className="menuDivider"></div>
+                    <button className="menuItem" onClick={() => onEdit(task)}>
+                      <Edit size={14} />
+                      <span>Edit Task</span>
+                    </button>
+                  </>
+                )}
+                {onDelete && (
+                  <button className="menuItem delete" onClick={() => onDelete(task.id)}>
+                    <Trash size={14} />
+                    <span>Delete Task</span>
+                  </button>
+                )}
               </div>
             )}
           </div>
         </div>
       </div>
 
-
-{/* EXTENDED DETAILS */}
+      {/* EXTENDED DETAILS */}
       {isExpanded && (
         <div className="taskCardContent">
           {task.description && <p className="taskDescription">{task.description}</p>}
@@ -203,8 +205,8 @@ const TaskCard: React.FC<TaskCardProps> = ({ task,onEdit,onDelete, onStatusChang
                 <span>Assignee</span>
               </div>
               <div className="taskDetailValue">
-                {task.assignee ? (
-                  // TODO: SHOW MULTIPLE USERS
+                {task.assignee && task.assignee.length > 0 ? (
+                  // Show multiple users if available
                   <div className="assigneeInfo">
                     <div className="assigneeAvatar">{task.assignee[0].name.charAt(0).toUpperCase()}</div>
                     <span>{task.assignee[0].name}</span>
@@ -237,7 +239,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task,onEdit,onDelete, onStatusChang
             <div className="taskDetailItem">
               <div className="taskDetailLabel">
                 <Weight size={14} />
-                <span>weighting</span>
+                <span>Weighting</span>
               </div>
               <div className="taskDetailValue">
                 <div className="weightInfo">
@@ -267,8 +269,6 @@ const TaskCard: React.FC<TaskCardProps> = ({ task,onEdit,onDelete, onStatusChang
               </div>
             </div>
           </div>
-
-
         </div>
       )}
     </div>
