@@ -19,7 +19,6 @@ interface AssignmentCardProps {
   isExpanded: boolean;
   onToggleExpand: (assignmentId: string) => void;
   onViewDetails: (assignment: Assignment) => void;
-  onStatusChange: (taskId: string) => void;
 }
 
 // AssignmentCard Component
@@ -28,7 +27,6 @@ export const AssignmentListCard = ({
   isExpanded,
   onToggleExpand,
   onViewDetails,
-  onStatusChange,
 }: AssignmentCardProps) => {
   const bgColor = getCardBgColor(assignment.tasks, assignment.deadline);
   const progress = calculateProgress(assignment.tasks);

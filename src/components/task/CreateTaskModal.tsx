@@ -1,21 +1,21 @@
 "use client"
 
 import type React from "react"
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { X, Calendar, User, AlignLeft, Weight, Flag, HelpCircle, Clock, AlertTriangle, CheckCircle } from "lucide-react"
 import "./CreateTaskModal.css"
-import { Assignment, User as Member } from "@/types/assignment"
-import {TaskStatus} from "@/types/task"
+import {  User as Member } from "@/types/assignment"
+import {Task, TaskStatus} from "@/types/task"
 import { useOnClickOutside } from "@/utils/utils"
 
 interface CreateTaskModalProps {
-  assignment?:Assignment
   isOpen: boolean
   onClose: () => void
   onSave: (task: any) => void
   members: Member[]
   maxWeight: number
   currentWeight: number
+  task:Task | null
 }
 
 const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
@@ -25,10 +25,11 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
   members,
   maxWeight,
   currentWeight,
+  task
 }) => {
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
-  const [assignee, setAssignee] = useState("")
+  const [assignee, setAssignee] = useState( "") //look into multiple assignees
   const [deadline, setDeadline] = useState("")
   const [weighting, setWeight] = useState(1)
   const [status, setStatus] = useState<TaskStatus>("To-Do")
@@ -37,17 +38,36 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
   //manage opening
   const menuRef = useRef<HTMLDivElement>(null);
   useOnClickOutside(menuRef, onClose);
+
+  console.log("We have prefilled with",task,title)
   // Calculate remaining weighting
   const remainingWeight = maxWeight - currentWeight
 
+
+  useEffect(() => {
+    if (isOpen && task) {
+      setTitle(task.title || "")
+      setDescription(task.description || "")
+      setAssignee(task.assignee?.[0]?.id || "")
+      setDeadline(task.deadline || "")
+      setWeight(task.weighting || 1)
+      setStatus(task.status || "To-Do")
+      setPriority(task.priority || "medium")
+    }
+  }, [isOpen, task])
+
   if (!isOpen) return null
 
+  const handleClose =()=>{
+    resetForm()
+    onClose()
+  }
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
     const newTask = {
-      id: `${Date.now()}`,
-      title,
+      id: task?.id || `${Date.now()}`,
+            title,
       description,
       assignee: assignee || undefined,
       deadline: deadline || undefined,
@@ -89,8 +109,8 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
     <div className="taskModalOverlay">
       <div ref={menuRef} className="taskModalContent">
         <div className="taskModalHeader">
-          <h3>Create New Task</h3>
-          <button className="closeButton" onClick={onClose}>
+          <h3>{task?"Edit":"Create New"} Task</h3>
+          <button className="closeButton" onClick={handleClose}>
             <X size={20} />
           </button>
         </div>
@@ -239,7 +259,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
           </div>
 
           <div className="formActions">
-            <button type="button" className="cancelButton" onClick={onClose}>
+            <button type="button" className="cancelButton" onClick={handleClose}>
               Cancel
             </button>
             <button type="submit" className="saveButton" disabled={!title || remainingWeight <= 0}>

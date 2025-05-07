@@ -10,7 +10,6 @@ import {
   Flag,
   Clock,
   Edit,
-  Filter,
   Plus,
 } from "lucide-react"
 import { useState, useRef, useEffect, useCallback } from "react"
@@ -18,8 +17,8 @@ import ProgressCircle from "../common/ProgressCircle"
 import { SortDirection, SortOption } from "@/types/auxilary"
 import SortMenu from "../common/SortMenu"
 import TaskCard from "../task/TaskCard"
-import { Task } from "@/types/task"
-import {AssignmentLink, FileAttachment} from "@/types/assignment"
+import { Task, TaskStatus } from "@/types/task"
+import {AssignmentLink, FileAttachment, User} from "@/types/assignment"
 import { formatDate, isLate, useOnClickOutside } from "@/utils/utils"
 import {  calculateProgress, getCardBgColor } from "@/utils/assignmentUtils"
 import FilesLinksSection from "./FilesLinksSection"
@@ -35,12 +34,13 @@ interface AssignmentDetailsProps {
   files?: FileAttachment[]
   links?: AssignmentLink[]
   tasks: Task[]
-  members?: string[] 
+  members?: User[] 
 
-  isTaskModalOpen:boolean
+  isTaskFormOpen:boolean
   onClose: () => void
-  onTodoToggle: (id: string) => void
-  onAddTodo: () => void
+  onTaskDelete:(taskId: string) => void
+  onTaskUpdate: (taskId: string, updates: Partial<Task>) => void
+  openTaskForm: (task?:Task) => void
   onExpand: () => void
 }
 
@@ -58,9 +58,10 @@ const AssignmentDetailPanel: React.FC<AssignmentDetailsProps> = ({
   links = [],
 
   onClose,
-  onTodoToggle,
-  isTaskModalOpen,
-  onAddTodo,
+  onTaskDelete,
+  onTaskUpdate,
+  isTaskFormOpen,
+  openTaskForm,
   onExpand,
 }) => {
   const sortOptions:SortOption[] = [
@@ -84,7 +85,9 @@ const AssignmentDetailPanel: React.FC<AssignmentDetailsProps> = ({
   const [sortBy, setSortBy] = useState<SortOption>(sortOptions[0])
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc")
 
-
+const taskStatusChange = (taskId:string,newStatus:TaskStatus)=>{
+  onTaskUpdate(taskId,{status:newStatus})
+}
 
   const handleSortChange = (sortType: SortOption) => {
     if (sortBy.key === sortType.key) {
@@ -124,6 +127,8 @@ const AssignmentDetailPanel: React.FC<AssignmentDetailsProps> = ({
     setIsFilterMenuOpen(false)
   }
 
+
+  //TODO: CONDENSE FILTER AND SORT FUNCTIONS IN ONE LOCATION
   type FilterKey = keyof typeof filters;
 
   const handleFilterChange = (type: string, value: string) => {
@@ -249,8 +254,9 @@ const AssignmentDetailPanel: React.FC<AssignmentDetailsProps> = ({
 
   const filteredAndSortedTodos = applyFiltersAndSort(tasks)
   const mainPanelRef = useRef<HTMLDivElement>(null);
-  
-  useOnClickOutside(mainPanelRef, ()=>{if (!isTaskModalOpen){onClose()};}); // todo: fix typing error
+  useOnClickOutside(mainPanelRef, ()=>{if (!isTaskFormOpen){onClose()};}); // todo: fix typing error
+
+
 
   return (
     <div ref={mainPanelRef} className="assignmentDetails">
@@ -326,123 +332,6 @@ const AssignmentDetailPanel: React.FC<AssignmentDetailsProps> = ({
                 isOpen={isFilterMenuOpen} 
                 toggleOpen={toggleFilterMenu}/>
 
-                {/* <button className="actionButton" onClick={toggleFilterMenu}>
-                  <Filter size={18} />
-                </button>
-                {isFilterMenuOpen && (
-                  <div className="filterMenu">
-                    <div className="filterSection">
-                      <h4>Status</h4>
-                      <div className="filterOptions">
-                        <label className="filterOption">
-                          <input
-                            type="checkbox"
-                            checked={filters.status.includes("todo")}
-                            onChange={() => handleFilterChange("status", "todo")}
-                          />
-                          <span>To Do</span>
-                        </label>
-                        <label className="filterOption">
-                          <input
-                            type="checkbox"
-                            checked={filters.status.includes("inProgress")}
-                            onChange={() => handleFilterChange("status", "inProgress")}
-                          />
-                          <span>In Progress</span>
-                        </label>
-                        <label className="filterOption">
-                          <input
-                            type="checkbox"
-                            checked={filters.status.includes("completed")}
-                            onChange={() => handleFilterChange("status", "completed")}
-                          />
-                          <span>Completed</span>
-                        </label>
-                        <label className="filterOption">
-                          <input
-                            type="checkbox"
-                            checked={filters.status.includes("unassigned")}
-                            onChange={() => handleFilterChange("status", "unassigned")}
-                          />
-                          <span>Unassigned</span>
-                        </label>
-                      </div>
-                    </div>
-                    <div className="filterSection">
-                      <h4>Priority</h4>
-                      <div className="filterOptions">
-                        <label className="filterOption">
-                          <input
-                            type="checkbox"
-                            checked={filters.priority.includes("high")}
-                            onChange={() => handleFilterChange("priority", "high")}
-                          />
-                          <span>High</span>
-                        </label>
-                        <label className="filterOption">
-                          <input
-                            type="checkbox"
-                            checked={filters.priority.includes("medium")}
-                            onChange={() => handleFilterChange("priority", "medium")}
-                          />
-                          <span>Medium</span>
-                        </label>
-                        <label className="filterOption">
-                          <input
-                            type="checkbox"
-                            checked={filters.priority.includes("low")}
-                            onChange={() => handleFilterChange("priority", "low")}
-                          />
-                          <span>Low</span>
-                        </label>
-                      </div>
-                    </div>
-                    <div className="filterSection">
-                      <h4>Members</h4>
-                      <div className="filterOptions">
-                        {members?.map((member: string) => (
-                          <label key={member} className="filterOption">
-                            <input
-                              type="checkbox"
-                              checked={filters.members?.includes(member) || false}
-                              onChange={() => handleFilterChange("members", member)}
-                            />
-                            <span>{member}</span>
-                          </label>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="filterSection">
-                      <h4>Date Range</h4>
-                      <div className="dateRangeInputs">
-                        <div className="dateInput">
-                          <label>From:</label>
-                          <input
-                            type="date"
-                            value={filters.dateRange.start}
-                            onChange={(e) => handleDateRangeChange("start", e.target.value)}
-                          />
-                        </div>
-                        <div className="dateInput">
-                          <label>To:</label>
-                          <input
-                            type="date"
-                            value={filters.dateRange.end}
-                            onChange={(e) => handleDateRangeChange("end", e.target.value)}
-                          />
-                        </div>
-                      </div>
-                      {(filters.dateRange.start || filters.dateRange.end) && (
-                        <button
-                          className="clearDateButton"
-                          onClick={() => setFilters({ ...filters, dateRange: { start: "", end: "" } })}
-                        >
-                          Clear Date Filter
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                )} */}
               </div>
                         <SortMenu
                           sortMenuOpen={isSortMenuOpen}
@@ -460,7 +349,7 @@ const AssignmentDetailPanel: React.FC<AssignmentDetailsProps> = ({
           <div className="todoList">
             {filteredAndSortedTodos.length > 0 ? (
               filteredAndSortedTodos.map((task) =>
-                <TaskCard key={task.id} task={task} onStatusChange={onTodoToggle} />)
+                <TaskCard key={task.id} task={task} onDelete={onTaskDelete} onEdit={()=>openTaskForm(task)} onStatusChange={taskStatusChange} />)
               
   
             ) : (
@@ -468,7 +357,7 @@ const AssignmentDetailPanel: React.FC<AssignmentDetailsProps> = ({
                 <p>No tasks added yet</p>
               </div>
             )}
-             <button className="addTaskButton" onClick={onAddTodo}>
+             <button className="addTaskButton" onClick={()=>openTaskForm()}>
               <Plus size={18} />
               <span>Add New Task</span>
             </button>

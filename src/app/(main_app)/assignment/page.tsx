@@ -2,23 +2,17 @@
 
 import { useState, useEffect, useMemo, useCallback } from "react";
 import "./assignment.css";
-import {  isLate } from "@/utils/utils";
+import { isLate } from "@/utils/utils";
 import AssignmentRow from "@/components/assignment/AssignmentRow";
 import AssignmentCard from "@/components/assignment/AssignmentCard";
 import AssignmentOverlay from "@/components/assignment/AssignmentOverlay";
 import CreateAssignmentModal from "@/components/assignment/CreateAssignmentModal";
-import {
-  PlusIcon,
-  Calendar,
-  Clock,
-} from "lucide-react";
+import { PlusIcon, Calendar, Clock } from "lucide-react";
 import ViewToggle from "@/components/common/ViewToggle";
 import { SortOption, SortDirection, ViewMode } from "@/types/auxilary";
 import SortMenu from "@/components/common/SortMenu";
 import { Task, TaskStatus } from "@/types/task";
-import {
-  Assignment,
-} from "@/types/assignment";
+import { Assignment } from "@/types/assignment";
 import {
   calculateDaysRemaining,
   calculateProgress,
@@ -48,14 +42,11 @@ function sortAssignmentsList(
 }
 
 export default function Assignments() {
-
-
   const [expandedAssignment, setExpandedAssignment] = useState<string | null>(
     null
   );
   const [selectedAssignmentData, setSelectedAssignmentData] =
     useState<Assignment | null>(null);
-
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -64,15 +55,10 @@ export default function Assignments() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-
-
   // Managing view
-  const viewOptions:ViewMode[] =[
-    {label:"Kanban"},{label:"List"},
-
-  ]
+  const viewOptions: ViewMode[] = [{ label: "Kanban" }, { label: "List" }];
   const [viewMode, setViewMode] = useState<ViewMode>(viewOptions[0]);
-  const switchViewMode = (_:ViewMode) => {
+  const switchViewMode = (_: ViewMode) => {
     //ignore input and just toggle
     if (viewMode.label == viewOptions[0].label) {
       setViewMode(viewOptions[1]);
@@ -90,7 +76,7 @@ export default function Assignments() {
   const [sortBy, setSortBy] = useState<SortOption>(sortOptions[0]);
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
 
-  // Fetch all assignments 
+  // Fetch all assignments
 
   useEffect(() => {
     const fetchAssignments = async () => {
@@ -98,8 +84,7 @@ export default function Assignments() {
         setIsLoading(true);
         const res = await fetch("/api/assignments");
         if (!res.ok) throw new Error("Failed to fetch assignments");
-   
-  
+
         const data = await res.json();
         setAssignments(data);
         setError(null);
@@ -110,10 +95,9 @@ export default function Assignments() {
         setIsLoading(false);
       }
     };
-  
+
     fetchAssignments();
   }, []);
-  
 
   /**
    * Get active assignments with memoization
@@ -159,13 +143,15 @@ export default function Assignments() {
   const handleListClick = useCallback(
     (id: string) => {
       console.log("waddup");
-      
+
       if (viewMode.label == "List") {
         setExpandedAssignment((prevId) => (prevId === id ? null : id));
-        setSelectedAssignmentData(assignments.find((as) => as.id == id) || selectedAssignmentData);
-        console.log(isModalOpen)
-      }else{
-        console.log(viewMode)
+        setSelectedAssignmentData(
+          assignments.find((as) => as.id == id) || selectedAssignmentData
+        );
+        console.log(isModalOpen);
+      } else {
+        console.log(viewMode);
       }
     },
     [assignments, selectedAssignmentData, viewMode]
@@ -192,110 +178,180 @@ export default function Assignments() {
   }, []);
 
   /**
-   * Handle toggling task completion status
+   * Handle creating new assignment
    */
-  const setTaskStatus = useCallback(
-    (taskId: string, newStatus: TaskStatus) => {
+  const handleCreateAssignment = useCallback(
+    async (newAssignmentData: Assignment) => {
+      try {
+        const res = await fetch("/api/assignments", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title: newAssignmentData.title,
+            description: newAssignmentData.description,
+            weighting: newAssignmentData.weighting,
+            deadline: newAssignmentData.deadline,
+            status: "Not Started", // or other default
+            progress: 0,
+            finalGrade: null,
+          }),
+        });
+
+        if (!res.ok) throw new Error("Failed to create assignment");
+
+        const created = await res.json();
+        setAssignments((prev) => [...prev, created]);
+        setIsCreateModalOpen(false);
+      } catch (err) {
+        console.error(err);
+        // optionally show toast here
+      }
+    },
+    []
+  );
+
+  /**
+   * Handle updating assignment
+   */
+  const handleUpdateAssignment = useCallback(
+    async (assignID: string, updates: Partial<Assignment>) => {
+      try {
+        // Find the base assignment using assignID
+        const base =
+          selectedAssignmentData?.id === assignID
+            ? selectedAssignmentData
+            : assignments.find((a) => a.id === assignID);
+
+        if (!base) throw new Error("Assignment not found");
+
+        const updatedAssignment = {
+          ...base,
+          ...updates,
+          id: assignID, // ensure ID is preserved
+        };
+
+        const res = await fetch(`/api/assignments/${assignID}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updatedAssignment),
+        });
+
+        if (!res.ok) throw new Error("Failed to update assignment");
+
+        const updated = await res.json();
+
+        setAssignments((prev) =>
+          prev.map((assignment) =>
+            assignment.id === updated.id ? updated : assignment
+          )
+        );
+
+        if (selectedAssignmentData?.id === updated.id) {
+          setSelectedAssignmentData(updated);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    },
+    [assignments, selectedAssignmentData]
+  );
+
+  const updateTask = useCallback(
+    (taskId: string, updates: Partial<Task>) => {
       if (!selectedAssignmentData) {
         return;
       }
-      
+
       setSelectedAssignmentData((prevData) => {
         if (!prevData) return null;
-        
-        // Find the task to update
-        const task = prevData.tasks.find((t) => t.id === taskId);
-        if (!task) return prevData;
-        
-        // Update tasks array with explicit type
+
+        const taskExists = prevData.tasks.some((t) => t.id === taskId);
+        if (!taskExists) return prevData;
+
+        //NOTE: Can probs just update the task itself with partials, rather than update via updating assignment lol
         const updatedTasks: Task[] = prevData.tasks.map((t) =>
           t.id === taskId
             ? {
                 ...t,
-                status: newStatus,
-                updatedAt: new Date().toISOString(),
+                ...updates,
               }
             : t
         );
-        
-        // Create updated assignment object
+
         const updatedAssignment: Assignment = {
           ...prevData,
           tasks: updatedTasks,
         };
-        
-        // Also update the assignments list
+
         setAssignments((prev) =>
           prev.map((a) =>
             a.id === updatedAssignment.id ? updatedAssignment : a
           )
         );
-        
+
         return updatedAssignment;
       });
     },
     [selectedAssignmentData]
   );
 
-  
-
-  /**
-   * Handle creating new assignment
-   */
-  const handleCreateAssignment = useCallback(async (newAssignmentData: Assignment) => {
-    try {
-      const res = await fetch("/api/assignments", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: newAssignmentData.title,
-          description: newAssignmentData.description,
-          weighting: newAssignmentData.weighting,
-          deadline: newAssignmentData.deadline,
-          status: "Not Started", // or other default
-          progress: 0,
-          finalGrade: null,
-        }),
-      });
-  
-      if (!res.ok) throw new Error("Failed to create assignment");
-  
-      const created = await res.json();
-      setAssignments(prev => [...prev, created]);
-      setIsCreateModalOpen(false);
-    } catch (err) {
-      console.error(err);
-      // optionally show toast here
-    }
-  }, []);
-  
-
-  /**
-   * Handle updating assignment
-   */
-  const handleUpdateAssignment = useCallback(async (updatedAssignment: Assignment) => {
-    try {
-      const res = await fetch(`/api/assignments/${updatedAssignment.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatedAssignment),
-      });
-  
-      if (!res.ok) throw new Error("Failed to update assignment");
-  
-      const updated = await res.json();
-  
-      setAssignments((prev) =>
-        prev.map((assignment) => assignment.id === updated.id ? updated : assignment)
-      );
-      if (selectedAssignmentData?.id === updated.id) {
-        setSelectedAssignmentData(updated);
+  // TODO: use handleUpdateAssignment to simply update the tasks existing in the assignment
+  const deleteTask = useCallback(
+    (taskId: string) => {
+      if (!selectedAssignmentData) {
+        return;
       }
-    } catch (err) {
-      console.error(err);
-    }
-  }, [selectedAssignmentData]);
-  
+
+      setSelectedAssignmentData((prevData) => {
+        if (!prevData) return null;
+
+        const taskExists = prevData.tasks.some((t) => t.id === taskId);
+        if (!taskExists) return prevData;
+
+        const updatedTasks = selectedAssignmentData.tasks.filter(
+          (t) => t.id !== taskId
+        );
+
+        const updatedAssignment: Assignment = {
+          ...prevData,
+          tasks: updatedTasks,
+        };
+
+        setAssignments((prev) =>
+          prev.map((a) =>
+            a.id === updatedAssignment.id ? updatedAssignment : a
+          )
+        );
+
+        return updatedAssignment;
+      });
+    },
+    [selectedAssignmentData]
+  );
+
+  // OLD FUNCTION | KEEPING JUST INCASE
+  // const handleUpdateAssignment = useCallback(async (updatedAssignment: Assignment) => {
+  //   try {
+  //     const res = await fetch(`/api/assignments/${updatedAssignment.id}`, {
+  //       method: "PUT",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify(updatedAssignment),
+  //     });
+
+  //     if (!res.ok) throw new Error("Failed to update assignment");
+
+  //     const updated = await res.json();
+
+  //     setAssignments((prev) =>
+  //       prev.map((assignment) => assignment.id === updated.id ? updated : assignment)
+  //     );
+  //     if (selectedAssignmentData?.id === updated.id) {
+  //       setSelectedAssignmentData(updated);
+  //     }
+  //   } catch (err) {
+  //     console.error(err);
+  //   }
+  // }, [selectedAssignmentData]);
 
   // Rows data for rendering
   const rows = useMemo(
@@ -337,114 +393,115 @@ export default function Assignments() {
     );
   }
 
-
   if (assignments.length == 0) {
     //TODO: STYLE THIS
     return (
       <div className="loadingContainer">
         <p>No assignments...</p>
         <p>Time to get working!</p>
-        <div
-                  className="addCard"
-                  onClick={() => setIsCreateModalOpen(true)}
-                >
-                  <PlusIcon size={24} />
-                  <span>Add Assignment</span>
-                </div>
+        <div className="addCard" onClick={() => setIsCreateModalOpen(true)}>
+          <PlusIcon size={24} />
+          <span>Add Assignment</span>
+        </div>
       </div>
     );
   }
 
   return (
-    <><header className="assignmentHeader">
-      <h1 className="title">Assignments</h1>
-
-    </header>
+    <>
+      <header className="assignmentHeader">
+        <h1 className="title">Assignments</h1>
+      </header>
       <div className="mainContainer">
-    <div className="actions">
-        <SortMenu
-          sortMenuOpen={sortMenuOpen}
-          setSortMenuOpen={() => setSortMenuOpen(!sortMenuOpen)}
-          sortBy={sortBy}
-          sortDirection={sortDirection}
-          handleSortChange={handleSortChange}
-          options={sortOptions} />
+        <div className="actions">
+          <SortMenu
+            sortMenuOpen={sortMenuOpen}
+            setSortMenuOpen={() => setSortMenuOpen(!sortMenuOpen)}
+            sortBy={sortBy}
+            sortDirection={sortDirection}
+            handleSortChange={handleSortChange}
+            options={sortOptions}
+          />
 
-        <ViewToggle currentView={viewMode} onViewChange={switchViewMode} options={viewOptions} />
+          <ViewToggle
+            currentView={viewMode}
+            onViewChange={switchViewMode}
+            options={viewOptions}
+          />
         </div>
-        
 
         {/* todo: handle vert scroll on list view */}
-      <div className="assignmentsContainer">
-
-
-        {viewMode.label === "Kanban" ? (
-          // Kanban View
-          <div className="rowsContainer">
-            {rows.map((row) => (
-              <AssignmentRow key={row.id} title={row.title} color={row.color}>
-                {row.assignments.map((assignment) => {
-                  return (
-                    <div
-                      key={assignment.id}
-                      onClick={() => handleCardClick(assignment)}
-                    >
-                      <AssignmentCard
-                        title={assignment.title}
-                        deadline={assignment.deadline}
-                        weighting={assignment.weighting}
-                        description={assignment.description}
-                        progress={calculateProgress(assignment.tasks)}
-                        daysRemaining={calculateDaysRemaining(assignment.deadline)}
-                        isLate={isLate(assignment.deadline)}
-                        bgColor={getCardBgColor(
-                          assignment.tasks,
-                          assignment.deadline
-                        )} />
-                    </div>
-                  );
-                })}
-
-              </AssignmentRow>
-            ))}
-          </div>
-        ) : (
-          //list view
-          <div className="listContainer">
-            {rows.map((row) => {
-              return (
-                <AssignmentListSection
-                  key={row.id}
-                  title={row.title}
-                  color={row.color}
-                >
+        <div className="assignmentsContainer">
+          {viewMode.label === "Kanban" ? (
+            // Kanban View
+            <div className="rowsContainer">
+              {rows.map((row) => (
+                <AssignmentRow key={row.id} title={row.title} color={row.color}>
                   {row.assignments.map((assignment) => {
                     return (
                       <div
                         key={assignment.id}
+                        onClick={() => handleCardClick(assignment)}
                       >
-                        <AssignmentListCard
-                          assignment={assignment}
-                          isExpanded={expandedAssignment === assignment.id}
-                          onToggleExpand={() => handleListClick(assignment.id)}
-                          onViewDetails={() => handleCardClick(assignment)}
-                          onStatusChange={setTaskStatus} />
+                        <AssignmentCard
+                          title={assignment.title}
+                          deadline={assignment.deadline}
+                          weighting={assignment.weighting}
+                          description={assignment.description}
+                          progress={calculateProgress(assignment.tasks)}
+                          daysRemaining={calculateDaysRemaining(
+                            assignment.deadline
+                          )}
+                          isLate={isLate(assignment.deadline)}
+                          bgColor={getCardBgColor(
+                            assignment.tasks,
+                            assignment.deadline
+                          )}
+                        />
                       </div>
                     );
                   })}
-
-                  <div
-                    className="addListItem"
-                    onClick={() => setIsCreateModalOpen(true)}
+                </AssignmentRow>
+              ))}
+            </div>
+          ) : (
+            //list view
+            <div className="listContainer">
+              {rows.map((row) => {
+                return (
+                  <AssignmentListSection
+                    key={row.id}
+                    title={row.title}
+                    color={row.color}
                   >
-                    <PlusIcon size={20} />
-                    <span>Add New Assignment</span>
-                  </div>
-                </AssignmentListSection>
-              );
-            })}
-          </div>
-        )}</div>
+                    {row.assignments.map((assignment) => {
+                      return (
+                        <div key={assignment.id}>
+                          <AssignmentListCard
+                            assignment={assignment}
+                            isExpanded={expandedAssignment === assignment.id}
+                            onToggleExpand={() =>
+                              handleListClick(assignment.id)
+                            }
+                            onViewDetails={() => handleCardClick(assignment)}
+                          />
+                        </div>
+                      );
+                    })}
+
+                    <div
+                      className="addListItem"
+                      onClick={() => setIsCreateModalOpen(true)}
+                    >
+                      <PlusIcon size={20} />
+                      <span>Add New Assignment</span>
+                    </div>
+                  </AssignmentListSection>
+                );
+              })}
+            </div>
+          )}
+        </div>
 
         {/* create assignment button */}
         <button
@@ -455,20 +512,24 @@ export default function Assignments() {
         </button>
 
         {/* /* TODO PROVIDE STATE OF ASSIGNMENT DETAILS USING USE CONTEXT */
-    /* Display modal */}
+        /* Display modal */}
         {selectedAssignmentData && (
           <AssignmentOverlay
             isOpen={isModalOpen}
             assignment={selectedAssignmentData} // should just pass the assignment
             onClose={handleCloseModal}
-            onTodoToggle={setTaskStatus}
-            onUpdate={handleUpdateAssignment} />
+            onTaskUpdate={updateTask}
+            onTaskDelete={deleteTask}
+            onAssignmentUpdate={handleUpdateAssignment}
+          />
         )}
 
         <CreateAssignmentModal
           isOpen={isCreateModalOpen}
           onClose={() => setIsCreateModalOpen(false)}
-          onSave={handleCreateAssignment} />
-      </div></>
+          onSave={handleCreateAssignment}
+        />
+      </div>
+    </>
   );
 }

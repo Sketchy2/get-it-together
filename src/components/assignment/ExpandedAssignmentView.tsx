@@ -35,21 +35,29 @@ import TaskFilter from "../task/TaskFilter";
 import FilesLinksSection from "./FilesLinksSection";
 
 interface ExpandedAssignmentViewProps {
-  assignment: Assignment;
-  onTaskAdd: () => void;
   isOpen: boolean;
   onClose: () => void;
-  onMinimise: ()=>void;
-  onUpdate: (updatedAssignment: Assignment) => void;
+  onMinimise: () => void;
+
+  assignment: Assignment;
+  onTaskDelete: (taskId: string) => void;
+  onTaskUpdate: (taskId: string, updates: Partial<Task>) => void;
+  openTaskForm: (task?: Task) => void;
+  onAssignmentUpdate: (
+    assignmentId: string,
+    updates: Partial<Assignment>
+  ) => void;
 }
 
 const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
-  assignment,
   isOpen,
   onClose,
   onMinimise,
-  onUpdate,
-  onTaskAdd,
+  assignment,
+  onTaskDelete,
+  onTaskUpdate,
+  openTaskForm,
+  onAssignmentUpdate,
 }) => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [progress, setProgress] = useState(0);
@@ -84,7 +92,6 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
     setProgress(calculateProgress(taskList));
   }, []);
 
-  // TODO: pls retrieve
   const members = useMemo(() => {
     const undefinedMember: User = { id: "undef", name: "Unassigned" };
     return [undefinedMember, ...(assignment.members ?? [])];
@@ -131,24 +138,9 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
     [members]
   );
 
-  const handleTaskStatusChange = (taskId: string, newStatus: TaskStatus) => {
-    const updatedTasks = tasks.map((task) => {
-      if (task.id === taskId) {
-        return { ...task, status: newStatus };
-      }
-      return task;
-    });
 
-    setTasks(updatedTasks);
-    calcProgress(updatedTasks);
-    calculateMemberProgress(updatedTasks);
-
-    const updatedAssignment = {
-      ...assignment,
-      tasks: updatedTasks,
-    };
-
-    onUpdate(updatedAssignment);
+  const taskStatusChange = (taskId: string, newStatus: TaskStatus) => {
+    onTaskUpdate(taskId, { status: newStatus });
   };
 
   const handleDragEnd = (result: any) => {
@@ -232,7 +224,7 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
       tasks: updatedTasks,
     };
 
-    onUpdate(updatedAssignment);
+    onAssignmentUpdate(updatedAssignment.id,updatedAssignment);
   };
 
   const getStatusIcon = (status: string) => {
@@ -390,16 +382,19 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
     [filters, sortBy, sortDirection]
   );
 
+
+
+
+  // UPDATE LOGIC
   const handleSaveDescription = () => {
-    const updatedAssignment = {
-      ...assignment,
-      description: editedDescription,
-    };
-    onUpdate(updatedAssignment);
+
+    onAssignmentUpdate(assignment.id,{description: editedDescription});
     setIsEditingDescription(false);
   };
 
-  // TASK GROUPING METHODS
+  //DISPLAY METHODS
+    const bgColor: string = getCardBgColor(assignment.tasks, assignment.deadline);
+
   const getTasksByStatus = useCallback(
     (status: string) => {
       return applyFiltersAndSort(
@@ -454,7 +449,13 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
           items={tasks}
           headerContent={icon}
           renderItem={(task) => (
-            <TaskCard task={task} onStatusChange={handleTaskStatusChange} />
+            <TaskCard
+            key={task.id}
+            task={task}
+            onDelete={onTaskDelete}
+            onEdit={() => openTaskForm(task)}
+            onStatusChange={taskStatusChange}
+          />
           )}
         />
       ))}
@@ -488,7 +489,13 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
         items={getTasksByMember(null)}
         headerContent={<HelpCircle size={16} />}
         renderItem={(task) => (
-          <TaskCard task={task} onStatusChange={handleTaskStatusChange} />
+          <TaskCard
+          key={task.id}
+          task={task}
+          onDelete={onTaskDelete}
+          onEdit={() => openTaskForm(task)}
+          onStatusChange={taskStatusChange}
+        />
         )}
       />
 
@@ -521,7 +528,13 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
               </div>
             }
             renderItem={(task) => (
-              <TaskCard task={task} onStatusChange={handleTaskStatusChange} />
+              <TaskCard
+                key={task.id}
+                task={task}
+                onDelete={onTaskDelete}
+                onEdit={() => openTaskForm(task)}
+                onStatusChange={taskStatusChange}
+              />
             )}
           />
         );
@@ -529,8 +542,6 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
     </div>
   );
 
-  // const daysRemaining: number = calculateDaysRemaining(assignment.deadline)
-  const bgColor: string = getCardBgColor(assignment.tasks, assignment.deadline);
 
   // REVIEW
   useEffect(() => {
@@ -684,7 +695,7 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
                 toggleOpen={toggleFilterMenu}
               />
               {/* sort */}
-              <div className="sortContainer" >
+              <div className="sortContainer">
                 <SortMenu
                   sortMenuOpen={isSortMenuOpen}
                   setSortMenuOpen={toggleSortMenu}
@@ -696,7 +707,10 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
               </div>
 
               {/* add task */}
-              <button className="createTaskButton" onClick={onTaskAdd}>
+              <button
+                className="createTaskButton"
+                onClick={() => openTaskForm()}
+              >
                 <Plus size={18} />
                 <span>New Task</span>
               </button>

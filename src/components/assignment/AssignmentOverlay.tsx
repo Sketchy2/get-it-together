@@ -14,19 +14,28 @@ interface AssignmentOverlayProps {
   isOpen: boolean
   assignment: Assignment
   onClose: () => void
-  onTodoToggle: (id: string) => void
-  onUpdate: (updatedAssignment: any) => void
+  onTaskDelete: (taskId: string)=> void
+  onTaskUpdate: (taskId: string, updates: Partial<Task>) => void
+  // onPartialTaskUpdate: <K extends keyof Task>(property: K) => (taskId: string, value: Task[K])=>void// might remove
+  onAssignmentUpdate: (assignmentId: string, updates: Partial<Assignment>) => void
+  // onPartialAssignmentUpdate: (updatedAssignment: any) => void
 }
+
+
 
 export default function AssignmentOverlay({
   isOpen,
   assignment,
   onClose,
-  onTodoToggle,
-  onUpdate,
+  onTaskDelete,
+  onTaskUpdate,
+  // onPartialTaskUpdate, // migth remove
+  onAssignmentUpdate,
 }:AssignmentOverlayProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const [isCreateTaskModalOpen, setIsCreateTaskModalOpen] = useState(false)
+  const [isEditTask, setIsEditTask] = useState<Task|null>(null)
+  const [isEditAssignment, setIsEditAssignment] = useState(false)
 
   if (!isOpen || !assignment) return null
 
@@ -38,7 +47,12 @@ export default function AssignmentOverlay({
     setIsExpanded(false)
   }
 
-  const handleAddAssignmentTask = () => {
+  //todo: make so changes display faster
+  const handleAddAssignmentTask = (taskEdited?:Task) => {
+    if (taskEdited)
+      {setIsEditTask(taskEdited);
+        console.log(taskEdited)
+      }
     setIsCreateTaskModalOpen(true)
   }
 
@@ -46,14 +60,11 @@ export default function AssignmentOverlay({
     const updatedTasks = [...assignment.tasks, newTask];
     setIsCreateTaskModalOpen(false);
 
-    const updatedAssignment = {
-      ...assignment,
-      tasks: updatedTasks,
-    };
 
-    onUpdate(updatedAssignment);
+    onAssignmentUpdate(assignment.id,{tasks: updatedTasks});
   };
 
+  //TODO: USE USE CONTEXT TO PASS UPDATE METHODS BETTER
   return (
     <>
       {isExpanded ? (
@@ -62,38 +73,39 @@ export default function AssignmentOverlay({
           isOpen={isExpanded}
           onClose={onClose}
           onMinimise={handleCloseExpanded}
-          onUpdate={onUpdate}
-          onTaskAdd={handleAddAssignmentTask}
-        />
+          onAssignmentUpdate={onAssignmentUpdate}
+          onTaskDelete={onTaskDelete}
+          onTaskUpdate={onTaskUpdate}
+          openTaskForm={handleAddAssignmentTask}
+  />
       ) : (
         <div className="modalOverlay">
           <div className="modalContent">
             <AssignmentDetailPanel
-                id={assignment.id}
-                title={assignment.title}
-                createdAt={assignment.createdAt}
-                deadline={assignment.deadline}
-                weighting={assignment.weighting}
-                description={assignment.description}
-                files={assignment.files || []}
-                tasks={assignment.tasks || []}
+                {...assignment}
                 onClose={onClose}
-                onTodoToggle={onTodoToggle}
-                onAddTodo={handleAddAssignmentTask}
+                onTaskDelete={onTaskDelete}
+                onTaskUpdate={onTaskUpdate}
+                openTaskForm={handleAddAssignmentTask}
                 onExpand={handleExpandView} 
-                isTaskModalOpen={isCreateTaskModalOpen}            />
+                isTaskFormOpen={isCreateTaskModalOpen}
+                 />
           </div>
         </div>
       )}
       
       <CreateTaskModal
         isOpen={isCreateTaskModalOpen}
-        onClose={() => setIsCreateTaskModalOpen(false)}
+        onClose={() => {setIsCreateTaskModalOpen(false);setIsEditTask(null)}}
         onSave={handleCreateTask}
         members={assignment.members || []}
         maxWeight={assignment.weighting || 100}
         currentWeight={assignment.tasks.reduce((sum, task) => sum + (task.weighting ? task.weighting : 1), 0)}
+        task ={isEditTask}
+        
       />
+
+      
     </>
   )}
 

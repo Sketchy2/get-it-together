@@ -25,10 +25,12 @@ import { useOnClickOutside } from "@/utils/utils"
 
 interface TaskCardProps {
   task: Task
+  onEdit:(task:Task)=>void
+  onDelete:(taskId: string)=>void
   onStatusChange: (taskId: string, newStatus: TaskStatus) => void
 }
 
-const TaskCard: React.FC<TaskCardProps> = ({ task, onStatusChange }) => {
+const TaskCard: React.FC<TaskCardProps> = ({ task,onEdit,onDelete, onStatusChange }) => {
   const [isExpanded, setIsExpanded] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null);
@@ -174,11 +176,11 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onStatusChange }) => {
                   <span>Mark as Completed</span>
                 </button>
                 <div className="menuDivider"></div>
-                <button className="menuItem">
+                <button className="menuItem" onClick={()=>onEdit(task)}>
                   <Edit size={14} />
                   <span>Edit Task</span>
                 </button>
-                <button className="menuItem delete">
+                <button className="menuItem delete" onClick={()=>onDelete(task.id)}>
                   <Trash size={14} />
                   <span>Delete Task</span>
                 </button>
@@ -189,6 +191,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onStatusChange }) => {
       </div>
 
 
+{/* EXTENDED DETAILS */}
       {isExpanded && (
         <div className="taskCardContent">
           {task.description && <p className="taskDescription">{task.description}</p>}
