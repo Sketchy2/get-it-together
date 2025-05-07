@@ -93,8 +93,7 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
   }, []);
 
   const members = useMemo(() => {
-    const undefinedMember: User = { id: "undef", name: "Unassigned" };
-    return [undefinedMember, ...(assignment.members ?? [])];
+    return assignment.members ?? []
   }, [assignment.members]);
 
   const calculateMemberProgress = useCallback(

@@ -100,7 +100,7 @@ export default function AssignmentOverlay({
         onSave={handleCreateTask}
         members={assignment.members || []}
         maxWeight={assignment.weighting || 100}
-        currentWeight={assignment.tasks.reduce((sum, task) => sum + (task.weighting ? task.weighting : 1), 0)}
+        currentWeight={assignment.tasks?assignment.tasks.reduce((sum, task) => sum + (task.weighting ? task.weighting : 1), 0):0}
         task ={isEditTask}
         
       />
