@@ -223,7 +223,7 @@
   }
   
   .priorityButton.active {
-    background-color: #3a3a3a;
+    background-color: #505050;
     border-color: rgba(255, 255, 255, 0.3);
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -275,86 +275,8 @@
   }
   
   .statusButton.active {
-    background-color: #3a3a3a;
+    background-color: #505050;
     border-color: rgba(255, 255, 255, 0.3);
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   }
-  
-  .formActions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-    margin-top: 20px;
-  }
-  
-  .cancelButton,
-  .saveButton {
-    padding: 10px 18px;
-    border-radius: 8px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  
-  .cancelButton {
-    background-color: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: white;
-  }
-  
-  .cancelButton:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-  }
-  
-  .saveButton {
-    background-color: #4d5696;
-    border: none;
-    color: white;
-  }
-  
-  .saveButton:hover {
-    background-color: #5a64a8;
-    transform: translateY(-2px);
-  }
-  
-  .saveButton:disabled {
-    background-color: rgba(77, 86, 150, 0.5);
-    cursor: not-allowed;
-    transform: none;
-  }
-  
-  /* Scrollbar styling */
-  .taskModalContent::-webkit-scrollbar {
-    width: 6px;
-  }
-  
-  .taskModalContent::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.1);
-  }
-  
-  .taskModalContent::-webkit-scrollbar-thumb {
-    background-color: rgba(255, 255, 255, 0.1);
-    border-radius: 3px;
-  }
-  
-  .taskModalContent::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(255, 255, 255, 0.2);
-  }
-  
-  /* Responsive adjustments */
-  @media (max-width: 600px) {
-    .formRow {
-      flex-direction: column;
-      gap: 16px;
-    }
-  
-    .statusSelector {
-      flex-direction: column;
-    }
-  
-    .prioritySelector {
-      flex-direction: column;
-    }
-  }
-  
