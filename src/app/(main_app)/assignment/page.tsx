@@ -20,6 +20,8 @@ import {
 } from "@/utils/assignmentUtils";
 import { AssignmentListSection } from "@/components/assignment/AssignmentListSection";
 import { AssignmentListCard } from "@/components/assignment/AssignmentListCard";
+import ActionButton from "@/components/common/ActionButton";
+import CreateTaskModal from "@/components/task/CreateTaskModal";
 
 // Define sort function outside the component to avoid hoisting issues
 // TODO: ADJUST BASED ON PROVIDED
@@ -503,13 +505,11 @@ export default function Assignments() {
           )}
         </div>
 
-        {/* create assignment button */}
-        <button
-          className="floatingAddButton"
-          onClick={() => setIsCreateModalOpen(true)}
-        >
-          <PlusIcon size={24} />
-        </button>
+        <ActionButton
+          icon={<PlusIcon size={24} />}
+          onclick={() => setIsCreateModalOpen(true)}
+          tooltip="Create a New Assignment"
+        />
 
         {/* /* TODO PROVIDE STATE OF ASSIGNMENT DETAILS USING USE CONTEXT */
         /* Display modal */}
@@ -528,6 +528,7 @@ export default function Assignments() {
           isOpen={isCreateModalOpen}
           onClose={() => setIsCreateModalOpen(false)}
           onSave={handleCreateAssignment}
+          assignment={null}
         />
       </div>
     </>

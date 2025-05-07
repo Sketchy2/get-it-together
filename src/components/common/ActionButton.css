@@ -1,0 +1,23 @@
+.floatingActionButton {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background-color: #3e4578;
+    color: white;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s, background-color 0.2s;
+  }
+  
+  .floatingActionButton:hover {
+    transform: translateY(-4px);
+    background-color: #4a5490;
+  }
+  

@@ -421,54 +421,6 @@
   background-color: #3e3e3e;
 }
 
-.addButton {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background-color: #4d5696;
-  color: white;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  z-index: 10;
-  transition: all 0.2s ease;
-}
-
-.addButton:hover {
-  background-color: #5a64a8;
-  transform: translateY(-3px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
-}
-
-.floatingAddButton {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background-color: #3e4578;
-  color: white;
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  transition: transform 0.2s, background-color 0.2s;
-}
-
-.floatingAddButton:hover {
-  transform: translateY(-4px);
-  background-color: #4a5490;
-}
-
 
 
 /* Smooth transitions */
