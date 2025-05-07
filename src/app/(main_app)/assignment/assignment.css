@@ -1,21 +1,21 @@
-/* Enhanced assignments.css */
 .mainContainer{
-  /* background-color: #dd992b; */
+  /* backgroqund-color: #dd992b; */
   padding: 3%;
   max-width: 1200px;  
   min-width: 600px;
   margin: 0 auto;
-  
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 
 }
 
 .assignmentsContainer {
-  display: flex;
+  display: block;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-
-  height: 65vh;                  /* or 100vh, or any % of screen */
+  height: 80vh;                 
   width: 100%;
   max-width: 1200px;
   min-width: 600px;
@@ -23,12 +23,59 @@
   padding: 2%;
   background-color: #1e1e1e;
   color: white;
-
-
-  overflow-y: auto;              /* scroll this container */
-  overflow-x: hidden;              /* scroll this container */
+  overflow-y: auto;
+  overflow-x: hidden;
   border-radius: 5%;
+
 }
+/* Override any potential interference with rowContent scrolling */
+.assignmentsContainer .rowContent,
+.mainContainer .rowContent,
+.rowsContainer .rowContent {
+  overflow-x: scroll !important;
+  scrollbar-width: auto !important;
+  -ms-overflow-style: scrollbar !important;
+}
+
+/* Ensure webkit scrollbars always show in parent contexts */
+.assignmentsContainer .rowContent::-webkit-scrollbar,
+.mainContainer .rowContent::-webkit-scrollbar,
+.rowsContainer .rowContent::-webkit-scrollbar {
+  display: block !important;
+  height: 18px !important;
+  visibility: visible !important;
+}
+
+/* Ensure the row container doesn't have hidden overflow in parent contexts */
+.assignmentsContainer .rowContainer,
+.mainContainer .rowContainer,
+.rowsContainer .rowContainer {
+  overflow: visible !important;
+  margin-bottom: 30px !important; /* Extra margin to separate rows */
+}
+
+
+
+/* Force scrollbar styling in all parent contexts */
+.assignmentsContainer .rowContent::-webkit-scrollbar-thumb,
+.mainContainer .rowContent::-webkit-scrollbar-thumb,
+.rowsContainer .rowContent::-webkit-scrollbar-thumb {
+  background-color: #FF5500 !important;
+  border-radius: 9px !important;
+  border: 2px solid #333333 !important;
+  min-height: 30px !important;
+}
+
+.assignmentsContainer .rowContent::-webkit-scrollbar-track,
+.mainContainer .rowContent::-webkit-scrollbar-track,
+.rowsContainer .rowContent::-webkit-scrollbar-track {
+  background-color: #555555 !important;
+  border-radius: 9px !important;
+  margin: 0 10px !important;
+}
+
+
+
 
 .assignmentHeader {
   max-width: 1200px;
@@ -60,6 +107,7 @@
   flex-wrap: nowrap;
   gap: 12px;
   margin-bottom: 15px;
+  width: 100%;
 
 }
 
