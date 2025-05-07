@@ -12,7 +12,7 @@ import {
   Edit,
   Plus,
 } from "lucide-react"
-import { useState, useRef, useEffect, useCallback } from "react"
+import { useState, useRef, useEffect, useCallback, RefObject, ReactNode } from "react"
 import ProgressCircle from "../common/ProgressCircle"
 import { SortDirection, SortOption } from "@/types/auxilary"
 import SortMenu from "../common/SortMenu"
@@ -23,6 +23,7 @@ import { formatDate, isLate, useOnClickOutside } from "@/utils/utils"
 import {  calculateProgress, getCardBgColor } from "@/utils/assignmentUtils"
 import FilesLinksSection from "./FilesLinksSection"
 import TaskFilter from "../task/TaskFilter"
+import ActionButton from "../common/ActionButton"
 
 interface AssignmentDetailsProps {
   id: string
@@ -36,13 +37,14 @@ interface AssignmentDetailsProps {
   tasks: Task[]
   members?: User[] 
 
-  isTaskFormOpen:boolean
+  isFormOpen:boolean
   onClose: () => void
   onTaskDelete:(taskId: string) => void
   onTaskUpdate: (taskId: string, updates: Partial<Task>) => void
   openTaskForm: (task?:Task) => void
   onExpand: () => void
-}
+  actionButtonRef?: RefObject<HTMLDivElement|null> // Added ref for the action button
+  }
 
 // TODO: CHANGE SO PASSES ASSIGNMENTOPBJECT
 const AssignmentDetailPanel: React.FC<AssignmentDetailsProps> = ({
@@ -60,9 +62,9 @@ const AssignmentDetailPanel: React.FC<AssignmentDetailsProps> = ({
   onClose,
   onTaskDelete,
   onTaskUpdate,
-  isTaskFormOpen,
+  isFormOpen,
   openTaskForm,
-  onExpand,
+  onExpand,actionButtonRef
 }) => {
   const sortOptions:SortOption[] = [
     { key: "deadline", label: "Due Date", icon: <Calendar size={16} /> },
@@ -254,8 +256,19 @@ const taskStatusChange = (taskId:string,newStatus:TaskStatus)=>{
 
   const filteredAndSortedTodos = applyFiltersAndSort(tasks)
   const mainPanelRef = useRef<HTMLDivElement>(null);
-  useOnClickOutside(mainPanelRef, ()=>{if (!isTaskFormOpen){onClose()};}); // todo: fix typing error
 
+  useOnClickOutside(mainPanelRef, (event) => {
+    // Don't close if any modal is open
+    if (isFormOpen) return;
+    
+    // Don't close if click was on the action button
+    if (actionButtonRef && actionButtonRef.current && 
+        actionButtonRef.current.contains(event.target as Node)) {
+      return;
+    }
+    
+    onClose();
+  });
 
 
   return (
@@ -285,11 +298,10 @@ const taskStatusChange = (taskId:string,newStatus:TaskStatus)=>{
         <div className="detailsSection">
           <div className="sectionHeader">
             <h3 className="sectionTitle">Description</h3>
-            <button className="editButton" onClick={() => setIsEditing(!isEditing)}>
-              <Edit size={16} />
-            </button>
           </div>
-          {isEditing ? (
+          <p className="descriptionText">{description}</p>
+
+          {/* {isEditing ? (
             <div className="editDescriptionContainer">
               <textarea
                 className="descriptionTextarea"
@@ -308,7 +320,7 @@ const taskStatusChange = (taskId:string,newStatus:TaskStatus)=>{
             </div>
           ) : (
             <p className="descriptionText">{description}</p>
-          )}
+          )} */}
         </div>
 
         <div className="detailsSection">

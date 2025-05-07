@@ -635,12 +635,13 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
           <div className="descriptionSection">
             <div className="sectionHeader">
               <h3 className="sectionTitle">Description</h3>
-              <button
+
+              {/* <button
                 className="editButton"
                 onClick={() => setIsEditingDescription(!isEditingDescription)}
               >
                 <Edit size={16} />
-              </button>
+              </button> */}
             </div>
 
             {isEditingDescription ? (
@@ -732,8 +733,8 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
           </DragDropContext>
         </div>
       </div>
-    </div>
-  );
+      </div>
+    );
 };
 
 export default ExpandedAssignmentView;

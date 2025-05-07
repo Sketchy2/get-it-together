@@ -5,7 +5,7 @@ import type React from "react"
 import { useEffect, useState } from "react"
 import { X, Upload, Plus, User, Calendar, Percent, FileText, Link } from "lucide-react"
 import "./CreateAssignmentModal.css"
-import { Assignment } from "@/types/assignment"
+import { Assignment, AssignmentLink } from "@/types/assignment"
 import FormItem from "../common/FormItem"
 import Form from "../common/Form"
 import FormRow from "../common/FormRow"
@@ -27,23 +27,21 @@ const CreateAssignmentModal: React.FC<CreateAssignmentModalProps> = ({ isOpen, o
   const [members, setMembers] = useState<string[]>([]) // have so accepts 
   const [newMember, setNewMember] = useState("") //TODO: figure out how members will be handled in forms
   const [files, setFiles] = useState<File[]>([])
-  const [links, setLinks] = useState<{ url: string; title: string }[]>([])
-  const [newLink, setNewLink] = useState({ url: "", title: "" })
+  const [links, setLinks] = useState<AssignmentLink[]>([])
+  const [newLink, setNewLink] = useState<AssignmentLink>({ url: "", title: "" })
   const [showLinkForm, setShowLinkForm] = useState(false)
 
 
+  // prefill information if possible
     useEffect(() => {
       if (isOpen && assignment) {
         setTitle(assignment.title)
         setDescription(assignment.description||"")
-        setDueDate("")
-        setWeight(100)
+        setDueDate(assignment.deadline||"")
+        setWeight(assignment.weighting||100)
         // setMembers([assignment.members?.[0]?.id]||[]) //TODO: CHANGE SO ACCEPTS USERS
-        setNewMember("")
-        // setFiles(assignment.files||[])
+        // setFiles(assignment.files||[]) // TODO: Adjust file type to match db reqs
         setLinks([])
-        setNewLink({ url: "", title: "" })
-        setShowLinkForm(false)
       }
     }, [isOpen, assignment])
 
@@ -69,18 +67,14 @@ const CreateAssignmentModal: React.FC<CreateAssignmentModalProps> = ({ isOpen, o
     // Calculate days remaining
     const today = new Date()
     const due = new Date(deadline)
-    const daysRemaining = Math.ceil((due.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
 
     const newAssignment = {
       id: `assignment-${Date.now()}`, // assignment id == prefill if needed
       title,
-      date: today.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+      createdAt: today.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
       deadline: due.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
       weighting,
       description,
-      progress: 0,
-      daysRemaining,
-      isLate: daysRemaining < 0,
       members, // TODO: ENSURE create assignment API can accept emails
               // TODO: ensure that
       files: files.map((file) => file.name),
@@ -132,7 +126,9 @@ const CreateAssignmentModal: React.FC<CreateAssignmentModalProps> = ({ isOpen, o
       isOpen={isOpen}
       onClose={onClose}
       onSave={handleSubmit}
-      formTitle="Create New Assignment"
+      formTitle={assignment?"Edit Assignment":"Create New Assignment"}  
+      formSubmitLabel={assignment?"Edit Assignment":"Create Assignment"}
+  
       disabledCondition={false}
     >
       <FormItem label="Assignment Title" htmlFor="title">

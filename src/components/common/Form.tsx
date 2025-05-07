@@ -8,6 +8,7 @@ interface FormProps {
   onClose: () => void;
   onSave: (e: React.FormEvent) => void;
   formTitle: string;
+  formSubmitLabel:string
   children: React.ReactNode;
   disabledCondition:boolean
 }
@@ -18,6 +19,7 @@ export default function Form({
   onClose,
   onSave,
   formTitle,
+  formSubmitLabel,
   children,
   disabledCondition,
   ...props
@@ -45,7 +47,7 @@ export default function Form({
               Cancel
             </button>
             <button type="submit" className="saveButton" disabled={disabledCondition}>
-              Create Task
+              {formSubmitLabel}
             </button>
           </div>
         </form>

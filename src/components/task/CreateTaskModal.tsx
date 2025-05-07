@@ -107,7 +107,9 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
 isOpen={isOpen} 
 onClose={handleClose} 
     formTitle={task?"Edit Task":"Create New Task"}  
+    formSubmitLabel={task?"Edit Task":"Create Task"}
     disabledCondition={!title || remainingWeight <= 0}>
+      
 
         
         <FormItem label="Task Title" htmlFor="taskTitle">
