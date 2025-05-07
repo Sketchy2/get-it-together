@@ -1,17 +1,23 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
-import { X, Calendar, User, AlignLeft, Weight, Flag, HelpCircle, Clock, AlertTriangle, CheckCircle } from "lucide-react"
+import { useEffect, useState } from "react"
+import {  Calendar, User, AlignLeft, Flag, HelpCircle, Clock, AlertTriangle, CheckCircle } from "lucide-react"
 import "./CreateTaskModal.css"
+import {  User as Member } from "@/types/assignment"
+import {Task, TaskStatus} from "@/types/task"
+import FormItem from "../common/FormItem"
+import FormRow from "../common/FormRow"
+import Form from "../common/Form"
 
 interface CreateTaskModalProps {
   isOpen: boolean
   onClose: () => void
   onSave: (task: any) => void
-  members: string[]
+  members: Member[]
   maxWeight: number
   currentWeight: number
+  task:Task | null
 }
 
 const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
@@ -21,32 +27,49 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
   members,
   maxWeight,
   currentWeight,
+  task
 }) => {
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
-  const [assignee, setAssignee] = useState("")
-  const [deadline, setDueDate] = useState("")
-  const [weight, setWeight] = useState(1)
-  const [status, setStatus] = useState<"unassigned" | "todo" | "inProgress" | "completed">("todo")
+  const [assignee, setAssignee] = useState( "") //look into multiple assignees
+  const [deadline, setDeadline] = useState("")
+  const [weighting, setWeight] = useState(1)
+  const [status, setStatus] = useState<TaskStatus>("To-Do")
   const [priority, setPriority] = useState<"low" | "medium" | "high">("medium")
 
-  // Calculate remaining weight
+  // Calculate remaining weighting
   const remainingWeight = maxWeight - currentWeight
+
+
+  useEffect(() => {
+    if (isOpen && task) {
+      setTitle(task.title || "")
+      setDescription(task.description || "")
+      setAssignee(task.assignee?.[0]?.id || "")
+      setDeadline(task.deadline || "")
+      setWeight(task.weighting || 1)
+      setStatus(task.status || "To-Do")
+      setPriority(task.priority || "medium")
+    }
+  }, [isOpen, task])
 
   if (!isOpen) return null
 
+  const handleClose =()=>{
+    resetForm()
+    onClose()
+  }
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
     const newTask = {
-      id: `task-${Date.now()}`,
-      title,
+      id: task?.id || `${Date.now()}`,
+            title,
       description,
       assignee: assignee || undefined,
       deadline: deadline || undefined,
-      completed: status === "completed",
       status,
-      weight,
+      weighting,
       priority,
       createdAt: new Date().toISOString(),
     }
@@ -59,21 +82,20 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
     setTitle("")
     setDescription("")
     setAssignee("")
-    setDueDate("")
+    setDeadline("")
     setWeight(1)
-    setStatus("todo")
+    setStatus("To-Do")
     setPriority("medium")
   }
 
-  const getStatusIcon = (statusType: string) => {
+  const getStatusIcon = (statusType: TaskStatus) => {
     switch (statusType) {
-      case "unassigned":
-        return <HelpCircle size={16} />
-      case "todo":
+
+      case "To-Do":
         return <Clock size={16} />
-      case "inProgress":
+      case "In Progress":
         return <AlertTriangle size={16} />
-      case "completed":
+      case "Completed":
         return <CheckCircle size={16} />
       default:
         return <HelpCircle size={16} />
@@ -81,177 +103,120 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
   }
 
   return (
-    <div className="taskModalOverlay">
-      <div className="taskModalContent">
-        <div className="taskModalHeader">
-          <h3>Create New Task</h3>
-          <button className="closeButton" onClick={onClose}>
-            <X size={20} />
-          </button>
-        </div>
+<Form onSave={handleSubmit} 
+isOpen={isOpen} 
+onClose={handleClose} 
+    formTitle={task?"Edit Task":"Create New Task"}  
+    formSubmitLabel={task?"Edit Task":"Create Task"}
+    disabledCondition={!title || remainingWeight <= 0}>
+      
 
-        <form onSubmit={handleSubmit} className="taskForm">
-          <div className="formGroup">
-            <label htmlFor="taskTitle">Task Title</label>
-            <input
-              type="text"
-              id="taskTitle"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Enter task title"
-              required
-            />
-          </div>
+        
+        <FormItem label="Task Title" htmlFor="taskTitle">
+    <input
+      type="text"
+      id="taskTitle"
+      value={title}
+      onChange={(e) => setTitle(e.target.value)}
+      placeholder="Enter task title"
+      required
+    />
+  </FormItem>
 
-          <div className="formGroup">
-            <label htmlFor="taskDescription" className="inputWithIcon">
-              <AlignLeft size={16} />
-              <span>Description</span>
-            </label>
-            <textarea
-              id="taskDescription"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Enter task description"
-              rows={3}
-            />
-          </div>
 
-          <div className="formRow">
-            <div className="formGroup">
-              <label htmlFor="taskAssignee" className="inputWithIcon">
-                <User size={16} />
-                <span>Assignee</span>
-              </label>
-              <select id="taskAssignee" value={assignee} onChange={(e) => setAssignee(e.target.value)}>
-                <option value="">Unassigned</option>
-                {members.map((member, index) => (
-                  <option key={index} value={member}>
-                    {member}
-                  </option>
-                ))}
-              </select>
-            </div>
+  <FormItem label="Description" htmlFor="taskDescription" icon={<AlignLeft size={16} />}>
+    <textarea
+      id="taskDescription"
+      value={description}
+      onChange={(e) => setDescription(e.target.value)}
+      placeholder="Enter task description"
+      rows={3}
+    />
+  </FormItem>
 
-            <div className="formGroup">
-              <label htmlFor="taskDueDate" className="inputWithIcon">
-                <Calendar size={16} />
-                <span>Due Date</span>
-              </label>
-              <input type="date" id="taskDueDate" value={deadline} onChange={(e) => setDueDate(e.target.value)} />
-            </div>
-          </div>
 
-          <div className="formRow">
-            <div className="formGroup">
-              <label htmlFor="taskWeight" className="inputWithIcon">
-                <Weight size={16} />
-                <span>Task Weight (Remaining: {remainingWeight}%)</span>
-              </label>
-              <div className="weightInputContainer">
-                <input
-                  type="range"
-                  id="taskWeight"
-                  min="1"
-                  max={Math.min(remainingWeight, 50)} // Limit to remaining weight or 50, whichever is smaller
-                  value={weight}
-                  onChange={(e) => setWeight(Number.parseInt(e.target.value))}
-                  className="weightSlider"
-                />
-                <span className="weightValue">{weight}%</span>
-              </div>
-              <div className="weightDescription">
-                {remainingWeight <= 0 ? (
-                  <span className="weightWarning">No weight remaining for this assignment!</span>
-                ) : (
-                  "Higher weight means the task contributes more to overall progress"
-                )}
-              </div>
-            </div>
+  <FormRow>
+    <FormItem label="Assignee" htmlFor="taskAssignee" icon={<User size={16} />}>
+      <select id="taskAssignee" value={assignee} onChange={(e) => setAssignee(e.target.value)}>
+        <option value="">Unassigned</option>
+        {members.map((member, index) => (
+          <option key={index} value={member.name}>
+            {member.name}
+          </option>
+        ))}
+      </select>
+    </FormItem>
 
-            <div className="formGroup">
-              <label htmlFor="taskPriority" className="inputWithIcon">
-                <Flag size={16} />
-                <span>Priority</span>
-              </label>
-              <div className="prioritySelector">
-                <button
-                  type="button"
-                  className={`priorityButton ${priority === "low" ? "active" : ""}`}
-                  onClick={() => setPriority("low")}
-                >
-                  <span className="priorityDot low"></span>
-                  <span>Low</span>
-                </button>
-                <button
-                  type="button"
-                  className={`priorityButton ${priority === "medium" ? "active" : ""}`}
-                  onClick={() => setPriority("medium")}
-                >
-                  <span className="priorityDot medium"></span>
-                  <span>Medium</span>
-                </button>
-                <button
-                  type="button"
-                  className={`priorityButton ${priority === "high" ? "active" : ""}`}
-                  onClick={() => setPriority("high")}
-                >
-                  <span className="priorityDot high"></span>
-                  <span>High</span>
-                </button>
-              </div>
-            </div>
-          </div>
+    <FormItem label="Due Date" htmlFor="taskDueDate" icon={<Calendar size={16} />}>
+      <input type="date" id="taskDueDate" value={deadline} onChange={(e) => setDeadline(e.target.value)} />
+    </FormItem>
+  </FormRow>
 
-          <div className="formGroup">
-            <label htmlFor="taskStatus">Initial Status</label>
-            <div className="statusSelector">
-              <button
-                type="button"
-                className={`statusButton ${status === "unassigned" ? "active" : ""}`}
-                onClick={() => setStatus("unassigned")}
-              >
-                {getStatusIcon("unassigned")}
-                <span>Unassigned</span>
-              </button>
-              <button
-                type="button"
-                className={`statusButton ${status === "todo" ? "active" : ""}`}
-                onClick={() => setStatus("todo")}
-              >
-                {getStatusIcon("todo")}
-                <span>To Do</span>
-              </button>
-              <button
-                type="button"
-                className={`statusButton ${status === "inProgress" ? "active" : ""}`}
-                onClick={() => setStatus("inProgress")}
-              >
-                {getStatusIcon("inProgress")}
-                <span>In Progress</span>
-              </button>
-              <button
-                type="button"
-                className={`statusButton ${status === "completed" ? "active" : ""}`}
-                onClick={() => setStatus("completed")}
-              >
-                {getStatusIcon("completed")}
-                <span>Completed</span>
-              </button>
-            </div>
-          </div>
-
-          <div className="formActions">
-            <button type="button" className="cancelButton" onClick={onClose}>
-              Cancel
-            </button>
-            <button type="submit" className="saveButton" disabled={!title || remainingWeight <= 0}>
-              Create Task
-            </button>
-          </div>
-        </form>
-      </div>
+  <FormRow>
+  {/* <FormItem
+    label={`Task weighting (Remaining: ${remainingWeight}%)`}
+    htmlFor="taskWeight"
+    icon={<Weight size={16} />}
+  >
+    <div className="weightInputContainer">
+      <input
+        type="range"
+        id="taskWeight"
+        min="1"
+        max={Math.min(remainingWeight, 50)}
+        value={weighting}
+        onChange={(e) => setWeight(Number.parseInt(e.target.value))}
+        className="weightSlider"
+      />
+      <span className="weightValue">{weighting}%</span>
     </div>
+    <div className="weightDescription">
+      {remainingWeight <= 0 ? (
+        <span className="weightWarning">
+          No weighting remaining for this assignment!
+        </span>
+      ) : (
+        "Higher weighting means the task contributes more to overall progress"
+      )}
+    </div>
+  </FormItem> */}
+
+  <FormItem label="Priority" htmlFor="taskPriority" icon={<Flag size={16} />}>
+    <div className="prioritySelector">
+      {["low", "medium", "high"].map((level) => (
+        <button
+          key={level}
+          type="button"
+          className={`priorityButton ${priority === level ? "active" : ""}`}
+          onClick={() => setPriority(level as "low" | "medium" | "high")}
+        >
+          <span className={`priorityDot ${level}`}></span>
+          <span>{level.charAt(0).toUpperCase() + level.slice(1)}</span>
+        </button>
+      ))}
+    </div>
+  </FormItem>
+</FormRow>
+
+
+<FormItem label="Initial Status" htmlFor="taskStatus">
+  <div className="statusSelector">
+    {["To-Do", "In Progress", "Completed"].map((s) => (
+      <button
+        key={s}
+        type="button"
+        className={`statusButton ${status === s ? "active" : ""}`}
+        onClick={() => setStatus(s as TaskStatus)}
+      >
+        {getStatusIcon(s as TaskStatus)}
+        <span>{s}</span>
+      </button>
+    ))}
+  </div>
+</FormItem>
+</Form>
+
+
   )
 }
 

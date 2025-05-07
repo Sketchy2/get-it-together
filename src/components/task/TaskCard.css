@@ -6,13 +6,12 @@
   transition: all 0.3s ease;
   border-left: 3px solid #777777; /* Default color for unassigned */
   position: relative;
-  overflow: hidden;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  overflow: visible;
+  z-index: 0;
 }
 
 .taskCard:hover {
-  transform: translateY(-3px);
+  /* transform: translateY(-3px); */
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
 }
 

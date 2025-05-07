@@ -1,18 +1,21 @@
-
+import type {User} from "./assignment"
 export type {Task,TaskStatus}
 
-type Task = {
+
+type Task = {   
     id: string
     title: string
     description: string
-    assignee?: string
+    assignee?: User[]
     deadline?: string
     status: TaskStatus
-    weight?: number
+    weighting?: number
     createdAt?: string
-    priority?: "low" | "medium" | "high"  
+    priority?: "low" | "medium" | "high" 
 }
 
 
 // todo - change to enums
 type TaskStatus = "To-Do" | "In Progress" | "Completed"
+
+type TaskPriority = "low" | "medium" | "high"  

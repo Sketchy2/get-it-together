@@ -1,3 +1,10 @@
+.listCardContatiner.expanded{
+  background-color: rgba(49, 38, 145, 0.308);
+  border-radius: 10px;
+  animation: fadeIn 0.7s ease-out;
+
+}
+
 .listItemDetails {
     padding: 16px;
     border-bottom-left-radius: 8px;
