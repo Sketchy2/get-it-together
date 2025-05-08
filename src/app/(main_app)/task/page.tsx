@@ -367,7 +367,7 @@ export default function TasksPage() {
   }
 
   return (
-    <div className="tasksPageContainer">
+    <div>
       <header className="assignmentHeader">
         <h1 className="title">My Tasks</h1>
       </header>
