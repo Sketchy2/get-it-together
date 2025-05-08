@@ -39,3 +39,14 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# ignore specific JSON files
+.pack-lock.json
+pack-lock.json
+package.json
+
+# ignore all other irrelevant JSON configs (if that’s what you mean)
+*.json
+
+# you can still keep track of lockfiles if needed by whitelisting:
+# !package-lock.json
