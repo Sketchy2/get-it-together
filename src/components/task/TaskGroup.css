@@ -33,6 +33,12 @@
   transition: background-color 0.2s;
   position: relative;
   overflow: hidden;
+  height: 40px;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  border-radius: 8px 8px 0 0;
+  transition: border-radius 0.2s ease;
 }
 
 .taskGroupHeader:before {
@@ -230,6 +236,25 @@
 
 .taskGroupContent::-webkit-scrollbar-track {
   background-color: transparent;
+}
+
+.taskGroup.collapsed {
+  min-height: auto;
+  margin-bottom: 8px;
+}
+
+.taskGroup.collapsed .taskGroupHeader {
+  margin-bottom: 0;
+  border-radius: 8px;
+}
+
+/* Adjust spacing for list view */
+.taskGroup.list {
+  margin-bottom: 16px;
+}
+
+.taskGroup.list.collapsed {
+  margin-bottom: 8px;
 }
 
 @media (max-width: 768px) {

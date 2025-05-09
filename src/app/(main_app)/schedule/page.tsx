@@ -3,13 +3,11 @@
 import { useState, useEffect, useMemo, useCallback } from "react"
 import { Calendar, Clock, List, Grid } from "lucide-react"
 import { Calendar as BigCalendar, dateFnsLocalizer } from "react-big-calendar"
-import {format} from "date-fns/format"
-import {parse} from "date-fns/parse"
-import {startOfWeek} from "date-fns/startOfWeek"
-import {getDay} from "date-fns/getDay"
-import {enUS} from "date-fns/locale/en-US"
-import SortMenu from "@/components/common/SortMenu"
-import type { SortOption, SortDirection } from "@/types/auxilary"
+import { format } from "date-fns/format"
+import { parse } from "date-fns/parse"
+import { startOfWeek } from "date-fns/startOfWeek"
+import { getDay } from "date-fns/getDay"
+import { enUS } from "date-fns/locale/en-US"
 import type { Assignment } from "@/types/assignment"
 import EventModal from "@/components/calendar/EventModal"
 import CreateEventModal from "@/components/calendar/CreateEventModal"
@@ -68,7 +66,6 @@ export default function SchedulePage() {
   // State for view options
   const [view, setView] = useState<CalendarViewType>("month")
   const [date, setDate] = useState(new Date())
-  const [sortMenuOpen, setSortMenuOpen] = useState(false)
   const [filterAssignments, setFilterAssignments] = useState<string[]>([])
 
   // State for modals
@@ -76,14 +73,6 @@ export default function SchedulePage() {
   const [isEventModalOpen, setIsEventModalOpen] = useState(false)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [slotInfo, setSlotInfo] = useState<{ start: Date; end: Date } | null>(null)
-
-  // Sort options
-  const sortOptions: SortOption[] = [
-    { key: "date", label: "Date", icon: <Calendar size={16} /> },
-    { key: "assignment", label: "Assignment", icon: <List size={16} /> },
-  ]
-  const [sortBy, setSortBy] = useState<SortOption>(sortOptions[0])
-  const [sortDirection, setSortDirection] = useState<SortDirection>("asc")
 
   // Sample data generator function (would be replaced with API calls in production)
   const getSampleData = useCallback((): { assignments: Assignment[]; events: EventType[] } => {
@@ -239,30 +228,8 @@ export default function SchedulePage() {
 
   // Sort events based on current sort option
   const sortedEvents = useMemo(() => {
-    return [...filteredEvents].sort((a, b) => {
-      if (sortBy.key === "date") {
-        return sortDirection === "asc" ? a.start.getTime() - b.start.getTime() : b.start.getTime() - a.start.getTime()
-      } else if (sortBy.key === "assignment") {
-        const titleA = a.assignmentTitle || ""
-        const titleB = b.assignmentTitle || ""
-        return sortDirection === "asc" ? titleA.localeCompare(titleB) : titleB.localeCompare(titleA)
-      }
-      return 0
-    })
-  }, [filteredEvents, sortBy, sortDirection])
-
-  // Handle sort change
-  const handleSortChange = useCallback(
-    (sortOption: SortOption) => {
-      if (sortBy.key === sortOption.key) {
-        setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"))
-      } else {
-        setSortBy(sortOption)
-        setSortDirection("asc")
-      }
-    },
-    [sortBy],
-  )
+    return filteredEvents
+  }, [filteredEvents])
 
   // Handle event selection
   const handleSelectEvent = useCallback((event: EventType) => {
@@ -347,7 +314,32 @@ export default function SchedulePage() {
     <div className="calendarPageContainer">
       <header className="calendarHeader">
         <h1 className="calendarTitle">Schedule</h1>
-        <div className="calendarActions">
+        <div className="controlsContainer">
+          <div className="colorLegend">
+            <div className="legendItem">
+              <div className="colorSwatch" style={{ backgroundColor: EVENT_COLORS.assignment }}></div>
+              <span>Assignment Due</span>
+            </div>
+            <div className="legendItem">
+              <div className="colorSwatch" style={{ backgroundColor: EVENT_COLORS.meeting }}></div>
+              <span>Meeting</span>
+            </div>
+            <div className="legendItem">
+              <div className="colorSwatch" style={{ backgroundColor: EVENT_COLORS.task }}></div>
+              <span>Task Due</span>
+            </div>
+            <div className="legendItem">
+              <div className="colorSwatch" style={{ backgroundColor: EVENT_COLORS.presentation }}></div>
+              <span>Presentation</span>
+            </div>
+            <div className="legendItem">
+              <div className="colorSwatch" style={{ backgroundColor: EVENT_COLORS.other }}></div>
+              <span>Others</span>
+            </div>
+            {view === "agenda" && (
+              <div className="agendaNote">Agenda View: A list of all upcoming events organized by date</div>
+            )}
+          </div>
           <div className="viewControls">
             <button className={`viewButton ${view === "month" ? "active" : ""}`} onClick={() => setView("month")}>
               <Grid size={16} />
@@ -366,45 +358,8 @@ export default function SchedulePage() {
               <span>Agenda</span>
             </button>
           </div>
-          <SortMenu
-            sortMenuOpen={sortMenuOpen}
-            setSortMenuOpen={() => setSortMenuOpen(!sortMenuOpen)}
-            sortBy={sortBy}
-            sortDirection={sortDirection}
-            handleSortChange={handleSortChange}
-            options={sortOptions}
-          />
         </div>
       </header>
-
-      {/* Updated color legend */}
-      <div className="colorLegend">
-        <div className="legendItem">
-          <div className="colorSwatch" style={{ backgroundColor: EVENT_COLORS.assignment }}></div>
-          <span>Assignment Due</span>
-        </div>
-        <div className="legendItem">
-          <div className="colorSwatch" style={{ backgroundColor: EVENT_COLORS.meeting }}></div>
-          <span>Meeting</span>
-        </div>
-        <div className="legendItem">
-          <div className="colorSwatch" style={{ backgroundColor: EVENT_COLORS.task }}></div>
-          <span>Task Due</span>
-        </div>
-        <div className="legendItem">
-          <div className="colorSwatch" style={{ backgroundColor: EVENT_COLORS.presentation }}></div>
-          <span>Presentation</span>
-        </div>
-        <div className="legendItem">
-          <div className="colorSwatch" style={{ backgroundColor: EVENT_COLORS.other }}></div>
-          <span>Others</span>
-        </div>
-        {view === "agenda" && (
-          <div style={{ marginLeft: "auto", fontSize: "0.9rem", color: "rgba(255, 255, 255, 0.7)" }}>
-            Agenda View: A list of all upcoming events organized by date
-          </div>
-        )}
-      </div>
 
       <div className="calendarContainer">
         <BigCalendar

@@ -51,7 +51,7 @@ const TaskGroup: React.FC<TaskGroupProps> = ({
   }
 
   return (
-    <div className={`taskGroup ${viewMode}`}>
+    <div className={`taskGroup ${viewMode} ${isCollapsed ? "collapsed" : ""}`}>
       <div
         className="taskGroupHeader"
         style={{ backgroundColor: getGroupColor() }}
@@ -70,7 +70,16 @@ const TaskGroup: React.FC<TaskGroupProps> = ({
         <div className={`taskGroupContent ${viewMode === "kanban" ? "kanbanContent" : "listContent"}`}>
           {tasks.map((task) => (
             <div key={task.id} className="taskCardWrapper">
-              <TaskCard task={task} onStatusChange={(newStatus) => onStatusChange(task.id, newStatus)} />
+              <TaskCard
+                task={task}
+                onStatusChange={(newStatus) => onStatusChange(task.id, newStatus)}
+                onEdit={(task) => {
+                  // You can implement edit functionality here if needed
+                }}
+                onDelete={(taskId) => {
+                  // You can implement delete functionality here if needed
+                }}
+              />
             </div>
           ))}
 
