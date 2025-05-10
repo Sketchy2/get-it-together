@@ -527,8 +527,6 @@
   height: 80px;
 }
 
-
-
 .progress-circle svg {
   transform: rotate(-90deg);
 }
@@ -543,7 +541,7 @@
   dominant-baseline: middle;
 }
 
-/* Task Card Styles - Matching the TaskCard component */
+/*TODO: REMOVE Task Card Styles - Matching the TaskCard component */
 .taskCard {
   background-color: #3a3a3a;
   border-radius: 8px;
@@ -814,129 +812,6 @@
   transform: translateY(-2px);
 }
 
-/* Files Section */
-.filesSection {
-  background-color: rgba(0, 0, 0, 0.1);
-  padding: 16px;
-  border-radius: 8px;
-}
-
-.toggleFilesButton {
-  background: rgba(255, 255, 255, 0.1);
-  border: none;
-  color: white;
-  cursor: pointer;
-  padding: 6px;
-  border-radius: 6px;
-  transition: background-color 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.toggleFilesButton:hover {
-  background-color: rgba(255, 255, 255, 0.2);
-}
-
-.filesContainer {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  background-color: rgba(0, 0, 0, 0.1);
-  padding: 12px;
-  border-radius: 8px;
-}
-
-.fileItem {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  background-color: rgba(255, 255, 255, 0.05);
-  border-radius: 6px;
-  transition: all 0.2s ease;
-}
-
-.fileItem:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  transform: translateY(-2px);
-}
-
-.fileName {
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.9);
-  text-decoration: none;
-}
-
-.fileName:hover {
-  text-decoration: underline;
-}
-
-.addFileButton {
-  background-color: rgba(255, 255, 255, 0.2);
-  border: none;
-  color: white;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 4px;
-  transition: background-color 0.2s;
-}
-
-.addFileButton:hover {
-  background-color: rgba(255, 255, 255, 0.3);
-}
-
-/* Add styles for the file actions */
-.fileActions {
-  display: flex;
-  gap: 8px;
-  margin-top: 8px;
-}
-
-.fileActionButton {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  background-color: rgba(255, 255, 255, 0.05);
-  border: none;
-  color: rgba(255, 255, 255, 0.8);
-  padding: 8px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.fileActionButton:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: white;
-}
-
-.emptyFilesState {
-  text-align: center;
-  padding: 12px;
-  color: rgba(255, 255, 255, 0.6);
-  font-style: italic;
-}
-
-/* Add styles for link items */
-.linkItem {
-  background-color: rgba(77, 86, 150, 0.2);
-}
-
-.linkName {
-  color: #a3b1ff;
-}
-
-.linkName:hover {
-  text-decoration: underline;
-}
 
 /* Add responsive styles for mobile */
 @media (max-width: 768px) {
@@ -999,32 +874,6 @@
   margin-top: 8px;
 }
 
-.filterSection {
-  margin-bottom: 12px;
-}
-
-.filterSection h4 {
-  margin: 0 0 8px 0;
-  font-size: 0.9rem;
-  opacity: 0.9;
-}
-
-.filterOptions {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.filterOption {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-}
-
-.filterOption input {
-  cursor: pointer;
-}
 
 .sortOption {
   display: flex;

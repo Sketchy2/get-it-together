@@ -5,7 +5,7 @@
     right: 0;
     bottom: 0;
     background-color: #2a2a2a;
-    z-index: 1100;
+    z-index: 100;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -276,42 +276,12 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
-    background-color: rgba(0, 0, 0, 0.2);
+    background-color: rgba(0, 0, 0, 0.15);
     border-radius: 12px;
     padding: 12px 16px;
   }
   
-  .viewToggle {
-    display: flex;
-    background-color: rgba(0, 0, 0, 0.2);
-    border-radius: 10px;
-    padding: 4px;
-  }
-  
-  .viewToggleButton {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
-    border-radius: 8px;
-    background: none;
-    border: none;
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 0.9rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-  
-  .viewToggleButton.active {
-    background-color: #4d5696;
-    color: white;
-  }
-  
-  .viewToggleButton:hover:not(.active) {
-    background-color: rgba(255, 255, 255, 0.1);
-    color: white;
-  }
+
   
   .viewDescription {
     color: rgba(255, 255, 255, 0.7);
@@ -363,40 +333,7 @@
     overflow: hidden;
     animation: fadeIn 0.2s ease;
   }
-  
-  .filterSection {
-    padding: 12px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  }
-  
-  .filterSection:last-child {
-    border-bottom: none;
-  }
-  
-  .filterSection h4 {
-    margin: 0 0 8px 0;
-    font-size: 0.9rem;
-    color: rgba(255, 255, 255, 0.7);
-  }
-  
-  .filterOptions {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  
-  .filterOption {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    color: white;
-  }
-  
-  .filterOption input {
-    cursor: pointer;
-  }
+
   
   .sortMenu {
     display: flex;

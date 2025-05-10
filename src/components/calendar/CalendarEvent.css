@@ -1,0 +1,57 @@
+.calendarEvent {
+    padding: 4px 6px;
+    overflow: hidden;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  
+  .eventTitle {
+    font-weight: 600;
+    font-size: 0.9rem;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: ellipsis;
+    margin-bottom: 3px;
+    line-height: 1.3;
+  }
+  
+  .eventLocation,
+  .eventTime {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.75rem;
+    opacity: 0.9;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .eventLocation svg,
+  .eventTime svg {
+    flex-shrink: 0;
+  }
+  
+  /* Different styles for month view vs week/day view */
+  .rbc-month-view .calendarEvent {
+    padding: 2px 4px;
+  }
+  
+  .rbc-month-view .eventTitle {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .rbc-time-view .calendarEvent {
+    padding: 6px 8px;
+  }
+  
+  .rbc-time-view .eventTitle {
+    white-space: normal;
+    overflow: visible;
+    line-height: 1.4;
+  }
+  

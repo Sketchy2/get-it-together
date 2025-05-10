@@ -1,21 +1,21 @@
-/* Enhanced assignments.css */
 .mainContainer{
-  /* background-color: #dd992b; */
-  padding: 3%;
+  /* backgroqund-color: #dd992b; */
+  padding: 0vh 0vh 20vh 0vh;
   max-width: 1200px;  
   min-width: 600px;
   margin: 0 auto;
-  
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 
 }
 
 .assignmentsContainer {
-  display: flex;
+  display: block;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-
-  height: 65vh;                  /* or 100vh, or any % of screen */
+  height: fit-content;                 
   width: 100%;
   max-width: 1200px;
   min-width: 600px;
@@ -23,12 +23,59 @@
   padding: 2%;
   background-color: #1e1e1e;
   color: white;
-
-
-  overflow-y: auto;              /* scroll this container */
-  overflow-x: hidden;              /* scroll this container */
+  overflow-y: auto;
+  overflow-x: hidden;
   border-radius: 5%;
+
 }
+/* Override any potential interference with rowContent scrolling */
+.assignmentsContainer .rowContent,
+.mainContainer .rowContent,
+.rowsContainer .rowContent {
+  overflow-x: scroll !important;
+  scrollbar-width: auto !important;
+  -ms-overflow-style: scrollbar !important;
+}
+
+/* Ensure webkit scrollbars always show in parent contexts */
+.assignmentsContainer .rowContent::-webkit-scrollbar,
+.mainContainer .rowContent::-webkit-scrollbar,
+.rowsContainer .rowContent::-webkit-scrollbar {
+  display: block !important;
+  height: 18px !important;
+  visibility: visible !important;
+}
+
+/* Ensure the row container doesn't have hidden overflow in parent contexts */
+.assignmentsContainer .rowContainer,
+.mainContainer .rowContainer,
+.rowsContainer .rowContainer {
+  overflow: visible !important;
+  margin-bottom: 30px !important; /* Extra margin to separate rows */
+}
+
+
+
+/* Force scrollbar styling in all parent contexts */
+.assignmentsContainer .rowContent::-webkit-scrollbar-thumb,
+.mainContainer .rowContent::-webkit-scrollbar-thumb,
+.rowsContainer .rowContent::-webkit-scrollbar-thumb {
+  background-color: #FF5500 !important;
+  border-radius: 9px !important;
+  border: 2px solid #333333 !important;
+  min-height: 30px !important;
+}
+
+.assignmentsContainer .rowContent::-webkit-scrollbar-track,
+.mainContainer .rowContent::-webkit-scrollbar-track,
+.rowsContainer .rowContent::-webkit-scrollbar-track {
+  background-color: #555555 !important;
+  border-radius: 9px !important;
+  margin: 0 10px !important;
+}
+
+
+
 
 .assignmentHeader {
   max-width: 1200px;
@@ -60,6 +107,7 @@
   flex-wrap: nowrap;
   gap: 12px;
   margin-bottom: 15px;
+  width: 100%;
 
 }
 
@@ -105,6 +153,9 @@
   gap: 12px;
   cursor: pointer;
   transition: background-color 0.2s;
+
+  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+
 }
 
 .addCard:hover {
@@ -373,54 +424,6 @@
   background-color: #3e3e3e;
 }
 
-.addButton {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background-color: #4d5696;
-  color: white;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  z-index: 10;
-  transition: all 0.2s ease;
-}
-
-.addButton:hover {
-  background-color: #5a64a8;
-  transform: translateY(-3px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
-}
-
-.floatingAddButton {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background-color: #3e4578;
-  color: white;
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  transition: transform 0.2s, background-color 0.2s;
-}
-
-.floatingAddButton:hover {
-  transform: translateY(-4px);
-  background-color: #4a5490;
-}
-
 
 
 /* Smooth transitions */
@@ -444,25 +447,6 @@
   margin-top: 12px;
 }
 
-/* Improve scrollbar styling */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.2);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(255, 255, 255, 0.3);
-}
 
 /* Responsive adjustments */
 @media (max-width: 768px) {

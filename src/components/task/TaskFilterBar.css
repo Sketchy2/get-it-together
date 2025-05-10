@@ -1,0 +1,99 @@
+.taskFilterBar {
+  display: flex;
+  justify-content: space-between; /* Use full width */
+  align-items: center;
+  width: 100%;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+/* Single line layout */
+.taskFilterBar.single-line {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between; /* Spread across full width */
+  gap: 8px;
+  width: 100%;
+  overflow-x: auto;
+  padding: 8px 0;
+  white-space: nowrap;
+}
+
+.filterLabel {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.filterButton {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  color: white;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  height: 32px;
+}
+
+.filterButton:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.filterButton.active {
+  background: linear-gradient(135deg, #4d5696, #3e4578);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.filterDivider {
+  height: 24px;
+  width: 1px;
+  background-color: rgba(255, 255, 255, 0.2);
+  margin: 0 8px;
+}
+
+/* Status and Group sections */
+.statusSection,
+.groupSection {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1; /* Take available space */
+}
+
+/* Ensure proper scrolling for the filter bar */
+.taskFilterBar.single-line::-webkit-scrollbar {
+  height: 4px;
+}
+
+.taskFilterBar.single-line::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+}
+
+.taskFilterBar.single-line::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+@media (max-width: 768px) {
+  .taskFilterBar.single-line {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 8px;
+    justify-content: flex-start; /* On mobile, don't try to space out */
+  }
+
+  .filterButton {
+    font-size: 0.8rem;
+    padding: 4px 8px;
+  }
+}

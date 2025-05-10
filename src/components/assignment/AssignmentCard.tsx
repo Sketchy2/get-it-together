@@ -1,12 +1,12 @@
 import type React from "react";
 import "./AssignmentCard.css";
-import ProgressCircle from "./ProgressCircle";
+import ProgressCircle from "../common/ProgressCircle";
 import { formatDate } from "@/utils/utils";
 
 interface AssignmentCardProps {
   title: string;
   deadline: string;
-  weight: number;
+  weighting: number;
   description: string;
   progress: number;
   daysRemaining: number;
@@ -17,7 +17,7 @@ interface AssignmentCardProps {
 const AssignmentCard: React.FC<AssignmentCardProps> = ({
   title,
   deadline,
-  weight,
+  weighting,
   description,
   progress,
   daysRemaining,
@@ -37,16 +37,7 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({
     }
   }
   
-  console.log("AssignmentCard: ", {
-    title,
-    deadline,
-    weight,
-    description,
-    progress,
-    daysRemaining,
-    isLate,
-    bgColor,
-  });
+
   
   return (
     <div className="card-wrapper">
@@ -67,7 +58,7 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({
           </div>
           <div className="cardMeta">
             <span>
-              Due: {formatDate(deadline)} | Weighed: {weight}%
+              Due: {formatDate(deadline)} | Weighed: {weighting}%
             </span>
           </div>
           <p className="cardDescription">{description}</p>

@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import ToolTip from "@/components/ToolTip";
+import ToolTip from "@/components/common/ToolTip";
 import { MdOutlineMenu } from "react-icons/md";
 import { IoHome } from "react-icons/io5";
 import { IoDocumentTextOutline } from "react-icons/io5";
@@ -13,6 +13,7 @@ import { IconType } from "react-icons";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion,AnimatePresence } from "motion/react"
+import { it } from "node:test";
 
 type MenuItem = {
   name: string;
@@ -53,15 +54,14 @@ export default function NavBar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [hovered, setHovered] = useState(-1); //tracks which menuitem if any are hovered
 
-  function getMap() {
-    if (!menuRef.current) {
-      menuRef.current = new Map();
-    }
-    return menuRef.current;
-  }
+
   const pathname = usePathname();
 
   useEffect(() => {
+    router.prefetch('/assignment');
+    router.prefetch('/task');
+    router.prefetch('/schedule');
+    router.prefetch('/setting');
     setMenuOpen(false); // Close the navigation panel when route changes
   }, [pathname]);
 
@@ -84,19 +84,20 @@ export default function NavBar() {
         className="pie"
         style={customStyle({
           "--n": 16,
-          visibility: menuOpen ? "visible" : "hidden",
+          opacity: menuOpen ? 1 : 0 
         })}
       >
 <AnimatePresence>
   {menuOpen &&
     menuItems.map((item: MenuItem, idx: number) => (
-      <Link //https://stackoverflow.com/questions/75815089/how-can-i-use-nextjs-link-component-with-framer-motion-in-typescript
+      <div //https://stackoverflow.com/questions/75815089/how-can-i-use-nextjs-link-component-with-framer-motion-in-typescript
         key={idx}
-        href={{ pathname: item.href }}
+        onClick={()=>router.push(item.href)}
         className="slice"
         style={customStyle({ "--i": idx, "--c": item.colour })}
         onMouseEnter={() => setHovered(idx)}
         onMouseLeave={() => setHovered(-1)}
+        title={item.name}
       >
         <motion.div
           initial={{ opacity: 0, scale: 0.3, y: 20 }}
@@ -104,22 +105,11 @@ export default function NavBar() {
           exit={{ opacity: 0, scale: 0.3, y: 20 }}
           transition={{ duration: 0.3, delay: idx * 0.05 }}
         >
-          <div
-            ref={(node) => {
-              const refs = getMap();
-              if (node) {
-                refs.set(idx, node);
-              } else {
-                refs.delete(idx);
-              }            }}
-          >
+
             <item.icon />
-          </div>
         </motion.div>
-        {hovered === idx && (
-          <ToolTip content={item.name} targetRef={getMap().get(idx)} />
-        )}
-      </Link>
+
+      </div>
     ))}
 </AnimatePresence>
 
