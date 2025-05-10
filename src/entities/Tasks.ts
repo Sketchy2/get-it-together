@@ -6,10 +6,17 @@ import {
   ManyToOne,
   OneToMany,
 } from "typeorm";
-import { Assignment } from "./Assignments"; // 🔥 important
+import { Assignment } from "./Assignments";
 import { TaskAssignee } from "./TaskAssignee";
 import { UserEntity } from "./auth-entities";
 import type { Relation } from "typeorm";
+
+// Define a Priority enum for low, medium, high values
+export enum Priority {
+  Low = "low",
+  Medium = "medium",
+  High = "high",
+}
 
 @Entity("task")
 export class Task {
@@ -25,8 +32,14 @@ export class Task {
   @Column({ name: "status", type: "varchar", length: 50 })
   status: "To-Do" | "In Progress" | "Completed";
 
-  @Column({ name: "priority", type: "int", nullable: true })
-  priority: number | null;
+  // Use enum type for priority
+  @Column({
+    name: "priority",
+    type: "enum",
+    enum: Priority,
+    default: Priority.Medium,
+  })
+  priority: Priority;
 
   @Column({ name: "due_date", type: "timestamp", nullable: true })
   deadline: Date | null;
