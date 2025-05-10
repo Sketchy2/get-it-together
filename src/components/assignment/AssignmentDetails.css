@@ -1,0 +1,956 @@
+.detailsContainer {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 800px;
+  height: 100%;
+  max-height: 90vh;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  color: white;
+}
+
+.assignmentDetails {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 450px;
+  max-width: 100%;
+  background-color: #2a2a2a;
+  box-shadow: -8px 0 24px rgba(0, 0, 0, 0.4);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+  overflow: hidden;
+  border-radius: 12px 0 0 12px;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.detailsHeader {
+  position: relative;
+  padding: 24px 24px 32px;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.headerContent {
+  width: 100%;
+  text-align: center;
+  margin-right: 0;
+}
+
+.backToHomeButton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.2);
+  border: none;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  margin-bottom: 12px;
+  transition: all 0.2s ease;
+  width: fit-content;
+}
+
+.backToHomeButton:hover {
+  background-color: rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px);
+}
+
+.detailsTitle {
+  margin: 0 0 12px 0;
+  font-size: 2.2rem;
+  font-weight: bold;
+  letter-spacing: -0.5px;
+  text-align: center;
+}
+
+.detailsMetaRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.detailsMeta {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 500;
+}
+
+.statusIndicator {
+  background-color: rgba(0, 0, 0, 0.3);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+}
+
+.expandViewButton {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  background: rgba(0, 0, 0, 0.2);
+  border: none;
+  color: white;
+  cursor: pointer;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 5;
+}
+
+.expandViewButton:hover {
+  background-color: rgba(0, 0, 0, 0.4);
+  transform: scale(1.1);
+}
+
+
+
+.closeButton {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: rgba(0, 0, 0, 0.2);
+  border: none;
+  color: white;
+  cursor: pointer;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+  z-index: 6; /* Ensure it's above other elements */
+}
+
+.closeButton:hover {
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.expandButton {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.expandButton:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+
+
+
+.progress-text {
+  font-size: 10px;
+  text-anchor: middle;
+  fill: white;
+  font-weight: bold;
+  transform: rotate(90deg);
+  transform-origin: center;
+}
+
+.detailsContent {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-height: calc(100vh - 150px); /* Ensure it doesn't overflow the viewport */
+}
+
+.detailsSection {
+  margin-bottom: 36px;
+}
+
+.detailsInfo {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  background-color: rgba(0, 0, 0, 0.1);
+  padding: 16px;
+  border-radius: 8px;
+}
+
+.infoItem {
+  display: flex;
+  flex-direction: column;
+}
+
+.infoLabel {
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
+.infoValue {
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.detailsDescription {
+  background-color: rgba(0, 0, 0, 0.1);
+  padding: 16px;
+  border-radius: 8px;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.sectionTitle {
+  font-size: 1.3rem;
+  margin: 0;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.sectionActions {
+  display: flex;
+  gap: 12px;
+}
+
+.actionButton {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.actionButton:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.descriptionText {
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.6;
+  font-size: 1rem;
+  padding: 12px 16px;
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  border-left: 3px solid rgba(255, 255, 255, 0.2);
+}
+
+.editButton {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.editButton:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.editDescriptionContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.descriptionTextarea {
+  width: 100%;
+  padding: 12px;
+  background-color: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: white;
+  font-size: 1rem;
+  line-height: 1.6;
+  resize: vertical;
+}
+
+.editActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.cancelEditButton,
+.saveEditButton {
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.cancelEditButton {
+  background-color: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.cancelEditButton:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.saveEditButton {
+  background-color: #4d5696;
+  border: none;
+  color: white;
+}
+
+.saveEditButton:hover {
+  background-color: #5a64a8;
+  transform: translateY(-2px);
+}
+
+.detailsTodos {
+  background-color: rgba(0, 0, 0, 0.1);
+  padding: 16px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.todosHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.todoActions {
+  display: flex;
+  gap: 8px;
+}
+
+.todosList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.todoItem {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.todoHeader {
+  display: flex;
+  align-items: center;
+  padding: 10px 12px;
+}
+
+.todoCheckbox {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 2px;
+  margin-right: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.todoContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.todoText {
+  font-size: 1rem;
+}
+
+.todoText.completed {
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+.todoAssignee,
+.todoDueDate {
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+
+.todoPriority {
+  font-size: 0.75rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  display: inline-block;
+  margin-top: 4px;
+}
+
+.todoPriority.high {
+  background-color: rgba(255, 99, 71, 0.7);
+}
+
+.todoPriority.medium {
+  background-color: rgba(255, 165, 0, 0.7);
+}
+
+.todoPriority.low {
+  background-color: rgba(46, 139, 87, 0.7);
+}
+
+.todoExpandButton {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.todoDetails {
+  background-color: rgba(0, 0, 0, 0.1);
+  padding: 12px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.todoDetailItem {
+  display: flex;
+  flex-direction: column;
+}
+
+.todoDetailLabel {
+  font-size: 0.75rem;
+  opacity: 0.8;
+}
+
+.todoDetailValue {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.addTodoButton {
+  background-color: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+  transition: background-color 0.2s;
+}
+
+.addTodoButton:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+.emptyTodos {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+}
+
+.todoList {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  padding: 16px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.emptyTodoState {
+  text-align: center;
+  padding: 20px;
+  color: rgba(255, 255, 255, 0.6);
+  font-style: italic;
+}
+
+.detailsFooter {
+  padding: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.progressContainer {
+  width: 80px;
+  height: 80px;
+}
+
+.progress-circle svg {
+  transform: rotate(-90deg);
+}
+
+
+
+.progress-text {
+  fill: white;
+  font-size: 0.6rem;
+  font-weight: bold;
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+
+/*TODO: REMOVE Task Card Styles - Matching the TaskCard component */
+.taskCard {
+  background-color: #3a3a3a;
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+  border-left: 3px solid #777777; /* Default color for unassigned */
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.taskCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.taskCard.completed {
+  border-left-color: #647a67;
+  opacity: 0.8;
+}
+
+.taskCard.inProgress {
+  border-left-color: #4d5696;
+}
+
+.taskCard.todo {
+  border-left-color: #dd992b;
+}
+
+.taskCard.expanded {
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+.taskCard::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background-color: transparent;
+}
+
+.taskCard.unassigned::before {
+  background-color: #777777;
+}
+
+.taskCard.todo::before {
+  background-color: #dd992b;
+}
+
+.taskCard.inProgress::before {
+  background-color: #4d5696;
+}
+
+.taskCard.completed::before {
+  background-color: #647a67;
+}
+
+.taskCardHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.checkButton {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.7);
+  transition: color 0.2s;
+}
+
+.checkButton:hover {
+  color: white;
+}
+
+.checkIcon.completed {
+  color: #647a67;
+}
+
+.taskTitleContainer {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.taskTitle {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 500;
+  color: white;
+  word-break: break-word;
+}
+
+.taskTitle.completed {
+  text-decoration: line-through;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.taskBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.taskStatusIndicator {
+  display: inline-block;
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: white;
+  font-weight: 500;
+}
+
+.taskWeightBadge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background-color: #555;
+  color: white;
+}
+
+.taskPriorityBadge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: white;
+}
+
+.taskCardActions {
+  display: flex;
+  gap: 4px;
+}
+
+.menuButton {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.menuButton:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.taskCardContent {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.taskDetailGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.taskDetailItem {
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+  padding: 8px 12px;
+}
+
+.taskDetailLabel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 6px;
+}
+
+.taskDetailValue {
+  font-size: 0.9rem;
+  color: white;
+}
+
+.assigneeInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.assigneeAvatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: #4d5696;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+.weightInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.weightBar {
+  display: flex;
+  gap: 2px;
+}
+
+.weightUnit {
+  width: 16px;
+  height: 8px;
+  background-color: #4d5696;
+  border-radius: 2px;
+}
+
+.addTaskButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+  padding: 12px;
+  border-radius: 10px;
+  width: 100%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  margin-top: 12px;
+}
+
+.addTaskButton:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+
+/* Add responsive styles for mobile */
+@media (max-width: 768px) {
+  .assignmentDetails {
+    width: 100%;
+    border-radius: 0;
+  }
+
+  .detailsTitle {
+    font-size: 1.8rem;
+  }
+
+  .progressCircle {
+    right: 50px;
+    width: 50px;
+    height: 50px;
+  }
+
+  .taskDetailGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Improve scrollbar styling */
+.detailsContent::-webkit-scrollbar {
+  width: 8px;
+}
+
+.detailsContent::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+
+.detailsContent::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+.detailsContent::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Filter and Sort Menus */
+.filterContainer,
+.sortContainer {
+  position: relative;
+}
+
+.filterMenu,
+.sortMenu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: #2a2a2a;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  padding: 12px;
+  z-index: 10;
+  width: 220px;
+  margin-top: 8px;
+}
+
+
+.sortOption {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 8px;
+  width: 100%;
+  text-align: left;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.sortOption:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.sortOption.active {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Add styles for sort direction indicators */
+.sortDirection {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+}
+
+/* Add styles for date range inputs */
+.dateRangeInputs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.dateInput {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dateInput label {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.dateInput input {
+  padding: 6px 8px;
+  background-color: #444444;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  color: white;
+  font-size: 0.85rem;
+}
+
+.dateInput input:focus {
+  outline: none;
+  border-color: #4d5696;
+}
+
+.clearDateButton {
+  margin-top: 8px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: rgba(255, 255, 255, 0.8);
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  width: 100%;
+}
+
+.clearDateButton:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}

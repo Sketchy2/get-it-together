@@ -1,0 +1,282 @@
+.taskModalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1200;
+    padding: 20px;
+  }
+  
+  .taskModalContent {
+    background-color: #2a2a2a;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    animation: fadeIn 0.3s ease-out;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .taskModalHeader {
+    width: 95%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background-color: #4d5696;
+    border-radius: 12px 12px 0 0;
+  }
+  
+  .taskModalHeader h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: white;
+    font-weight: 600;
+  }
+  
+  .taskModalHeader .closeButton {
+    position: relative;
+    background: rgba(0, 0, 0, 0.2);
+    border: none;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    top:0;
+    right:0;
+
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .closeButton:hover {
+    background-color: rgba(0, 0, 0, 0.3);
+  }
+  
+  .taskForm {
+    overflow-x: hidden;
+    padding: 20px;
+  }
+  
+  .formGroup {
+    margin-bottom: 16px;
+  }
+  
+  .formRow {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  
+  .formRow .formGroup {
+    flex: 1;
+    margin-bottom: 0;
+  }
+  
+  .formGroup label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.9);
+  }
+  
+  .inputWithIcon {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .formGroup input[type="text"],
+  .formGroup input[type="date"],
+  .formGroup textarea,
+  .formGroup select {
+    width: 100%;
+    padding: 12px;
+    background-color: #333333;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: white;
+    font-size: 0.95rem;
+    transition: border-color 0.2s;
+  }
+  
+  .formGroup input:focus,
+  .formGroup textarea:focus,
+  .formGroup select:focus {
+    border-color: #4d5696;
+    outline: none;
+  }
+  
+  .weightInputContainer {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .weightSlider {
+    flex: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 6px;
+    background: #333333;
+    border-radius: 3px;
+    outline: none;
+  }
+  
+  .weightSlider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #4d5696;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .weightSlider::-webkit-slider-thumb:hover {
+    background: #5a64a8;
+    transform: scale(1.1);
+  }
+  
+  .weightSlider::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #4d5696;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+  }
+  
+  .weightSlider::-moz-range-thumb:hover {
+    background: #5a64a8;
+    transform: scale(1.1);
+  }
+  
+  .weightValue {
+    background-color: #4d5696;
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.9rem;
+  }
+  
+  .weightDescription {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin-top: 8px;
+    font-style: italic;
+  }
+  
+  .weightWarning {
+    color: #e74c3c;
+    font-weight: 500;
+  }
+  
+  .prioritySelector {
+    display: flex;
+    gap: 8px;
+  }
+  
+  .priorityButton {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px;
+    background-color: #333333;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: white;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .priorityButton:hover {
+    background-color: #3a3a3a;
+  }
+  
+  .priorityButton.active {
+    background-color: #505050;
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  .priorityDot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+  
+  .priorityDot.low {
+    background-color: #3498db;
+  }
+  
+  .priorityDot.medium {
+    background-color: #f39c12;
+  }
+  
+  .priorityDot.high {
+    background-color: #e74c3c;
+  }
+  
+  .statusSelector {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  
+  .statusButton {
+    flex: 1;
+    min-width: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px;
+    background-color: #333333;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: white;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .statusButton:hover {
+    background-color: #3a3a3a;
+  }
+  
+  .statusButton.active {
+    background-color: #505050;
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }

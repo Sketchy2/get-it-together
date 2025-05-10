@@ -1,0 +1,357 @@
+
+  .formGroup {
+    margin-bottom: 20px;
+    width: 100%;
+  }
+  
+  .formRow {
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  
+  .formRow .formGroup {
+    flex: 1;
+    margin-bottom: 0;
+  }
+  
+  .formGroup label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  .formGroup.shared {
+    display: block;
+    width: 40%;
+    background-color: red;
+    
+  }
+
+  .formGroup.shared input {
+    display: block;
+    width: 45%;
+    background-color: blue;
+    
+  }
+  .inputWithIcon {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .formGroup input[type="text"],
+  .formGroup input[type="email"],
+  .formGroup input[type="date"],
+  .formGroup input[type="number"],
+  .formGroup textarea {
+    width: 100%;
+    padding: 12px;
+    background-color: #333333;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: white;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+  }
+  
+  .formGroup input:focus,
+  .formGroup textarea:focus {
+    border-color: #4d5696;
+    outline: none;
+  }
+  
+  .memberInputContainer {
+    display: flex;
+    gap: 8px;
+  }
+  
+  .memberInputContainer input {
+    flex: 1;
+  }
+  
+  .addButton {
+    background-color: #4d5696;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    width: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .addButton:hover {
+    background-color: #5a64a8;
+  }
+  
+  .addButton:disabled {
+    background-color: rgba(77, 86, 150, 0.5);
+    cursor: not-allowed;
+  }
+  
+  .membersList,
+  .filesList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  
+  .memberChip,
+  .fileChip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #4d5696;
+    padding: 6px 10px;
+    border-radius: 16px;
+    font-size: 0.9rem;
+    color: white;
+  }
+  
+  .removeButton {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+  }
+  
+  .removeButton:hover {
+    color: white;
+  }
+  
+  .fileUploadContainer {
+    position: relative;
+  }
+  
+  .fileInput {
+    position: absolute;
+    width: 0.1px;
+    height: 0.1px;
+    opacity: 0;
+    overflow: hidden;
+    z-index: -1;
+  }
+  
+  .fileUploadButton {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #333333;
+    border: 1px dashed rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    padding: 12px;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.8);
+    transition: all 0.2s;
+  }
+  
+  .fileUploadButton:hover {
+    background-color: #3a3a3a;
+    border-color: rgba(255, 255, 255, 0.5);
+  }
+  
+  /* Add styles for link management */
+  .linkSection {
+    margin-top: 16px;
+    overflow: visible;
+  }
+  
+  .addLinkButton {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px dashed rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    padding: 12px;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.8);
+    transition: all 0.2s;
+    width: 100%;
+  }
+  
+  .addLinkButton:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.5);
+  }
+  
+  .linkForm {
+    display: flex;
+    flex-direction: column;
+
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+  
+  .linkInputs {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  
+  .linkInputs input {
+    width: 100%;
+    padding: 10px;
+    background-color: #333333;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    color: white;
+    font-size: 0.9rem;
+  }
+  
+  .linkInputs input:focus {
+    outline: none;
+    border-color: #4d5696;
+  }
+  
+  .linkFormActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+  
+  .cancelLinkButton,
+  .saveLinkButton {
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+  }
+  
+  .cancelLinkButton {
+    background-color: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+  }
+  
+  .cancelLinkButton:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .saveLinkButton {
+    background-color: #4d5696;
+    border: none;
+    color: white;
+  }
+  
+  .saveLinkButton:hover {
+    background-color: #5a64a8;
+  }
+  
+  .saveLinkButton:disabled {
+    background-color: rgba(77, 86, 150, 0.5);
+    cursor: not-allowed;
+  }
+  
+  .linksList {
+    margin-top: 12px;
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 12px;
+  }
+  
+  .linksList h4 {
+    margin: 0 0 8px 0;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.8);
+  }
+  
+  .linkChip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: rgba(77, 86, 150, 0.3);
+    padding: 6px 10px;
+    border-radius: 16px;
+    font-size: 0.9rem;
+    color: white;
+    margin-bottom: 8px;
+  }
+  
+  .linkChip:last-child {
+    margin-bottom: 0;
+  }
+  
+  .formActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 24px;
+  }
+  
+  .cancelButton,
+  .saveButton {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .cancelButton {
+    background-color: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+  }
+  
+  .cancelButton:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .saveButton {
+    background-color: #4d5696;
+    border: none;
+    color: white;
+  }
+  
+  .saveButton:hover {
+    background-color: #5a64a8;
+    transform: translateY(-2px);
+  }
+  
+  /* Scrollbar styling */
+  .createModalContent::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .createModalContent::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+  }
+  
+  .createModalContent::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+  }
+  
+  .createModalContent::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 600px) {
+    .formRow {
+      flex-direction: column;
+      gap: 20px;
+    }
+  
+    .createModalContent {
+      max-height: 85vh;
+    }
+  }
+  

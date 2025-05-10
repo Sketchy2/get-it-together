@@ -1,0 +1,202 @@
+/* Row container - with improved overflow handling */
+.rowContainer {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: 200px;               /* Adjusted height */
+  min-height: 200px;           /* Adjusted minimum height */
+  max-height: 40vh;            /* Maximum height based on viewport */
+  background-color: #3A3A3A;
+  border-radius: 10px;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  margin-bottom: 20px;         /* Add space between rows */
+}
+
+
+
+/* Row header - fixed for vertical category headers */
+.rowHeader {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 15px 10px;
+  color: white;
+  font-weight: bold;
+  border-radius: 10px 0 0 10px;
+  width: 80px;                 /* Slightly wider for better text fit */
+  flex-shrink: 0;              /* Prevent the header from shrinking */
+  height: 100%;                /* Take full height of parent */
+}
+
+/* Header colors */
+.rowHeader.active {
+  background-color: #E49B0F;   /* Orange-yellow for Active */
+}
+
+.rowHeader.completed {
+  background-color: #5B8266;   /* Green for Completed */
+}
+
+.verticalTitleContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.verticalTitle {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-size: 1.2rem;
+  text-align: center;
+  white-space: nowrap;
+  flex-grow: 1;
+}
+
+.rotatedIcon {
+  transform: rotate(270deg);
+  margin-bottom: 10px;
+}
+
+/* Row content - Enhanced scrollbar visibility */
+.rowContent {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 15px;
+  padding: 15px;
+  overflow-x: auto;           /* Enable horizontal scrolling */
+  overflow-y: hidden;         /* Disable vertical scrolling */
+  flex: 1;                    /* Take remaining width */
+  height: 100%;
+  scrollbar-width: thin;      /* For Firefox */
+  scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+  -ms-overflow-style: scrollbar; /* Show scrollbar in Edge */
+  background-color: #3A3A3A;
+
+}
+
+/* Force scrollbar to be visible on WebKit browsers */
+.rowContent::-webkit-scrollbar {
+  height: 10px;                /* Taller for better visibility */
+  width: auto;
+  display: block !important;  /* Force display */
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.rowContent::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  margin: 0 15px;            /* Add margin to track */
+}
+
+.rowContent::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.5); /* Brighter for visibility */
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  min-height: 30px; /* Ensure minimum size for the thumb */
+}
+
+.rowContent::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.7);
+}
+
+/* Assignment card styles */
+.assignmentCard {
+  min-width: 250px;
+  width: 280px;               /* Fixed width */
+  height: calc(100% - 30px);  /* Full height minus padding */
+  background-color: #B30000;  /* Red background */
+  border-radius: 10px;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;             /* Prevent cards from shrinking */
+  position: relative;         /* For absolute positioning of % */
+}
+
+.cardTitle {
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin-bottom: 8px;
+  padding-right: 30px;       /* Make room for percentage */
+}
+
+.cardDate {
+  font-size: 0.85rem;
+  margin-bottom: 8px;
+}
+
+.cardDescription {
+  font-size: 0.9rem;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;     /* Limit to 2 lines */
+  -webkit-box-orient: vertical;
+  text-overflow: ellipsis;
+}
+
+.percentDisplay {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  font-weight: bold;
+}
+
+/* Media queries for better responsiveness */
+@media (max-width: 768px) {
+  .rowContainer {
+    height: 220px;
+  }
+  
+  .rowHeader {
+    width: 60px;
+  }
+  
+  .assignmentCard {
+    min-width: 220px;
+    width: 250px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .rowContainer {
+    max-height: 300px;
+  }
+  
+  .assignmentCard {
+    min-width: 280px;
+    width: 320px;
+  }
+}
+
+/* Fix for Safari and other WebKit browsers that might hide scrollbars */
+@supports (-webkit-appearance:none) {
+  .rowContent {
+    overflow-x: scroll;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .rowContent::-webkit-scrollbar {
+    display: block !important;
+  }
+}
+
+/* For Internet Explorer and Edge Legacy */
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+  .rowContent {
+    -ms-overflow-style: scrollbar; /* Changed from -ms-autohiding-scrollbar */
+  }
+}
+
+/* Additional fixes for modern browsers */
+@supports (scrollbar-width: thin) {
+  .rowContent {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.5) rgba(0, 0, 0, 0.2);
+  }
+}

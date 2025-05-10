@@ -14,8 +14,9 @@ export async function middleware(req:NextRequest) {
     return NextResponse.redirect(new URL('/login', req.url));
   }
 
+
   // if already logged in and in loginpage, redirect to home page
-  if (token && req.nextUrl.pathname == "/login") {
+  if (token && (req.nextUrl.pathname == "/login" ||req.nextUrl.pathname == "/")) {
     return NextResponse.redirect(new URL('/home', req.url));
   }
   // if already logged in and in root, redirect to home page

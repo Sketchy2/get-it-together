@@ -1,0 +1,525 @@
+.taskCard {
+  background: #3a3a3a;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  border-left: 3px solid #777777; /* Default color for unassigned */
+  position: relative;
+  overflow: visible;
+  z-index: 0;
+}
+
+.taskCard:hover {
+  /* transform: translateY(-3px); */
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+}
+
+.taskCard.completed {
+  border-left-color: #647a67;
+  opacity: 0.85;
+}
+
+.taskCard.inProgress {
+  border-left-color: #4d5696;
+}
+
+.taskCard.todo {
+  border-left-color: #dd992b;
+}
+
+.taskCard.expanded {
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+}
+
+.taskCard::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background-color: transparent;
+}
+
+.taskCard.unassigned::before {
+  background-color: #777777;
+}
+
+.taskCard.todo::before {
+  background-color: #dd992b;
+}
+
+.taskCard.inProgress::before {
+  background-color: #4d5696;
+}
+
+.taskCard.completed::before {
+  background-color: #647a67;
+}
+
+.taskCardHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.checkButton {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.7);
+  transition: all 0.3s ease;
+}
+
+.checkButton:hover {
+  color: white;
+  transform: scale(1.1);
+}
+
+.checkIcon.completed {
+  color: #647a67;
+}
+
+.taskTitleContainer {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.taskTitle {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: white;
+  word-break: break-word;
+  line-height: 1.4;
+}
+
+.taskTitle.completed {
+  text-decoration: line-through;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.taskBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.taskStatusIndicator {
+  display: inline-block;
+  font-size: 0.75rem;
+  padding: 3px 8px;
+  border-radius: 20px;
+  color: white;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.taskWeightBadge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  padding: 3px 8px;
+  border-radius: 20px;
+  background: rgba(85, 85, 85, 0.7);
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.taskPriorityBadge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  padding: 3px 8px;
+  border-radius: 20px;
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.priorityIcon {
+  animation: pulse 2s infinite;
+}
+
+.priorityIcon.high {
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.7;
+  }
+}
+
+.taskCardActions {
+  display: flex;
+  gap: 6px;
+}
+
+.expandButton,
+.menuButton {
+  background: rgba(255, 255, 255, 0.05);
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  width: 28px;
+  height: 28px;
+}
+
+.expandButton:hover,
+.menuButton:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  transform: translateY(-2px);
+}
+
+.menuContainer {
+  position: relative;
+}
+
+.menuDropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: #2a2a2a;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  z-index: 10;
+  min-width: 200px;
+  overflow: hidden;
+  animation: fadeIn 0.3s ease;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  margin-top: 8px;
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.95rem;
+}
+
+.menuItem:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.menuItem.delete {
+  color: #e74c3c;
+}
+
+.menuItem.delete:hover {
+  background: rgba(231, 76, 60, 0.2);
+}
+
+.menuDivider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 6px 0;
+}
+
+.taskCardContent {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.taskDescription {
+  margin: 0 0 16px 0;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.6;
+  padding: 12px 16px;
+  background: #232323;
+  border-radius: 10px;
+  border-left: 3px solid rgba(255, 255, 255, 0.15);
+}
+
+.taskDetailGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.taskDetailItem {
+  background: #232323;
+  border-radius: 10px;
+  padding: 12px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.taskDetailLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 8px;
+}
+
+.taskDetailValue {
+  font-size: 0.95rem;
+  color: white;
+}
+
+.assigneeInfo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.assigneeAvatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4d5696, #3e4578);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  font-weight: bold;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.unassigned {
+  color: rgba(255, 255, 255, 0.5);
+  font-style: italic;
+}
+
+.dueDateInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.daysRemaining {
+  font-size: 0.85rem;
+  color: #3498db;
+  font-weight: 500;
+}
+
+.daysRemaining.overdue {
+  color: #e74c3c;
+  font-weight: bold;
+}
+
+.noDueDate {
+  color: rgba(255, 255, 255, 0.5);
+  font-style: italic;
+}
+
+.weightInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.weightBar {
+  display: flex;
+  gap: 3px;
+}
+
+.weightUnit {
+  width: 18px;
+  height: 8px;
+  background: #4d5696;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.taskComments {
+  margin-top: 16px;
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+  padding: 12px;
+}
+
+.taskCommentsHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.commentsList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.commentItem {
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+  padding: 8px 12px;
+}
+
+.commentHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.commentAuthor {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.commentAvatar {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #4d5696;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: bold;
+}
+
+.commentDate {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.commentText {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.addCommentForm {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.commentInput {
+  flex: 1;
+  padding: 10px 16px;
+  border-radius: 24px;
+  border: none;
+  background: #232323;
+  color: white;
+  font-size: 0.95rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.commentInput:focus {
+  outline: none;
+  background: rgba(0, 0, 0, 0.3);
+  border-color: rgba(77, 86, 150, 0.5);
+}
+
+.commentButton {
+  background: linear-gradient(135deg, #4d5696, #3e4578);
+  color: white;
+  border: none;
+  border-radius: 24px;
+  padding: 10px 20px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.commentButton:hover:not(:disabled) {
+  background: linear-gradient(135deg, #5a64a8, #4d5696);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+.commentButton:disabled {
+  background: rgba(77, 86, 150, 0.5);
+  cursor: not-allowed;
+}
+
+/* Add styles for the add task button */
+.addTaskButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  margin-top: 8px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.addTaskButton:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.addTaskButton span {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .taskDetailGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .taskCardHeader {
+    gap: 8px;
+  }
+
+  .taskTitle {
+    font-size: 1rem;
+  }
+}

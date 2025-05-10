@@ -1,0 +1,479 @@
+.mainContainer{
+  /* backgroqund-color: #dd992b; */
+  padding: 0vh 0vh 20vh 0vh;
+  max-width: 1200px;  
+  min-width: 600px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+}
+
+.assignmentsContainer {
+  display: block;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  height: fit-content;                 
+  width: 100%;
+  max-width: 1200px;
+  min-width: 600px;
+  margin: 0 auto;
+  padding: 2%;
+  background-color: #1e1e1e;
+  color: white;
+  overflow-y: auto;
+  overflow-x: hidden;
+  border-radius: 5%;
+
+}
+/* Override any potential interference with rowContent scrolling */
+.assignmentsContainer .rowContent,
+.mainContainer .rowContent,
+.rowsContainer .rowContent {
+  overflow-x: scroll !important;
+  scrollbar-width: auto !important;
+  -ms-overflow-style: scrollbar !important;
+}
+
+/* Ensure webkit scrollbars always show in parent contexts */
+.assignmentsContainer .rowContent::-webkit-scrollbar,
+.mainContainer .rowContent::-webkit-scrollbar,
+.rowsContainer .rowContent::-webkit-scrollbar {
+  display: block !important;
+  height: 18px !important;
+  visibility: visible !important;
+}
+
+/* Ensure the row container doesn't have hidden overflow in parent contexts */
+.assignmentsContainer .rowContainer,
+.mainContainer .rowContainer,
+.rowsContainer .rowContainer {
+  overflow: visible !important;
+  margin-bottom: 30px !important; /* Extra margin to separate rows */
+}
+
+
+
+/* Force scrollbar styling in all parent contexts */
+.assignmentsContainer .rowContent::-webkit-scrollbar-thumb,
+.mainContainer .rowContent::-webkit-scrollbar-thumb,
+.rowsContainer .rowContent::-webkit-scrollbar-thumb {
+  background-color: #FF5500 !important;
+  border-radius: 9px !important;
+  border: 2px solid #333333 !important;
+  min-height: 30px !important;
+}
+
+.assignmentsContainer .rowContent::-webkit-scrollbar-track,
+.mainContainer .rowContent::-webkit-scrollbar-track,
+.rowsContainer .rowContent::-webkit-scrollbar-track {
+  background-color: #555555 !important;
+  border-radius: 9px !important;
+  margin: 0 10px !important;
+}
+
+
+
+
+.assignmentHeader {
+  max-width: 1200px;
+  margin: 0 auto;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+
+  /* margin-bottom: 24px; */
+  display: flex;
+
+}
+
+
+
+.title {
+  font-size: 3rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.actions {
+  display: flex;               
+  align-items:end;
+  justify-content: end;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: 12px;
+  margin-bottom: 15px;
+  width: 100%;
+
+}
+
+.iconButton {
+  background-color: #2a2a2a;
+  border: none;
+  color: white;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.iconButton:hover {
+  background-color: #3e3e3e;
+}
+
+
+
+.rowsContainer {
+  margin: auto 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  overflow-y: auto;
+  flex: 1;
+  padding-bottom: 70px;
+}
+
+.addCard {
+  min-width: 230px;
+  height: 95%;
+  background-color: #2a2a2a;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+
+}
+
+.addCard:hover {
+  background-color: #3e3e3e;
+}
+
+/* List View Styling */
+.listContainer {
+  width: 100%;
+  padding: 20px;
+}
+
+.listSection {
+  background-color: #2a2a2a;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.listSectionHeader {
+  padding: 12px 16px;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  display: flex;
+  align-items: center;
+}
+
+.listSectionTitle {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: white;
+}
+
+.listItems {
+  max-height: 70vh;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.listItem {
+  transform: translateY(-2px);
+  background-color: #dd992b;
+  border-radius: 8px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.2s;
+  background-color: transparent !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+  .listItem:hover {
+    filter: brightness(2);
+  }
+
+.listItem.expanded {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.listItemIcon {
+  margin-right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+
+.listItemContent {
+  flex: 1;
+}
+
+.listItemTitle {
+  margin: 0 0 4px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: white;
+}
+
+.listItemMeta {
+  font-size: 0.8rem;
+  opacity: 0.9;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+
+
+
+
+.progress-text {
+  fill: white;
+  font-size: 0.6rem;
+  font-weight: bold;
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+
+
+
+.todoItems {
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  padding: 12px;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.todoItemHeader {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 6px;
+}
+
+.todoItem {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  background-color: #4a4682;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.todoItem:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.todoItemCheckbox {
+  margin-right: 8px;
+  margin-right: 15px;
+  display: flex;
+  align-items: center;
+}
+
+.todoItemText {
+  flex: 1;
+  color: white;
+}
+
+.todoItemProgressBars {
+  display: flex;
+  gap: 4px;
+  margin-right: 8px;
+  display: flex;
+  gap: 3px;
+  margin: 0 15px;
+}
+
+
+.todoItemAvatar {
+  width: 24px;
+  height: 24px;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: #6a6a9f;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.emptyTodoState {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 16px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+}
+
+.addTodoButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+  padding: 12px 16px;
+  border-radius: 8px;
+  width: 100%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.addTodoButton:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  background-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.detailsFooter {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+  margin-top: 20px;
+}
+
+.viewFullButton {
+  background-color: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  background-color: rgba(255, 255, 255, 0.15);
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.viewFullButton:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+  background-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+}
+
+.addListItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #2a2a2a;
+  border-radius: 8px;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.addListItem:hover {
+  background-color: #3e3e3e;
+}
+
+
+
+/* Smooth transitions */
+.listItem,
+.progressRing::before {
+  transition: all 0.3s ease;
+}
+
+/* Card hover effects */
+.card {
+  position: relative;
+  z-index: 0;
+}
+
+.cardFooter {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+}
+
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .assignmentsContainer {
+    padding: 16px;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .addCard {
+    min-width: 180px;
+    height: 150px;
+  }
+  .listItem {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+
+
+  .rowContainer {
+    width: 100%;
+  }
+
+  .title {
+    font-size: 1.8rem;
+  }
+}

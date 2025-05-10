@@ -1,0 +1,131 @@
+.profileHeader {
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    background-color: #2a2a2a;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  }
+  
+  .profileHeaderBackground {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 120px;
+    background: linear-gradient(135deg, #4d5696, #3e4578);
+    z-index: 1;
+  }
+  
+  .profileHeaderContent {
+    position: relative;
+    padding: 24px;
+    padding-top: 80px;
+    display: flex;
+    align-items: flex-end;
+    z-index: 2;
+  }
+  
+  .avatarContainer {
+    margin-right: 24px;
+    margin-bottom: -16px;
+  }
+  
+  .avatarWrapper {
+    position: relative;
+    width: 120px;
+    height: 120px;
+  }
+  
+  .avatar {
+    border-radius: 50%;
+    border: 4px solid #2a2a2a;
+    background-color: #3a3a3a;
+    object-fit: cover;
+  }
+  
+  .changeAvatarButton {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: #4d5696;
+    color: white;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+  
+  .changeAvatarButton:hover {
+    background-color: #5a64a8;
+    transform: scale(1.1);
+  }
+  
+  .profileInfo {
+    flex: 1;
+  }
+  
+  .profileName {
+    margin: 0 0 8px 0;
+    font-size: 2rem;
+    font-weight: 700;
+    color: white;
+  }
+  
+  .profileMeta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1rem;
+  }
+  
+  .profileDivider {
+    opacity: 0.5;
+  }
+  
+  .editProfileButton {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #4d5696;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  .editProfileButton:hover {
+    background-color: #5a64a8;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+  }
+  
+  @media (max-width: 768px) {
+    .profileHeaderContent {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding-top: 100px;
+    }
+  
+    .avatarContainer {
+      margin-right: 0;
+      margin-bottom: 16px;
+    }
+  
+    .profileInfo {
+      margin-bottom: 16px;
+    }
+  }
+  

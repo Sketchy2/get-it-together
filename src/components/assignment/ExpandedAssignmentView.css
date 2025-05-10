@@ -1,0 +1,635 @@
+.expandedViewOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #2a2a2a;
+    z-index: 100;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+  }
+  
+  .expandedViewContent {
+    background-color: #2a2a2a;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  
+  .expandedViewHeader {
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    position: relative;
+  }
+  
+  .backButton {
+    background: rgba(0, 0, 0, 0.2);
+    border: none;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    margin-right: 16px;
+    transition: background-color 0.2s;
+  }
+  
+  .backButton:hover {
+    background-color: rgba(0, 0, 0, 0.3);
+  }
+  
+  .headerContent {
+    flex: 1;
+  }
+  
+  .assignmentTitle {
+    margin: 0 0 8px 0;
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: white;
+  }
+  
+  .assignmentMeta {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  
+  .metaItem {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.9rem;
+    background-color: rgba(0, 0, 0, 0.2);
+    padding: 4px 10px;
+    border-radius: 20px;
+  }
+  
+
+  
+
+  
+  .closeButton {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.2);
+    border: none;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    z-index: 6; /* Ensure it's above other elements */
+  }
+  
+  .closeButton:hover {
+    background-color: rgba(0, 0, 0, 0.3);
+  }
+  
+  .expandedViewBody {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto; /* Enable vertical scrolling */
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .descriptionSection,
+  .filesSection {
+    margin-bottom: 20px;
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    padding: 16px;
+  }
+  
+  .sectionHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  
+  .sectionTitle {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: white;
+  }
+  
+  .editButton,
+  .toggleFilesButton {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .editButton:hover,
+  .toggleFilesButton:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+  
+  .descriptionText {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.6;
+    font-size: 1rem;
+  }
+  
+  .editDescriptionContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .descriptionTextarea {
+    width: 100%;
+    padding: 12px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: white;
+    font-size: 1rem;
+    line-height: 1.6;
+    resize: vertical;
+  }
+  
+  .editActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+  }
+  
+  .cancelEditButton,
+  .saveEditButton {
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+  }
+  
+  .cancelEditButton {
+    background-color: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+  }
+  
+  .cancelEditButton:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .saveEditButton {
+    background-color: #4d5696;
+    border: none;
+    color: white;
+  }
+  
+  .saveEditButton:hover {
+    background-color: #5a64a8;
+    transform: translateY(-2px);
+  }
+  
+  .filesContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .fileItem {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+    transition: all 0.2s ease;
+  }
+  
+  .fileItem:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+  }
+  
+  .fileName {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.9);
+  }
+  
+  /* Add styles for link items */
+  .linkItem {
+    background-color: rgba(77, 86, 150, 0.2);
+  }
+  
+  .linkName {
+    color: #a3b1ff;
+  }
+  
+  .linkName:hover {
+    text-decoration: underline;
+  }
+  
+  .addFileButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px dashed rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.8);
+    padding: 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 8px;
+  }
+  
+  .addFileButton:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+  }
+  
+  .toolbarContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    background-color: rgba(0, 0, 0, 0.15);
+    border-radius: 12px;
+    padding: 12px 16px;
+  }
+  
+
+  
+  .viewDescription {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    font-style: italic;
+  }
+  
+  .taskActions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+  
+  .filterContainer,
+  .sortContainer {
+    position: relative;
+  }
+  
+  .actionButton {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: white;
+  }
+  
+  .actionButton:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+  
+  .filterMenu,
+  .sortMenu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 8px;
+    background-color: #333333;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    z-index: 10;
+    min-width: 200px;
+    overflow: hidden;
+    animation: fadeIn 0.2s ease;
+  }
+
+  
+  .sortMenu {
+    display: flex;
+    flex-direction: column;
+    min-width: 180px;
+  }
+  
+  .sortOption {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px;
+    background: none;
+    border: none;
+    color: white;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .sortOption:last-child {
+    border-bottom: none;
+  }
+  
+  .sortOption:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .sortOption.active {
+    background-color: rgba(77, 86, 150, 0.2);
+  }
+  
+  .sortOption span {
+    flex: 1;
+  }
+  
+  .createTaskButton {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    background-color: #4d5696;
+    border: none;
+    color: white;
+  }
+  
+  .createTaskButton:hover {
+    background-color: #5a64a8;
+    transform: translateY(-2px);
+  }
+  
+  .kanbanBoard {
+    display: flex;
+    gap: 20px;
+    flex: 1;
+    overflow-x: auto;
+    padding-bottom: 16px;
+    justify-content: center; /* Center the columns */
+    min-height: 0; /* Important for flex containers to allow scrolling */
+    width: 100%;
+    max-width: 1400px; /* Limit maximum width */
+    margin: 0 auto; /* Center the board */
+  }
+  
+  .kanbanColumn {
+    flex: 1; /* Allow columns to grow */
+    min-width: 280px;
+    max-width: 350px; /* Increased max-width */
+    background-color: #333333;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    height: 100%;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+  }
+  
+  .kanbanColumn:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
+  }
+  
+  .columnHeader {
+    padding: 16px;
+    background-color: #3a3a3a;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .columnHeaderTitle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .memberHeader {
+    background-color: #3a3a3a;
+  }
+  
+  .memberHeaderInfo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .memberAvatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: #4d5696;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 0.9rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+  
+  .memberAvatar.unassigned {
+    background-color: #777;
+  }
+  
+  .memberStats {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+  }
+  
+  .memberProgress {
+    width: 100px;
+    height: 8px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+  }
+  
+  .memberProgressBar {
+    height: 100%;
+    background-color: #4d5696;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+  }
+  
+  .memberProgressText {
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.7rem;
+    color: white;
+    font-weight: bold;
+  }
+  
+  .memberTaskStats {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 16px;
+    background-color: rgba(0, 0, 0, 0.1);
+    font-size: 0.8rem;
+  }
+  
+  .taskStatItem {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  
+  .taskStatDot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+  
+  .taskStatDot.todo {
+    background-color: #dd992b;
+  }
+  
+  .taskStatDot.inProgress {
+    background-color: #4d5696;
+  }
+  
+  .taskStatDot.completed {
+    background-color: #647a67;
+  }
+  
+  .taskStatLabel {
+    color: rgba(255, 255, 255, 0.7);
+  }
+  
+  .taskStatValue {
+    font-weight: bold;
+    color: white;
+  }
+  
+  .columnHeader h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: white;
+  }
+  
+  .taskCount {
+    background-color: rgba(0, 0, 0, 0.2);
+    color: white;
+    font-size: 0.8rem;
+    padding: 2px 8px;
+    border-radius: 12px;
+  }
+  
+  .columnContent {
+    flex: 1;
+    padding: 16px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    height: calc(100% - 60px);
+    min-height: 0; /* Important for flex containers to allow scrolling */
+  }
+  
+  .columnContent.memberTasks {
+    height: calc(100% - 100px);
+  }
+  
+  /* Scrollbar styling */
+  .columnContent::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .columnContent::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+  }
+  
+  .columnContent::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+  }
+  
+  .columnContent::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+  
+  .kanbanBoard::-webkit-scrollbar {
+    height: 8px;
+  }
+  
+  .kanbanBoard::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+  }
+  
+  .kanbanBoard::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+  }
+  
+  .kanbanBoard::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .expandedViewHeader {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+    }
+  
+  
+    .toolbarContainer {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 16px;
+    }
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-5px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
