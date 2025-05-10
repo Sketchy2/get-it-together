@@ -1,29 +1,24 @@
-"use client";
+"use client"
 
-import type React from "react";
-
-import { useRef, useState } from "react";
-import "./AssignmentOverlay.css";
-import AssignmentDetailPanel from "./AssignmentDetailPanel";
-import ExpandedAssignmentView from "./ExpandedAssignmentView";
-import CreateTaskModal from "../task/CreateTaskModal";
-import { Assignment } from "@/types/assignment";
-import { Task } from "@/types/task";
-import CreateAssignmentModal from "./CreateAssignmentModal";
-import ActionButton from "../common/ActionButton";
-import { Edit } from "lucide-react";
+import { useRef, useState } from "react"
+import "./AssignmentOverlay.css"
+import AssignmentDetailPanel from "./AssignmentDetailPanel"
+import ExpandedAssignmentView from "./ExpandedAssignmentView"
+import CreateTaskModal from "../task/CreateTaskModal"
+import type { Assignment } from "@/types/assignment"
+import type { Task } from "@/types/task"
+import CreateAssignmentModal from "./CreateAssignmentModal"
+import ActionButton from "../common/ActionButton"
+import { Edit } from "lucide-react"
 
 interface AssignmentOverlayProps {
-  isOpen: boolean;
-  assignment: Assignment;
-  onClose: () => void;
-  onTaskDelete: (taskId: string) => void;
-  onTaskUpdate: (taskId: string, updates: Partial<Task>) => void;
+  isOpen: boolean
+  assignment: Assignment
+  onClose: () => void
+  onTaskDelete: (taskId: string) => void
+  onTaskUpdate: (taskId: string, updates: Partial<Task>) => void
   // onPartialTaskUpdate: <K extends keyof Task>(property: K) => (taskId: string, value: Task[K])=>void// might remove
-  onAssignmentUpdate: (
-    assignmentId: string,
-    updates: Partial<Assignment>
-  ) => void;
+  onAssignmentUpdate: (assignmentId: string, updates: Partial<Assignment>) => void
   // onPartialAssignmentUpdate: (updatedAssignment: any) => void
 }
 
@@ -36,46 +31,42 @@ export default function AssignmentOverlay({
   // onPartialTaskUpdate, // migth remove
   onAssignmentUpdate,
 }: AssignmentOverlayProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [isCreateTaskModalOpen, setIsCreateTaskModalOpen] = useState(false);
-  const [isEditTask, setIsEditTask] = useState<Task | null>(null);
-  const [isCreateAssignmentModalOpen, setIsCreateAssignmentModalOpen] =
-    useState(false);
+  const [isExpanded, setIsExpanded] = useState(false)
+  const [isCreateTaskModalOpen, setIsCreateTaskModalOpen] = useState(false)
+  const [isEditTask, setIsEditTask] = useState<Task | null>(null)
+  const [isCreateAssignmentModalOpen, setIsCreateAssignmentModalOpen] = useState(false)
 
-
-
-  const actionButtonRef = useRef<HTMLDivElement>(null);
-    const handleExpandView = () => {
-    setIsExpanded(true);
-  };
+  const actionButtonRef = useRef<HTMLDivElement>(null)
+  const handleExpandView = () => {
+    setIsExpanded(true)
+  }
 
   const handleCloseExpanded = () => {
-    setIsExpanded(false);
-  };
+    setIsExpanded(false)
+  }
 
   //todo: make so changes display faster
   const handleAddAssignmentTask = (taskEdited?: Task) => {
     if (taskEdited) {
-      setIsEditTask(taskEdited);
-      console.log(taskEdited);
+      setIsEditTask(taskEdited)
+      console.log(taskEdited)
     }
-    setIsCreateTaskModalOpen(true);
-  };
+    setIsCreateTaskModalOpen(true)
+  }
 
   const handleCreateTask = (newTask: Task) => {
-    const updatedTasks = [...assignment.tasks, newTask];
-    setIsCreateTaskModalOpen(false);
+    const updatedTasks = [...assignment.tasks, newTask]
+    setIsCreateTaskModalOpen(false)
 
-    onAssignmentUpdate(assignment.id, { tasks: updatedTasks });
-  };
-
+    onAssignmentUpdate(assignment.id, { tasks: updatedTasks })
+  }
 
   const handleEditAssignment = (edittedAssignment: Assignment) => {
-    setIsCreateAssignmentModalOpen(false);
+    setIsCreateAssignmentModalOpen(false)
 
-    onAssignmentUpdate(assignment.id, { ...edittedAssignment });
-  };
-  if (!isOpen || !assignment) return null;
+    onAssignmentUpdate(assignment.id, { ...edittedAssignment })
+  }
+  if (!isOpen || !assignment) return null
 
   //TODO: USE USE CONTEXT TO PASS UPDATE METHODS BETTER
   return (
@@ -101,48 +92,44 @@ export default function AssignmentOverlay({
               onTaskUpdate={onTaskUpdate}
               openTaskForm={handleAddAssignmentTask}
               onExpand={handleExpandView}
-              isFormOpen={isCreateTaskModalOpen||isCreateAssignmentModalOpen}
+              isFormOpen={isCreateTaskModalOpen || isCreateAssignmentModalOpen}
               actionButtonRef={actionButtonRef}
             />
-
           </div>
         </div>
       )}
-      <div ref={actionButtonRef}>      <ActionButton
-        icon={<Edit size={16} />}
-        onclick={() => setIsCreateAssignmentModalOpen(true)}
-        tooltip="Edit Assignment"
-        zIdx={3000}
-      /></div>
-
+      <div ref={actionButtonRef}>
+        {" "}
+        <ActionButton
+          icon={<Edit size={16} />}
+          onclick={() => setIsCreateAssignmentModalOpen(true)}
+          tooltip="Edit Assignment"
+          zIdx={3000}
+        />
+      </div>
 
       <CreateTaskModal
         isOpen={isCreateTaskModalOpen}
         onClose={() => {
-          setIsCreateTaskModalOpen(false);
-          setIsEditTask(null);
+          setIsCreateTaskModalOpen(false)
+          setIsEditTask(null)
         }}
         onSave={handleCreateTask}
         members={assignment.members || []}
         maxWeight={assignment.weighting || 100}
         currentWeight={
-          assignment.tasks
-            ? assignment.tasks.reduce(
-                (sum, task) => sum + (task.weighting ? task.weighting : 1),
-                0
-              )
-            : 0
+          assignment.tasks ? assignment.tasks.reduce((sum, task) => sum + (task.weighting ? task.weighting : 1), 0) : 0
         }
         task={isEditTask}
       />
       <CreateAssignmentModal
         isOpen={isCreateAssignmentModalOpen}
         onClose={() => {
-          setIsCreateAssignmentModalOpen(false);
+          setIsCreateAssignmentModalOpen(false)
         }}
         onSave={handleEditAssignment}
         assignment={assignment}
       />
     </>
-  );
+  )
 }

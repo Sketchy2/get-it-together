@@ -29,6 +29,7 @@ import { calculateProgress, getCardBgColor } from "@/utils/assignmentUtils";
 import { SortDirection, SortOption, ViewMode } from "@/types/auxilary";
 import SortMenu from "../common/SortMenu";
 import { formatDate } from "@/utils/utils";
+import CreateAssignmentEventForm from "./CreateAssignmentEventForm";
 
 import TaskKanbanColumn from "../common/KanbanColumn";
 import TaskFilter from "../task/TaskFilter";
@@ -65,7 +66,9 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
   const [memberProgress, setMemberProgress] = useState<Record<string, number>>(
     {}
   );
-
+  
+  // Event form state
+  const [isEventFormOpen, setIsEventFormOpen] = useState(false);
 
   // managing filters
   const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
@@ -102,10 +105,7 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
     }
   };
 
-
-
   //Editing assih
-
   const [isEditingDescription, setIsEditingDescription] = useState(false);
   const [editedDescription, setEditedDescription] = useState("");
   const [showFiles, setShowFiles] = useState(false);
@@ -161,6 +161,12 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
     [members]
   );
 
+  // Event handler for creating events
+  const handleCreateEvent = () => {
+    // Here you would typically save the event to your backend
+    // For now, just close the form
+    setIsEventFormOpen(false);
+  };
 
   const taskStatusChange = (taskId: string, newStatus: TaskStatus) => {
     onTaskUpdate(taskId, { status: newStatus });
@@ -622,6 +628,28 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
                   completed)
                 </span>
               </div>
+              
+              {/* Add to Calendar Button */}
+              <button 
+                className="createEventButton"
+                onClick={() => setIsEventFormOpen(true)}
+                style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '6px', 
+                  background: '#3498DB', 
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  padding: '6px 12px',
+                  fontSize: '0.9rem',
+                  cursor: 'pointer',
+                  marginLeft: '8px'
+                }}
+              >
+                <Calendar size={16} />
+                <span>Add Event</span>
+              </button>
             </div>
           </div>
           <ProgressCircle percentage={progress} />
@@ -733,8 +761,18 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
           </DragDropContext>
         </div>
       </div>
-      </div>
-    );
+      
+      {/* Event Form Modal */}
+      {isEventFormOpen && (
+        <CreateAssignmentEventForm
+          isOpen={isEventFormOpen}
+          onClose={() => setIsEventFormOpen(false)}
+          onSave={handleCreateEvent}
+          assignment={assignment}
+        />
+      )}
+    </div>
+  );
 };
 
 export default ExpandedAssignmentView;
