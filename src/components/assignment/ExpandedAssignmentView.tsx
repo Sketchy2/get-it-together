@@ -688,7 +688,7 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [assignment, calculateMemberProgress]);
+  }, [assignment,setEditedDescription, calculateMemberProgress]);
 
 
   return (
