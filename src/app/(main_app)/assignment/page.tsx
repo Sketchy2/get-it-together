@@ -174,7 +174,7 @@ export default function Assignments() {
           description: newAssignmentData.description,
           weighting: newAssignmentData.weighting,
           deadline: newAssignmentData.deadline,
-          status: "Not Started", // or other default
+          status: "Not Started", 
           progress: 0,
           finalGrade: null,
         }),
