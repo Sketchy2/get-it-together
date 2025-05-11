@@ -8,6 +8,7 @@ import { Task } from "./entities/Tasks";
 import { TaskAssignee } from "./entities/TaskAssignee";
 import { Assignment } from "./entities/Assignments";
 import { AssignmentAssignee } from "./entities/AssignmentAssignee";
+import { Event } from "./entities/Event";
 
 if (!process.env.DATABASE_URL) {
   throw new Error("❌ DATABASE_URL is not defined in .env");
@@ -34,5 +35,6 @@ export const typeormOptions = {
     TaskAssignee,
     Assignment,
     AssignmentAssignee,
+    Event
   ],
 };

@@ -180,6 +180,8 @@ export default function Assignments() {
         }),
       })
 
+      console.log('LOOK HERE', res)
+
       if (!res.ok) throw new Error("Failed to create assignment")
 
       const created = await res.json()
@@ -190,6 +192,73 @@ export default function Assignments() {
       // optionally show toast here
     }
   }, [])
+
+  // Inside your Assignments.tsx (or overlay component)
+const handleAddTask = useCallback(
+  async (assignmentId: string, taskData: { text: string; dueDate?: string }) => {
+    // 1) Build payload matching your POST handler
+    const payload = {
+      title:       taskData.text,
+      description: null,        // or taskData.description if you collect one
+      dueDate:     taskData.dueDate,
+    };
+
+    try {
+      // 2) Send to your create-task endpoint
+      const res = await fetch(`/api/assignments/${assignmentId}/tasks`, {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        // Try JSON, then fallback to text
+        let errorBody: any;
+        try {
+          errorBody = await res.json();
+        } catch {
+          errorBody = await res.text();
+        }
+        console.error(
+          `Create task failed (status ${res.status}):`,
+          errorBody
+        );
+        throw new Error(
+          typeof errorBody === "object"
+            ? errorBody.error || JSON.stringify(errorBody)
+            : errorBody || "Unknown error"
+        );
+      }
+
+      // 3) Parse the newly created Task
+      const newTask = await res.json();
+      console.log("New task created:", newTask);
+
+      // 4) Merge into the assignments list
+      setAssignments(prev =>
+        prev.map(a =>
+          a.id === assignmentId
+            ? { ...a, tasks: [...a.tasks, newTask] }
+            : a
+        )
+      );
+
+      // 5) If this assignment is currently open, merge there too
+      setSelectedAssignmentData(prev =>
+        prev && prev.id === assignmentId
+          ? { ...prev, tasks: [...prev.tasks, newTask] }
+          : prev
+      );
+    } catch (err: any) {
+      console.error("handleAddTask caught error:", err);
+      // optionally surface to UI:
+      setError(`Couldn’t add task: ${err.message}`);
+      throw err;
+    }
+  },
+  []
+);
+
 
   /**
    * Handle updating assignment
@@ -464,13 +533,17 @@ export default function Assignments() {
         {selectedAssignmentData && (
           <AssignmentOverlay
             isOpen={isModalOpen}
-            assignment={selectedAssignmentData} // should just pass the assignment
+            assignment={selectedAssignmentData}
             onClose={handleCloseModal}
             onTaskUpdate={updateTask}
             onTaskDelete={deleteTask}
             onAssignmentUpdate={handleUpdateAssignment}
+            onTaskAdd={(text, dueDate) =>
+              handleAddTask(selectedAssignmentData.id, { text, dueDate })
+            }
           />
         )}
+
 
         <CreateAssignmentModal
           isOpen={isCreateModalOpen}

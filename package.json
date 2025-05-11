@@ -46,6 +46,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@types/date-fns": "^2.5.3",
     "@types/node": "^20",
     "@types/oracledb": "^6.5.3",
     "@types/react": "^19",

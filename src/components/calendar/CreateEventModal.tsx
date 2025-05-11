@@ -7,40 +7,19 @@ import { X } from "lucide-react"
 import {format} from "date-fns/format"
 import type { Assignment } from "@/types/assignment"
 import "./CreateEventModal.css"
+import { EventType, EVENT_COLORS } from "@/types/event"
 
-interface CalendarEvent {
-  id: string
-  title: string
-  start: Date
-  end: Date
-  allDay?: boolean
-  assignmentId?: string
-  assignmentTitle?: string
-  description?: string
-  location?: string
-  color?: string
-  eventType?: "assignment" | "meeting" | "task" | "presentation" | "other"
-}
-
-// Define event colors by type
-const EVENT_COLORS = {
-  assignment: "#E74C3C", // Red for assignment due
-  meeting: "#3498DB", // Blue for meetings
-  task: "#2ECC71", // Green for task due
-  presentation: "#F39C12", // Orange for presentations
-  other: "#9B59B6", // Purple for others
-}
 
 interface CreateEventModalProps {
   isOpen: boolean
   slotInfo: { start: Date; end: Date }
   onClose: () => void
-  onSave: (newEvent: CalendarEvent) => void
+  onSave: (newEvent: EventType) => void
   assignments: Assignment[]
 }
 
 export default function CreateEventModal({ isOpen, slotInfo, onClose, onSave, assignments }: CreateEventModalProps) {
-  const [newEvent, setNewEvent] = useState<Omit<CalendarEvent, "id">>({
+  const [newEvent, setNewEvent] = useState<Omit<EventType, "id">>({
     title: "",
     start: slotInfo.start,
     end: slotInfo.end,
@@ -124,7 +103,7 @@ export default function CreateEventModal({ isOpen, slotInfo, onClose, onSave, as
       return
     }
 
-    onSave(newEvent as CalendarEvent)
+    onSave(newEvent as EventType)
   }
 
   return (
