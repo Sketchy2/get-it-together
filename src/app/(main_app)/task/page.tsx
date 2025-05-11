@@ -261,6 +261,16 @@ export default function TasksPage() {
         // Prepare the update data
         const updatedTasks = assignment.tasks.filter((t) => t.id !== taskId)
 
+                // Update the local state
+                setAssignments((prevAssignments) => {
+                  return prevAssignments.map((a) => {
+                    if (a.id === assignment.id) {
+                      return { ...a, tasks: updatedTasks }
+                    }
+                    return a
+                  })
+                })
+        
 
         // Send the update to the API
         const res = await fetch(`/api/tasks/${taskId}`, {
@@ -271,15 +281,6 @@ export default function TasksPage() {
 
         if (!res.ok) throw new Error("Failed to update task status")
 
-        // Update the local state
-        setAssignments((prevAssignments) => {
-          return prevAssignments.map((a) => {
-            if (a.id === assignment.id) {
-              return { ...a, tasks: updatedTasks }
-            }
-            return a
-          })
-        })
       } catch (err) {
         console.error("Error updating task status:", err)
         // Optionally show an error toast/notification here
@@ -300,17 +301,7 @@ export default function TasksPage() {
         const updateData = {
           status: newStatus,
         }
-
-        // Send the update to the API
-        const res = await fetch(`/api/tasks/${taskId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(updateData),
-        })
-
-        if (!res.ok) throw new Error("Failed to update task status")
-
-        // Update the local state
+        // Update the local state before db
         setAssignments((prevAssignments) => {
           return prevAssignments.map((a) => {
             if (a.id === assignment.id) {
@@ -325,6 +316,16 @@ export default function TasksPage() {
             return a
           })
         })
+        // Send the update to the API
+        const res = await fetch(`/api/tasks/${taskId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updateData),
+        })
+
+        if (!res.ok) throw new Error("Failed to update task status")
+
+
       } catch (err) {
         console.error("Error updating task status:", err)
         // Optionally show an error toast/notification here
@@ -346,6 +347,7 @@ export default function TasksPage() {
   // Handle creating a new task
   const handleCreateTask = useCallback(
     async (newTaskData: any) => {
+      setIsCreateModalOpen(false)
       try {
         if (!newTaskData.assignmentId && selectedAssignmentId) {
           newTaskData.assignmentId = selectedAssignmentId
@@ -426,17 +428,28 @@ export default function TasksPage() {
   }
 
   // Empty state
-  if (allTasks.length === 0) {
+  if (allTasks.length == 0) {
     return (
-      <div className="loadingContainer">
+      <><div className="loadingContainer">
         <p>No tasks found...</p>
         <p>Time to create your first task!</p>
         <div className="addCard" onClick={() => setIsCreateModalOpen(true)}>
           <PlusIcon size={24} />
           <span>Add Task</span>
         </div>
-      </div>
-    )
+      </div><CreateTaskModal
+          isOpen={isCreateModalOpen}
+          onClose={() => {
+            setIsCreateModalOpen(false)
+            setSelectedAssignmentId(null)
+          } }
+          onSave={handleCreateTask}
+          members={[]}
+          maxWeight={100}
+          currentWeight={0}
+          task={null} /></>
+        )
+    
   }
 
   return (

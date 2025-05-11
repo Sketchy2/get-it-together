@@ -78,9 +78,8 @@ const TaskGroup: React.FC<TaskGroupProps> = ({
                 onEdit={(task) => {
                   // You can implement edit functionality here if needed
                 }}
-                onDelete={(taskId) => {
+                onDelete={() => {
                   onTaskDelete(task.id)
-                  // You can implement delete functionality here if needed
                 }}
               />
             </div>
