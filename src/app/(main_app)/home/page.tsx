@@ -4,7 +4,6 @@ import { useState, useEffect, useMemo, useCallback } from "react"
 import { ChevronLeft, ChevronRight, ClipboardList } from "lucide-react"
 import type { Assignment } from "@/types/assignment"
 import type { Task, TaskStatus } from "@/types/task"
-import { dateFnsLocalizer } from "react-big-calendar"
 import {
   format,
   parse,
@@ -18,49 +17,12 @@ import {
   isSaturday,
   isSunday,
 } from "date-fns"
-import { enUS } from "date-fns/locale/en-US"
 import EventModal from "@/components/calendar/EventModal"
 import TaskGroup from "@/components/task/TaskGroup"
 import AssignmentOverlay from "@/components/assignment/AssignmentOverlay"
 import "./dashboard.css"
 import "react-big-calendar/lib/css/react-big-calendar.css"
-
-// Setup localizer for react-big-calendar
-const locales = {
-  "en-US": enUS,
-}
-
-const localizer = dateFnsLocalizer({
-  format,
-  parse,
-  startOfWeek,
-  getDay,
-  locales,
-})
-
-// Define event type
-interface EventType {
-  id: string
-  title: string
-  start: Date
-  end: Date
-  allDay?: boolean
-  assignmentId?: string
-  assignmentTitle?: string
-  description?: string
-  location?: string
-  color?: string
-  eventType?: "assignment" | "meeting" | "task" | "presentation" | "other"
-}
-
-// Define event colors by type
-const EVENT_COLORS = {
-  assignment: "#E74C3C", // Red for assignment due
-  meeting: "#3498DB", // Blue for meetings
-  task: "#2ECC71", // Green for task due
-  presentation: "#F39C12", // Orange for presentations
-  other: "#9B59B6", // Purple for others
-}
+import { EventType, EVENT_COLORS } from "@/types/event"
 
 // Define task status colors
 const TASK_STATUS_COLORS = {
