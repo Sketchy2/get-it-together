@@ -180,6 +180,8 @@ export default function Assignments() {
         }),
       })
 
+      console.log('LOOK HERE', res)
+
       if (!res.ok) throw new Error("Failed to create assignment")
 
       const created = await res.json()
