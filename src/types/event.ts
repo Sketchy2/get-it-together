@@ -1,7 +1,7 @@
 import type { Assignment } from "./assignment"
 
-export type EventType = {
-  id: string
+export type CalendarEvent = {
+  id?: string
   title: string
   start: Date
   end: Date
@@ -22,6 +22,6 @@ export const EVENT_COLORS = {
   other: "#9B59B6", // Purple for others
 }
 
-export type EventWithAssignment = EventType & {
+export type EventWithAssignment = CalendarEvent & {
   assignment?: Assignment
 }

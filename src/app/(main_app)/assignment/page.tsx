@@ -174,7 +174,7 @@ export default function Assignments() {
           description: newAssignmentData.description,
           weighting: newAssignmentData.weighting,
           deadline: newAssignmentData.deadline,
-          status: "Not Started", // or other default
+          status: "Not Started", 
           progress: 0,
           finalGrade: null,
         }),
@@ -358,17 +358,23 @@ export default function Assignments() {
     )
   }
 
-  if (assignments.length == 0) {
+  if (assignments.length== 0) {
     //TODO: STYLE THIS
     return (
-      <div className="loadingContainer">
-        <p>No assignments...</p>
-        <p>Time to get working!</p>
+      <><div className="loadingContainer">
+        <h2>No assignments...</h2>
+        <h3>Time to get working!</h3>
         <div className="addCard" onClick={() => setIsCreateModalOpen(true)}>
           <PlusIcon size={24} />
           <span>Add Assignment</span>
         </div>
       </div>
+      
+      <CreateAssignmentModal
+          isOpen={isCreateModalOpen}
+          onClose={() => setIsCreateModalOpen(false)}
+          onSave={handleCreateAssignment}
+          assignment={null} /></>
     )
   }
 

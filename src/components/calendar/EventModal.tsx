@@ -7,20 +7,32 @@ import { X, Calendar, Clock, MapPin, Trash, Edit, Link } from "lucide-react"
 import {format} from "date-fns/format"
 import type { Assignment } from "@/types/assignment"
 import "./EventModal.css"
-import { EventType } from "@/types/event"
+
+interface CalendarEvent {
+  id: string
+  title: string
+  start: Date
+  end: Date
+  allDay?: boolean
+  assignmentId?: string
+  assignmentTitle?: string
+  description?: string
+  location?: string
+  color?: string
+}
 
 interface EventModalProps {
   isOpen: boolean
-  event: EventType
+  event: CalendarEvent
   onClose: () => void
-  onUpdate: (updatedEvent: EventType) => void
+  onUpdate: (updatedEvent: CalendarEvent) => void
   onDelete: (eventId: string) => void
   assignments: Assignment[]
 }
 
 export default function EventModal({ isOpen, event, onClose, onUpdate, onDelete, assignments }: EventModalProps) {
   const [isEditing, setIsEditing] = useState(false)
-  const [editedEvent, setEditedEvent] = useState<EventType>(event)
+  const [editedEvent, setEditedEvent] = useState<CalendarEvent>(event)
 
   if (!isOpen) return null
 
