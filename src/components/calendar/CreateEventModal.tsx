@@ -2,53 +2,50 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { X } from "lucide-react"
-import {format} from "date-fns/format"
+import { format } from "date-fns/format"
 import type { Assignment } from "@/types/assignment"
 import "./CreateEventModal.css"
-
-interface CalendarEvent {
-  id: string
-  title: string
-  start: Date
-  end: Date
-  allDay?: boolean
-  assignmentId?: string
-  assignmentTitle?: string
-  description?: string
-  location?: string
-  color?: string
-  eventType?: "assignment" | "meeting" | "task" | "presentation" | "other"
-}
-
-// Define event colors by type
-const EVENT_COLORS = {
-  assignment: "#E74C3C", // Red for assignment due
-  meeting: "#3498DB", // Blue for meetings
-  task: "#2ECC71", // Green for task due
-  presentation: "#F39C12", // Orange for presentations
-  other: "#9B59B6", // Purple for others
-}
+import { EventType, EVENT_COLORS } from "@/types/event"
 
 interface CreateEventModalProps {
   isOpen: boolean
   slotInfo: { start: Date; end: Date }
   onClose: () => void
-  onSave: (newEvent: CalendarEvent) => void
+  onSave: (newEvent: EventType) => void
   assignments: Assignment[]
+  userId: string | null
 }
 
-export default function CreateEventModal({ isOpen, slotInfo, onClose, onSave, assignments }: CreateEventModalProps) {
-  const [newEvent, setNewEvent] = useState<Omit<CalendarEvent, "id">>({
+export default function CreateEventModal({ isOpen, slotInfo, onClose, onSave, assignments, userId }: CreateEventModalProps) {
+  console.log(assignments)
+  const [newEvent, setNewEvent] = useState<Omit<EventType, "id">>({
     title: "",
     start: slotInfo.start,
     end: slotInfo.end,
     description: "",
     location: "",
+    assignmentId: undefined,
+    assignmentTitle: undefined,
     eventType: "other",
     color: EVENT_COLORS.other,
   })
+  
+  
+  useEffect(() => {
+    if (slotInfo) {
+      setNewEvent({
+        title: "",
+        start: new Date(slotInfo.start),
+        end: new Date(slotInfo.end),
+        description: "",
+        location: "",
+        eventType: "other",
+        color: EVENT_COLORS.other,
+      })
+    }
+  }, [slotInfo])
 
   if (!isOpen) return null
 
@@ -75,17 +72,24 @@ export default function CreateEventModal({ isOpen, slotInfo, onClose, onSave, as
   const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     const [hours, minutes] = value.split(":").map(Number)
-
+  
+    if (isNaN(hours) || isNaN(minutes)) return
+  
     if (name === "startTime") {
       const newStart = new Date(newEvent.start)
-      newStart.setHours(hours, minutes)
+      newStart.setHours(hours)
+      newStart.setMinutes(minutes)
+      newStart.setSeconds(0)
       setNewEvent((prev) => ({ ...prev, start: newStart }))
     } else if (name === "endTime") {
       const newEnd = new Date(newEvent.end)
-      newEnd.setHours(hours, minutes)
+      newEnd.setHours(hours)
+      newEnd.setMinutes(minutes)
+      newEnd.setSeconds(0)
       setNewEvent((prev) => ({ ...prev, end: newEnd }))
     }
   }
+  
 
   const handleAssignmentChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const assignmentId = e.target.value
@@ -124,7 +128,7 @@ export default function CreateEventModal({ isOpen, slotInfo, onClose, onSave, as
       return
     }
 
-    onSave(newEvent as CalendarEvent)
+    onSave(newEvent as EventType)
   }
 
   return (
@@ -161,9 +165,7 @@ export default function CreateEventModal({ isOpen, slotInfo, onClose, onSave, as
                 onChange={handleEventTypeChange}
                 required
               >
-                <option value="assignment">Assignment Due</option>
                 <option value="meeting">Meeting</option>
-                <option value="task">Task Due</option>
                 <option value="presentation">Presentation</option>
                 <option value="other">Other</option>
               </select>
@@ -193,7 +195,7 @@ export default function CreateEventModal({ isOpen, slotInfo, onClose, onSave, as
                   type="date"
                   id="startDate"
                   name="startDate"
-                  value={format(newEvent.start, "yyyy-MM-dd")}
+                  value={newEvent.start instanceof Date && !isNaN(newEvent.start.getTime()) ? format(newEvent.start, "yyyy-MM-dd") : ""}
                   onChange={handleDateChange}
                   required
                 />
@@ -205,7 +207,7 @@ export default function CreateEventModal({ isOpen, slotInfo, onClose, onSave, as
                   type="time"
                   id="startTime"
                   name="startTime"
-                  value={format(newEvent.start, "HH:mm")}
+                  value={newEvent.start instanceof Date && !isNaN(newEvent.start.getTime()) ? format(newEvent.start, "HH:mm") : ""}
                   onChange={handleTimeChange}
                   required
                 />
@@ -219,7 +221,7 @@ export default function CreateEventModal({ isOpen, slotInfo, onClose, onSave, as
                   type="date"
                   id="endDate"
                   name="endDate"
-                  value={format(newEvent.end, "yyyy-MM-dd")}
+                  value={newEvent.end instanceof Date && !isNaN(newEvent.end.getTime()) ? format(newEvent.end, "yyyy-MM-dd") : ""}
                   onChange={handleDateChange}
                   required
                 />
@@ -231,7 +233,7 @@ export default function CreateEventModal({ isOpen, slotInfo, onClose, onSave, as
                   type="time"
                   id="endTime"
                   name="endTime"
-                  value={format(newEvent.end, "HH:mm")}
+                  value={newEvent.end instanceof Date && !isNaN(newEvent.end.getTime()) ? format(newEvent.end, "HH:mm") : ""}
                   onChange={handleTimeChange}
                   required
                 />

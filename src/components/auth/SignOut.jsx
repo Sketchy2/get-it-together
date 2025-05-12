@@ -1,14 +1,25 @@
-import { signOut } from "@/auth"
- 
+"use client"
+
+import { SignOutAction } from "./SignOutAction"
+import { useRouter } from "next/navigation"
+import { LogOut } from "lucide-react"
+import "./SignOut.css"
+
 export default function SignOut() {
+  const router = useRouter()
+
+  const handleSignOut = async (e) => {
+    e.preventDefault()
+    await SignOutAction()
+    router.push("/")
+  }
+
   return (
-    <form
-      action={async () => {
-        "use server"
-              await signOut({ redirectTo: "/" });
-          }}
+    <button 
+      className="signOutButton" 
+      onClick={handleSignOut}
     >
-      <button type="submit">Sign Out</button>
-    </form>
+      <LogOut size={16} /> Sign Out
+    </button>
   )
-} 
+}

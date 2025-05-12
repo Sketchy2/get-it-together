@@ -4,6 +4,8 @@ import { DataSource } from "typeorm";
 import { typeormOptions } from "@/typeorm-datasource";
 import { Assignment } from "@/entities/Assignments";
 import { UserEntity } from "@/entities/auth-entities";
+import { AssignmentAssignee } from "@/entities/AssignmentAssignee";
+import { assignUserToAssignment } from "@/lib/assignAssignment";
 
 /**
  * Helper: create a fresh connection
@@ -20,78 +22,166 @@ async function getDataSource() {
  * GET /api/assignments
  * Fetch all assignments (with assignees and tasks)
  */
-export async function GET() {
+// export async function GET() {
+//   const session = await auth();
+//   const email = session?.user?.email;
+//   if (!email) {
+//     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+//   }
+
+//   const ds = await getDataSource();
+//   try {
+//     const assignments = await ds
+//       .getRepository(Assignment)
+//       .createQueryBuilder("assignment")
+//       // join in your assignees
+//       .leftJoinAndSelect("assignment.assignees", "assignee")
+//       // join the user on each assignee
+//       .leftJoinAndSelect("assignee.user", "user")
+//       // join any other relations you need
+//       .leftJoinAndSelect("assignment.tasks", "task")
+//       // filter by the logged-in user’s email
+//       .where("user.email = :email", { email })
+//       .getMany();
+
+//     return NextResponse.json(assignments);
+//   } catch (err) {
+//     console.error(err);
+//     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+//   } finally {
+//     await ds.destroy();
+//   }
+// }
+
+// src/app/api/assignments/route.ts
+
+export async function GET(req: NextRequest) {
+  const session = await auth();
+  const email   = session?.user?.email;
+  if (!email) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const ds = await getDataSource();
   try {
-    // Authenticate the user
-    const session = await auth();
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    // 1) Build your query: filter down to assignments this user is on,
+    //    then load *all* assignees (and their users), tasks, files & links.
+    const qb = ds.getRepository(Assignment).createQueryBuilder("assignment");
+    qb.innerJoin(
+      "assignment.assignees",
+      "filterAssignee"
+    ).innerJoin(
+      "filterAssignee.user",
+      "filterUser",
+      "filterUser.email = :email",
+      { email }
+    );
+    qb.leftJoinAndSelect("assignment.assignees", "assignee")
+      .leftJoinAndSelect("assignee.user",        "user")
+      .leftJoinAndSelect("assignment.tasks",     "task")
 
-    // Get all assignments, including related assignees and tasks
-    const dataSource = await getDataSource();
-    const repo = dataSource.getRepository(Assignment);
+    const raw = await qb.getMany();
 
-    const assignments = await repo.find({
-      relations: ["assignees", "tasks"],
-    });
+    // 2) Map it into exactly the shape your front-end `Assignment` type expects:
+    const formatted = raw.map((a) => ({
+      id:          a.id.toString(),
+      title:       a.title,
+      description: a.description ?? "",
+      deadline:    a.deadline    ? a.deadline.toISOString()    : "",
+      weighting:   a.weighting   ?? 0,
+      status:      a.status,
+      progress:    a.progress,
+      finalGrade:  a.finalGrade  ?? null,
 
-    await dataSource.destroy();
-    return NextResponse.json(assignments);
+      // pull out just the raw User objects
+      members: a.assignees.map((asst) => ({
+        id:    asst.user.id,
+        name:  asst.user.name,
+        email: asst.user.email ?? "",
+      })),
+
+      tasks: a.tasks.map((t) => ({
+        id:           t.id.toString(),
+        title:        t.title,
+        description:  t.description ?? "",
+        dueDate:      t.deadline   ? t.deadline.toISOString()   : "",
+        status:       t.status,
+        priority:     t.priority,
+        createdAt:    t.createdAt.toISOString(),
+        assignmentId: a.id.toString(),
+      })),
+    }));
+
+    return NextResponse.json(formatted);
   } catch (err) {
     console.error(err);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  } finally {
+    await ds.destroy();
   }
 }
 
-/**
- * POST /api/assignments
- * Create a new assignment
- */
+
 export async function POST(req: NextRequest) {
+  const session = await auth();
+  const email = session?.user?.email;
+  if (!email) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  console.log("executing add assignments")
+
+  const { title, description, weighting, deadline, progress, status, finalGrade, members } = await req.json();
+
+  if (!title || !status) {
+    return NextResponse.json({ error: "Title and Status are required" }, { status: 400 });
+  }
+
+  const ds = await getDataSource();
   try {
-    // Authenticate the user
-    const session = await auth();
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const assignmentRepo = ds.getRepository(Assignment);
+    const userRepo = ds.getRepository(UserEntity);
+
+    // Find the creator by email
+    const creator = await userRepo.findOne({ where: { email } });
+    if (!creator) {
+      return NextResponse.json({ error: "Creator not found" }, { status: 404 });
     }
 
-    // Parse input from the request body
-    const { title, description, weighting, deadline, progress, status, finalGrade } = await req.json();
-
-    if (!title || !status) {
-      return NextResponse.json({ error: "Title and Status are required" }, { status: 400 });
-    }
-
-    const dataSource = await getDataSource();
-    const assignmentRepo = dataSource.getRepository(Assignment);
-    const userRepo = dataSource.getRepository(UserEntity);
-
-    // Fetch the current user from the database
-    const user = await userRepo.findOneBy({ id: session.user.id as any });
-    if (!user) {
-      await dataSource.destroy();
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
-
-    // Create and save the new assignment updated to use the correct user type
+    // Create & save the assignment
     const assignment = assignmentRepo.create({
       title,
-      description: description || null,
-      weighting: weighting ?? null,
-      deadline: deadline ? new Date(deadline) : null,
-      progress: progress ?? 0,
+      description:   description   ?? null,
+      weighting:     weighting     ?? null,
+      deadline:      deadline      ? new Date(deadline) : null,
+      progress:      progress      ?? 0,
       status,
-      finalGrade: finalGrade ?? null,
-      createdByUser: user,
+      finalGrade:    finalGrade    ?? null,
+      createdByUser: creator,
     });
+    const saved = await assignmentRepo.save(assignment);
 
-    const savedAssignment = await assignmentRepo.save(assignment);
-    await dataSource.destroy();
+    // Use shared function to assign the creator
+    await assignUserToAssignment(ds, saved.id, creator.id);
 
-    return NextResponse.json(savedAssignment, { status: 201 });
+    // Assign all other members
+    console.log("Members to assign:", members);
+    if (Array.isArray(members)) {
+      const userRepo = ds.getRepository(UserEntity)
+      for (const email of members) {
+        console.log("Assigning member:", email);
+        const member = await userRepo.findOne({ where: { email } });
+        console.log("Found member:", member);
+        if (member) {
+          await assignUserToAssignment(ds, saved.id, member.id);
+        }
+      }
+    }
+    
+    return NextResponse.json(saved, { status: 201 });
   } catch (err) {
     console.error(err);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  } finally {
+    await ds.destroy();
   }
 }

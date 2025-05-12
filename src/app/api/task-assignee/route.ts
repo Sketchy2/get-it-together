@@ -5,6 +5,10 @@ import { typeormOptions } from "@/typeorm-datasource";
 import { TaskAssignee } from "@/entities/TaskAssignee";
 import { Task } from "@/entities/Tasks";
 import { UserEntity } from "@/entities/auth-entities";
+import { Assignment } from "@/entities/Assignments";
+import { Event } from "@/entities/Event";
+
+
 
 /**
  * Helper: create a fresh connection
@@ -53,8 +57,29 @@ export async function PUT(req: NextRequest) {
     });
 
     const savedAssignee = await assigneeRepo.save(taskAssignee);
-    await dataSource.destroy();
 
+    const eventRepo = dataSource.getRepository(Event);
+    const assignment = task.assignment || await dataSource.getRepository(Assignment).findOne({
+      where: { tasks: { id: task.id } },
+      relations: ["tasks"],
+    });
+    
+    const event = eventRepo.create({
+      title: task.title,
+      start: task.deadline || assignment?.deadline || new Date(),
+      end: task.deadline || assignment?.deadline || new Date(),
+      description: task.description || `Task for ${assignment?.title ?? "an assignment"}`,
+      eventType: "task",
+      color: "#2ECC71",
+      assignment: assignment || undefined,
+      assignmentId: assignment?.id,
+      user: user,
+      userId: user.id,
+    });
+    
+    await eventRepo.save(event);
+    await dataSource.destroy();
+    
     return NextResponse.json(savedAssignee, { status: 201 });
   } catch (err) {
     console.error(err);

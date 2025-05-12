@@ -17,6 +17,7 @@ import { calculateDaysRemaining, calculateProgress, getCardBgColor } from "@/uti
 import { AssignmentListSection } from "@/components/assignment/AssignmentListSection"
 import { AssignmentListCard } from "@/components/assignment/AssignmentListCard"
 import ActionButton from "@/components/common/ActionButton"
+import toast, { Toaster } from "react-hot-toast"
 
 // Define sort function outside the component to avoid hoisting issues
 // TODO: ADJUST BASED ON PROVIDED
@@ -70,17 +71,19 @@ export default function Assignments() {
 
   useEffect(() => {
     const fetchAssignments = async () => {
+      setIsLoading(true)
       try {
-        setIsLoading(true)
         const res = await fetch("/api/assignments")
         if (!res.ok) throw new Error("Failed to fetch assignments")
-
-        const data = await res.json()
+        // now the API returns exactly Assignment[], so just cast it:
+        const data = (await res.json()) as Assignment[]
+        console.log("Fetched assignments:", data)
         setAssignments(data)
+        console.log("Assignments fetched:", data)
         setError(null)
       } catch (err) {
         console.error(err)
-        setError("Failed to load assignments. Please try again.")
+        setError("Failed to load assignments")
       } finally {
         setIsLoading(false)
       }
@@ -128,8 +131,6 @@ export default function Assignments() {
    */
   const handleListClick = useCallback(
     (id: string) => {
-      console.log("waddup")
-
       if (viewMode.label == "List") {
         setExpandedAssignment((prevId) => (prevId === id ? null : id))
         setSelectedAssignmentData(assignments.find((as) => as.id == id) || selectedAssignmentData)
@@ -166,7 +167,7 @@ export default function Assignments() {
    */
   const handleCreateAssignment = useCallback(async (newAssignmentData: Assignment) => {
     try {
-      const res = await fetch("/api/assignments", {
+      const res = await toast.promise(fetch("/api/assignments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -177,8 +178,15 @@ export default function Assignments() {
           status: "Not Started", 
           progress: 0,
           finalGrade: null,
+          members: newAssignmentData.members ?? [],
         }),
       })
+      , {
+        loading: 'Creating assignment',
+        success: 'Assignment created!',
+        error: 'Error when creating assignment',
+      });
+      console.log('LOOK HERE', res)
 
       if (!res.ok) throw new Error("Failed to create assignment")
 
@@ -190,6 +198,79 @@ export default function Assignments() {
       // optionally show toast here
     }
   }, [])
+
+const handleAddTask = useCallback(
+  async (assignmentId: string, taskData: { text: string; dueDate?: string }) => {
+    // 1) Build payload matching your POST handler
+    const payload = {
+      title:       taskData.text,
+      description: null,        // or taskData.description if you collect one
+      dueDate:     taskData.dueDate,
+    };
+
+    try {
+      // 2) Send to your create-task endpoint
+      const res = await toast.promise(fetch(`/api/assignments/${assignmentId}/tasks`, {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify(payload),
+      })      , {
+        loading: 'Adding task to assignment',
+        success: 'Task created!',
+        error: 'Error when creating Task',
+      });
+
+      if (!res.ok) {
+        // Try JSON, then fallback to text
+        let errorBody: any;
+        try {
+          errorBody = await res.json();
+        } catch {
+          errorBody = await res.text();
+        }
+        console.error(
+          `Create task failed (status ${res.status}):`,
+          errorBody
+        );
+        throw new Error(
+          typeof errorBody === "object"
+            ? errorBody.error || JSON.stringify(errorBody)
+            : errorBody || "Unknown error"
+        );
+      }
+
+      // 3) Parse the newly created Task
+      const newTask = await res.json();
+      console.log("New task created:", newTask);
+
+      // 4) Merge into the assignments list
+      setAssignments(prev =>
+        prev.map(a =>
+          a.id === assignmentId
+            ? { ...a, tasks: [...a.tasks, newTask] }
+            : a
+        )
+      );
+
+      // 5) If this assignment is currently open, merge there too
+      if (selectedAssignmentData){
+        setSelectedAssignmentData({...selectedAssignmentData,tasks: [...selectedAssignmentData.tasks, newTask]})
+      }
+      // setSelectedAssignmentData(prev =>
+      //   prev && prev.id === assignmentId
+      //     ? { ...prev, tasks: [...prev.tasks, newTask] }
+      //     : prev
+      // );
+    } catch (err: any) {
+      console.error("handleAddTask caught error:", err);
+      // optionally surface to UI:
+      setError(`Couldn’t add task: ${err.message}`);
+      throw err;
+    }
+  },
+  []
+);
+
 
   /**
    * Handle updating assignment
@@ -209,11 +290,15 @@ export default function Assignments() {
           id: assignID, // ensure ID is preserved
         }
 
-        const res = await fetch(`/api/assignments/${assignID}`, {
+        const res = await toast.promise(fetch(`/api/assignments/${assignID}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(updatedAssignment),
-        })
+        }),    {
+          loading: 'Updating assignment',
+          success: 'Assignment updated!',
+          error: 'Error when creating assignment',
+        });
 
         if (!res.ok) throw new Error("Failed to update assignment")
 
@@ -231,6 +316,19 @@ export default function Assignments() {
     [assignments, selectedAssignmentData],
   )
 
+
+  const handleDeleteAssignment = useCallback(
+    async (assignID: string) => {
+      // DO DB SHIT HERE
+
+      // REMOVE ASSIGNMENT FROM VIEW AND CLOSE PANEL
+      handleCloseModal()
+      setSelectedAssignmentData(null)
+      setAssignments(assignments.filter((assignment => assignment.id !== assignID)))
+
+    },[assignments,selectedAssignmentData]
+     
+      )
   const updateTask = useCallback(
     (taskId: string, updates: Partial<Task>) => {
       if (!selectedAssignmentData) {
@@ -464,13 +562,18 @@ export default function Assignments() {
         {selectedAssignmentData && (
           <AssignmentOverlay
             isOpen={isModalOpen}
-            assignment={selectedAssignmentData} // should just pass the assignment
+            assignment={selectedAssignmentData}
             onClose={handleCloseModal}
             onTaskUpdate={updateTask}
             onTaskDelete={deleteTask}
             onAssignmentUpdate={handleUpdateAssignment}
+            onAssignmentDelete={handleDeleteAssignment}
+            onTaskAdd={(text, dueDate) =>
+              handleAddTask(selectedAssignmentData.id, { text, dueDate })
+            }
           />
         )}
+
 
         <CreateAssignmentModal
           isOpen={isCreateModalOpen}
@@ -478,6 +581,8 @@ export default function Assignments() {
           onSave={handleCreateAssignment}
           assignment={null}
         />
+              <Toaster />
+
       </div>
     </>
   )

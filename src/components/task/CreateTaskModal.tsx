@@ -1,11 +1,11 @@
+// components/task/CreateTaskModal.tsx
 "use client"
 
-import type React from "react"
-import { useEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
 import { Calendar, User, AlignLeft, Flag, HelpCircle, Clock, AlertTriangle, CheckCircle } from "lucide-react"
 import "./CreateTaskModal.css"
-import type { User as Member } from "@/types/assignment"
 import type { Task, TaskStatus } from "@/types/task"
+import type { User as Member, Assignment as AsnType } from "@/types/assignment"
 import FormItem from "../common/FormItem"
 import FormRow from "../common/FormRow"
 import Form from "../common/Form"
@@ -14,9 +14,9 @@ interface CreateTaskModalProps {
   isOpen: boolean
   onClose: () => void
   onSave: (task: any) => void
-  members: Member[]
+  assignmentId?: string
   maxWeight: number
-  currentWeight: number
+  // If in edit mode, pass the existing task
   task: Task | null
 }
 
@@ -24,110 +24,108 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
   isOpen,
   onClose,
   onSave,
-  members,
-  maxWeight,
-  currentWeight,
+  assignmentId: pinnedAssignmentId,
   task,
 }) => {
+  // form fields
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
-  const [assignee, setAssignee] = useState("") //look into multiple assignees
+  const [selectedAssignmentId, setSelectedAssignmentId] = useState<string>(pinnedAssignmentId || "")
+  const [availableMembers, setAvailableMembers] = useState<Member[]>([])
+  const [assignee, setAssignee] = useState("")
   const [deadline, setDeadline] = useState("")
   const [weighting, setWeight] = useState(1)
   const [status, setStatus] = useState<TaskStatus>("To-Do")
   const [priority, setPriority] = useState<"low" | "medium" | "high">("medium")
-  const [assignments, setAssignments] = useState<{ id: string; title: string }[]>([])
-  const [assignmentId, setAssignmentId] = useState("")
-
-  // Calculate remaining weighting
-  const remainingWeight = maxWeight - currentWeight
+  const [assignments, setAssignments] = useState<AsnType[]>([])
 
   useEffect(() => {
-    const fetchAssignments = async () => {
-      try {
-        const res = await fetch("/api/assignments")
-        if (res.ok) {
-          const data = await res.json()
-          setAssignments(data)
-        }
-      } catch (error) {
-        console.error("Error fetching assignments:", error)
-      }
+        if (!isOpen) return
+        fetch("/api/assignments")
+          .then((res) => {
+            if (!res.ok) throw new Error("Couldn’t load assignments")
+            return res.json() as Promise<AsnType[]>
+          })
+          .then(setAssignments)
+          .catch(console.error)
+      }, [isOpen])
+
+  // whenever the pinnedAssignmentId or user picks a new assignment, refresh the member list
+  useEffect(() => {
+    // find the assignment in our fetched list
+    console.log("selected ID:", selectedAssignmentId)
+    console.log(assignments)
+    const asn = assignments.find((a) => a.id === selectedAssignmentId)
+    console.log("asn:", asn)
+    setAvailableMembers(asn?.members || [])
+    // clear any previous assignee if they don’t exist in this new list
+    if (!asn?.members.some((m) => m.id === assignee)) {
+      setAssignee("")
     }
+  }, [selectedAssignmentId, assignments])
 
-    fetchAssignments()
-  }, [isOpen])
-
+  // prefill when editing
   useEffect(() => {
     if (isOpen && task) {
-      setTitle(task.title || "")
-      setDescription(task.description || "")
-      setAssignee(task.assignee?.[0]?.id || "")
+      setTitle(task.title)
+      setDescription(task.description)
       setDeadline(task.deadline || "")
-      setWeight(task.weighting || 1)
-      setStatus(task.status || "To-Do")
+      setStatus(task.status)
       setPriority(task.priority || "medium")
+      setSelectedAssignmentId(selectedAssignmentId)
+      setAssignee(task.assignee?.[0]?.id || "")
     }
   }, [isOpen, task])
 
   if (!isOpen) return null
 
-  const handleClose = () => {
-    resetForm()
-    onClose()
-  }
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-
-    const newTask = {
-      id: task?.id || `${Date.now()}`,
-      title,
-      description,
-      assignee: assignee ? [{ id: assignee, name: assignee }] : undefined,
-      deadline: deadline || undefined,
-      status,
-      weighting,
-      priority,
-      createdAt: new Date().toISOString(),
-      assignmentId,
-    }
-
-    onSave(newTask)
-    resetForm()
-  }
-
   const resetForm = () => {
     setTitle("")
     setDescription("")
-    setAssignee("")
     setDeadline("")
     setWeight(1)
     setStatus("To-Do")
     setPriority("medium")
-    setAssignmentId("")
+    setAssignee("")
+    // don’t clear pinned assignment
+    if (!pinnedAssignmentId) setSelectedAssignmentId("")
   }
 
-  const getStatusIcon = (statusType: TaskStatus) => {
-    switch (statusType) {
-      case "To-Do":
-        return <Clock size={16} />
-      case "In Progress":
-        return <AlertTriangle size={16} />
-      case "Completed":
-        return <CheckCircle size={16} />
-      default:
-        return <HelpCircle size={16} />
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    const newTask = {
+      id: task?.id || `${Date.now()}`,
+      title,
+      description,
+      assignmentId: selectedAssignmentId,
+      assignee:    assignee ? [{ id: assignee, name: "" }] : undefined,
+      deadline:    deadline || undefined,
+      status,
+      weighting,
+      priority,
+      createdAt:   new Date().toISOString(),
+    }
+    onSave(newTask)
+    resetForm()
+  }
+
+  const getStatusIcon = (s: TaskStatus) => {
+    switch (s) {
+      case "To-Do":      return <Clock size={16} />
+      case "In Progress": return <AlertTriangle size={16} />
+      case "Completed":   return <CheckCircle size={16} />
+      default:            return <HelpCircle size={16} />
     }
   }
-
+  console.log("avilable members:", availableMembers)
   return (
     <Form
       onSave={handleSubmit}
       isOpen={isOpen}
-      onClose={handleClose}
+      onClose={() => { resetForm(); onClose() }}
       formTitle={task ? "Edit Task" : "Create New Task"}
-      formSubmitLabel={task ? "Edit Task" : "Create Task"}
-      disabledCondition={!title || remainingWeight <= 0}
+      formSubmitLabel={task ? "Save Changes" : "Create Task"}
+      disabledCondition={!title || !selectedAssignmentId}
     >
       <FormItem label="Task Title" htmlFor="taskTitle">
         <input
@@ -140,7 +138,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
         />
       </FormItem>
 
-      <FormItem label="Description" htmlFor="taskDescription" icon={<AlignLeft size={16} />}>
+      <FormItem icon={<AlignLeft size={16} />} label="Description" htmlFor="taskDescription">
         <textarea
           id="taskDescription"
           value={description}
@@ -151,97 +149,78 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
       </FormItem>
 
       <FormRow>
-        <FormItem label="Assignment" htmlFor="taskAssignment">
+        {/* only show assignment picker if not pinned */}
+        {!pinnedAssignmentId && (
+          <FormItem label="Assignment" htmlFor="taskAssignment">
+            <select
+              id="taskAssignment"
+              value={selectedAssignmentId}
+              onChange={(e) => setSelectedAssignmentId(e.target.value)}
+              required
+            >
+              <option value="">Select Assignment</option>
+              {assignments.map((a) => (
+                <option key={a.id} value={a.id}>{a.title}</option>
+              ))}
+            </select>
+          </FormItem>
+        )}
+
+        <FormItem icon={<User size={16} />} label="Assignee" htmlFor="taskAssignee">
           <select
-            id="taskAssignment"
-            onChange={(e) => setAssignmentId(e.target.value)}
-            required
+            id="taskAssignee"
+            value={assignee}
+            onChange={(e) => setAssignee(e.target.value)}
           >
-            <option value="">Select Assignment</option>
-            {assignments.map((assignment) => (
-              <option key={assignment.id} value={assignment.id}>
-                {assignment.title}
-              </option>
-            ))}
-          </select>
-        </FormItem>
-        <FormItem label="Assignee" htmlFor="taskAssignee" icon={<User size={16} />}>
-          <select id="taskAssignee" value={assignee} onChange={(e) => setAssignee(e.target.value)}>
             <option value="">Unassigned</option>
-            {members.map((member, index) => (
-              <option key={index} value={member.name}>
-                {member.name}
-              </option>
+            {availableMembers.map((m) => (
+              <option key={m.id} value={m.id}>{m.email}</option>
             ))}
           </select>
         </FormItem>
 
-        <FormItem label="Due Date" htmlFor="taskDueDate" icon={<Calendar size={16} />}>
-          <input type="date" id="taskDueDate" value={deadline} onChange={(e) => setDeadline(e.target.value)} />
+        <FormItem icon={<Calendar size={16} />} label="Due Date" htmlFor="taskDueDate">
+          <input
+            type="date"
+            id="taskDueDate"
+            value={deadline}
+            onChange={(e) => setDeadline(e.target.value)}
+          />
         </FormItem>
       </FormRow>
 
       <FormRow>
-        {/* <FormItem
-    label={`Task weighting (Remaining: ${remainingWeight}%)`}
-    htmlFor="taskWeight"
-    icon={<Weight size={16} />}
-  >
-    <div className="weightInputContainer">
-      <input
-        type="range"
-        id="taskWeight"
-        min="1"
-        max={Math.min(remainingWeight, 50)}
-        value={weighting}
-        onChange={(e) => setWeight(Number.parseInt(e.target.value))}
-        className="weightSlider"
-      />
-      <span className="weightValue">{weighting}%</span>
-    </div>
-    <div className="weightDescription">
-      {remainingWeight <= 0 ? (
-        <span className="weightWarning">
-          No weighting remaining for this assignment!
-        </span>
-      ) : (
-        "Higher weighting means the task contributes more to overall progress"
-      )}
-    </div>
-  </FormItem> */}
-
-        <FormItem label="Priority" htmlFor="taskPriority" icon={<Flag size={16} />}>
+        <FormItem icon={<Flag size={16} />} label="Priority" htmlFor="taskPriority">
           <div className="prioritySelector">
-            {["low", "medium", "high"].map((level) => (
+            {(["low", "medium", "high"] as const).map((level) => (
               <button
                 key={level}
                 type="button"
                 className={`priorityButton ${priority === level ? "active" : ""}`}
-                onClick={() => setPriority(level as "low" | "medium" | "high")}
+                onClick={() => setPriority(level)}
               >
                 <span className={`priorityDot ${level}`}></span>
-                <span>{level.charAt(0).toUpperCase() + level.slice(1)}</span>
+                {level.charAt(0).toUpperCase() + level.slice(1)}
+              </button>
+            ))}
+          </div>
+        </FormItem>
+
+        <FormItem label="Initial Status" htmlFor="taskStatus">
+          <div className="statusSelector">
+            {(["To-Do", "In Progress", "Completed"] as TaskStatus[]).map((s) => (
+              <button
+                key={s}
+                type="button"
+                className={`statusButton ${status === s ? "active" : ""}`}
+                onClick={() => setStatus(s)}
+              >
+                {getStatusIcon(s)} {s}
               </button>
             ))}
           </div>
         </FormItem>
       </FormRow>
-
-      <FormItem label="Initial Status" htmlFor="taskStatus">
-        <div className="statusSelector">
-          {["To-Do", "In Progress", "Completed"].map((s) => (
-            <button
-              key={s}
-              type="button"
-              className={`statusButton ${status === s ? "active" : ""}`}
-              onClick={() => setStatus(s as TaskStatus)}
-            >
-              {getStatusIcon(s as TaskStatus)}
-              <span>{s}</span>
-            </button>
-          ))}
-        </div>
-      </FormItem>
     </Form>
   )
 }

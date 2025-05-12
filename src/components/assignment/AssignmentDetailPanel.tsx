@@ -209,46 +209,50 @@ const taskStatusChange = (taskId:string,newStatus:TaskStatus)=>{
       }
 
       // Sort tasks
-      return [...filteredTasks].sort((a, b) => {
-        const key = sortBy.key;
-        const dir = sortDirection === "asc" ? 1 : -1;
+      if (filteredTasks)
+        {return [...filteredTasks].sort((a, b) => {
+          const key = sortBy.key;
+          const dir = sortDirection === "asc" ? 1 : -1;
 
-        // Handle undefined values
-        if (key === "deadline") {
-          if (!a.deadline && !b.deadline) return 0;
-          if (!a.deadline) return dir;
-          if (!b.deadline) return -dir;
-          return (
-            dir *
-            (new Date(a.deadline).getTime() - new Date(b.deadline).getTime())
-          );
+          // Handle undefined values
+          if (key === "deadline") {
+            if (!a.deadline && !b.deadline) return 0;
+            if (!a.deadline) return dir;
+            if (!b.deadline) return -dir;
+            return (
+              dir *
+              (new Date(a.deadline).getTime() - new Date(b.deadline).getTime())
+            );
+          }
+
+          if (key === "weighting") {
+            const aWeight = a.weighting ?? 0;
+            const bWeight = b.weighting ?? 0;
+            return dir * (aWeight - bWeight);
+          }
+
+          if (key === "priority") {
+            const priorityOrder = { high: 3, medium: 2, low: 1, undefined: 0 };
+            const aVal =
+              priorityOrder[a.priority as keyof typeof priorityOrder] || 0;
+            const bVal =
+              priorityOrder[b.priority as keyof typeof priorityOrder] || 0;
+            return dir * (aVal - bVal);
+          }
+
+          // Default sort for createdAt and other fields
+          const aVal = a[key as keyof Task] as any;
+          const bVal = b[key as keyof Task] as any;
+
+          if (!aVal && !bVal) return 0;
+          if (!aVal) return dir;
+          if (!bVal) return -dir;
+
+          return dir * (aVal > bVal ? 1 : aVal < bVal ? -1 : 0);
+        });}
+        else{
+          return []
         }
-
-        if (key === "weighting") {
-          const aWeight = a.weighting ?? 0;
-          const bWeight = b.weighting ?? 0;
-          return dir * (aWeight - bWeight);
-        }
-
-        if (key === "priority") {
-          const priorityOrder = { high: 3, medium: 2, low: 1, undefined: 0 };
-          const aVal =
-            priorityOrder[a.priority as keyof typeof priorityOrder] || 0;
-          const bVal =
-            priorityOrder[b.priority as keyof typeof priorityOrder] || 0;
-          return dir * (aVal - bVal);
-        }
-
-        // Default sort for createdAt and other fields
-        const aVal = a[key as keyof Task] as any;
-        const bVal = b[key as keyof Task] as any;
-
-        if (!aVal && !bVal) return 0;
-        if (!aVal) return dir;
-        if (!bVal) return -dir;
-
-        return dir * (aVal > bVal ? 1 : aVal < bVal ? -1 : 0);
-      });
     },
     [filters, sortBy, sortDirection]
   );
@@ -322,7 +326,7 @@ const taskStatusChange = (taskId:string,newStatus:TaskStatus)=>{
             <p className="descriptionText">{description}</p>
           )} */}
         </div>
-
+{/* 
         <div className="detailsSection">
           <FilesLinksSection 
           showFiles={showFiles} 
@@ -331,7 +335,7 @@ const taskStatusChange = (taskId:string,newStatus:TaskStatus)=>{
           links={links}
           
           />
-        </div>
+        </div> */}
 
         <div className="detailsSection">
           <div className="sectionHeader">
