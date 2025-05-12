@@ -17,6 +17,7 @@ import { calculateDaysRemaining, calculateProgress, getCardBgColor } from "@/uti
 import { AssignmentListSection } from "@/components/assignment/AssignmentListSection"
 import { AssignmentListCard } from "@/components/assignment/AssignmentListCard"
 import ActionButton from "@/components/common/ActionButton"
+import toast, { Toaster } from "react-hot-toast"
 
 // Define sort function outside the component to avoid hoisting issues
 // TODO: ADJUST BASED ON PROVIDED
@@ -166,7 +167,7 @@ export default function Assignments() {
    */
   const handleCreateAssignment = useCallback(async (newAssignmentData: Assignment) => {
     try {
-      const res = await fetch("/api/assignments", {
+      const res = await toast.promise(fetch("/api/assignments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -179,7 +180,11 @@ export default function Assignments() {
           finalGrade: null,
         }),
       })
-
+      , {
+        loading: 'Creating assignment',
+        success: 'Assignment created!',
+        error: 'Error when creating assignment',
+      });
       console.log('LOOK HERE', res)
 
       if (!res.ok) throw new Error("Failed to create assignment")
@@ -205,10 +210,14 @@ const handleAddTask = useCallback(
 
     try {
       // 2) Send to your create-task endpoint
-      const res = await fetch(`/api/assignments/${assignmentId}/tasks`, {
+      const res = await toast.promise(fetch(`/api/assignments/${assignmentId}/tasks`, {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
         body:    JSON.stringify(payload),
+      })      , {
+        loading: 'Adding task to assignment',
+        success: 'Task created!',
+        error: 'Error when creating Task',
       });
 
       if (!res.ok) {
@@ -278,11 +287,15 @@ const handleAddTask = useCallback(
           id: assignID, // ensure ID is preserved
         }
 
-        const res = await fetch(`/api/assignments/${assignID}`, {
+        const res = await toast.promise(fetch(`/api/assignments/${assignID}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(updatedAssignment),
-        })
+        }),    {
+          loading: 'Updating assignment',
+          success: 'Assignment updated!',
+          error: 'Error when creating assignment',
+        });
 
         if (!res.ok) throw new Error("Failed to update assignment")
 
@@ -551,6 +564,8 @@ const handleAddTask = useCallback(
           onSave={handleCreateAssignment}
           assignment={null}
         />
+              <Toaster />
+
       </div>
     </>
   )
