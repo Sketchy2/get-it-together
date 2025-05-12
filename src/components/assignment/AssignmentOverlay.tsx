@@ -17,9 +17,8 @@ interface AssignmentOverlayProps {
   onClose: () => void
   onTaskDelete: (taskId: string) => void
   onTaskUpdate: (taskId: string, updates: Partial<Task>) => void
-  // onPartialTaskUpdate: <K extends keyof Task>(property: K) => (taskId: string, value: Task[K])=>void// might remove
   onAssignmentUpdate: (assignmentId: string, updates: Partial<Assignment>) => void
-  // onPartialAssignmentUpdate: (updatedAssignment: any) => void
+  onTaskAdd: (text: string, dueDate?: string) => Promise<void>
 }
 
 export default function AssignmentOverlay({
@@ -28,15 +27,17 @@ export default function AssignmentOverlay({
   onClose,
   onTaskDelete,
   onTaskUpdate,
-  // onPartialTaskUpdate, // migth remove
   onAssignmentUpdate,
+  onTaskAdd,
 }: AssignmentOverlayProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const [isCreateTaskModalOpen, setIsCreateTaskModalOpen] = useState(false)
   const [isEditTask, setIsEditTask] = useState<Task | null>(null)
   const [isCreateAssignmentModalOpen, setIsCreateAssignmentModalOpen] = useState(false)
+  const [modalError, setModalError] = useState<string | null>(null)
 
   const actionButtonRef = useRef<HTMLDivElement>(null)
+
   const handleExpandView = () => {
     setIsExpanded(true)
   }
@@ -45,30 +46,36 @@ export default function AssignmentOverlay({
     setIsExpanded(false)
   }
 
-  //todo: make so changes display faster
+  // Called when user submits the CreateTaskModal
+  const handleCreateTask = async (text: string, dueDate?: string) => {
+    console.log("About to create task:", { text, dueDate })
+    try {
+      await onTaskAdd(text, dueDate)
+      setModalError(null)
+      setIsCreateTaskModalOpen(false)
+      setIsEditTask(null)
+    } catch (err: any) {
+      console.error("Add task error:", err)
+      setModalError(err.message || "Failed to create task")
+    }
+  }
+
+  // Open the task-creation modal, optionally pre-populating for edit
   const handleAddAssignmentTask = (taskEdited?: Task) => {
     if (taskEdited) {
       setIsEditTask(taskEdited)
-      console.log(taskEdited)
     }
+    setModalError(null)
     setIsCreateTaskModalOpen(true)
   }
 
-  const handleCreateTask = (newTask: Task) => {
-    const updatedTasks = [...assignment.tasks, newTask]
-    setIsCreateTaskModalOpen(false)
-
-    onAssignmentUpdate(assignment.id, { tasks: updatedTasks })
-  }
-
-  const handleEditAssignment = (edittedAssignment: Assignment) => {
+  const handleEditAssignment = (editted: Assignment) => {
     setIsCreateAssignmentModalOpen(false)
-
-    onAssignmentUpdate(assignment.id, { ...edittedAssignment })
+    onAssignmentUpdate(assignment.id, { ...editted })
   }
+
   if (!isOpen || !assignment) return null
 
-  //TODO: USE USE CONTEXT TO PASS UPDATE METHODS BETTER
   return (
     <>
       {isExpanded ? (
@@ -98,8 +105,8 @@ export default function AssignmentOverlay({
           </div>
         </div>
       )}
+
       <div ref={actionButtonRef}>
-        {" "}
         <ActionButton
           icon={<Edit size={16} />}
           onclick={() => setIsCreateAssignmentModalOpen(true)}
@@ -108,20 +115,37 @@ export default function AssignmentOverlay({
         />
       </div>
 
+      {/* Show any error from creating a task */}
+      {modalError && (
+        <div
+          className="modalError"
+          style={{ color: "red", textAlign: "center", margin: "8px 0" }}
+        >
+          {modalError}
+        </div>
+      )}
+
       <CreateTaskModal
         isOpen={isCreateTaskModalOpen}
         onClose={() => {
           setIsCreateTaskModalOpen(false)
           setIsEditTask(null)
+          setModalError(null)
         }}
-        onSave={handleCreateTask}
+        onSave={(taskData) =>
+          // Use title and deadline from modal, not text/dueDate
+          handleCreateTask(taskData.title, taskData.deadline)
+        }
         members={assignment.members || []}
         maxWeight={assignment.weighting || 100}
         currentWeight={
-          assignment.tasks ? assignment.tasks.reduce((sum, task) => sum + (task.weighting ? task.weighting : 1), 0) : 0
+          assignment.tasks
+            ? assignment.tasks.reduce((sum, t) => sum + (t.weighting ?? 1), 0)
+            : 0
         }
         task={isEditTask}
       />
+
       <CreateAssignmentModal
         isOpen={isCreateAssignmentModalOpen}
         onClose={() => {

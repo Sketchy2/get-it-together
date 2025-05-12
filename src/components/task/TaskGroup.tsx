@@ -13,6 +13,7 @@ interface TaskGroupProps {
   tasks: Task[]
   viewMode: "kanban" | "list"
   onStatusChange: (taskId: string, newStatus: TaskStatus) => void | Promise<void>
+  onTaskDelete:(taskId: string) => void
   onCreateTask?: () => void
   assignmentDeadline?: string
 }
@@ -22,6 +23,7 @@ const TaskGroup: React.FC<TaskGroupProps> = ({
   tasks,
   viewMode,
   onStatusChange,
+  onTaskDelete,
   onCreateTask,
   assignmentDeadline,
 }) => {
@@ -76,8 +78,8 @@ const TaskGroup: React.FC<TaskGroupProps> = ({
                 onEdit={(task) => {
                   // You can implement edit functionality here if needed
                 }}
-                onDelete={(taskId) => {
-                  // You can implement delete functionality here if needed
+                onDelete={() => {
+                  onTaskDelete(task.id)
                 }}
               />
             </div>
