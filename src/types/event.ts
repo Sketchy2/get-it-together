@@ -1,5 +1,6 @@
 import type { Assignment } from "./assignment"
 
+
 export type CalendarEvent = {
   id?: string
   title: string

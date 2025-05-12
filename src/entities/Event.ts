@@ -1,6 +1,7 @@
 // entity/Event.ts
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from "typeorm"
 import { Assignment } from "./Assignments"
+import { UserEntity } from "./auth-entities"
 
 @Entity()
 export class Event {
@@ -28,10 +29,17 @@ export class Event {
   @Column({ nullable: true })
   eventType?: "assignment" | "meeting" | "task" | "presentation" | "other"
 
+  @ManyToOne(() => UserEntity, { eager: true, nullable: false })
+  @JoinColumn({ name: "userId" })
+  user: UserEntity
+
+  @Column()
+  userId: string
+
   @ManyToOne(() => Assignment, { nullable: true })
   @JoinColumn({ name: "assignmentId" })
   assignment?: Assignment
 
   @Column({ nullable: true })
-  assignmentId?: string
+  assignmentId?: Number
 }
