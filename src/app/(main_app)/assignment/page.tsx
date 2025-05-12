@@ -316,6 +316,19 @@ const handleAddTask = useCallback(
     [assignments, selectedAssignmentData],
   )
 
+
+  const handleDeleteAssignment = useCallback(
+    async (assignID: string) => {
+      // DO DB SHIT HERE
+
+      // REMOVE ASSIGNMENT FROM VIEW AND CLOSE PANEL
+      handleCloseModal()
+      setSelectedAssignmentData(null)
+      setAssignments(assignments.filter((assignment => assignment.id !== assignID)))
+
+    },[assignments,selectedAssignmentData]
+     
+      )
   const updateTask = useCallback(
     (taskId: string, updates: Partial<Task>) => {
       if (!selectedAssignmentData) {
@@ -554,6 +567,7 @@ const handleAddTask = useCallback(
             onTaskUpdate={updateTask}
             onTaskDelete={deleteTask}
             onAssignmentUpdate={handleUpdateAssignment}
+            onAssignmentDelete={handleDeleteAssignment}
             onTaskAdd={(text, dueDate) =>
               handleAddTask(selectedAssignmentData.id, { text, dueDate })
             }
