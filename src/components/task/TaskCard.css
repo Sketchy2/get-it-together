@@ -1,13 +1,17 @@
 .taskCard {
+  position: relative;
   background: #3a3a3a;
   border-radius: 12px;
   padding: 16px;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
   transition: all 0.3s ease;
   border-left: 3px solid #777777; /* Default color for unassigned */
-  position: relative;
   overflow: visible;
   z-index: 0;
+}
+
+.taskCard:has( .menuDropdown) {
+  z-index: 80;
 }
 
 .taskCard:hover {
@@ -207,7 +211,7 @@
   background: #2a2a2a;
   border-radius: 12px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-  z-index: 10;
+  z-index: 40;
   min-width: 200px;
   overflow: hidden;
   animation: fadeIn 0.3s ease;
