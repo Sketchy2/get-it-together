@@ -17,6 +17,7 @@ import { calculateDaysRemaining, calculateProgress, getCardBgColor } from "@/uti
 import { AssignmentListSection } from "@/components/assignment/AssignmentListSection"
 import { AssignmentListCard } from "@/components/assignment/AssignmentListCard"
 import ActionButton from "@/components/common/ActionButton"
+import toast, { Toaster } from "react-hot-toast"
 
 // Define sort function outside the component to avoid hoisting issues
 // TODO: ADJUST BASED ON PROVIDED
@@ -166,7 +167,7 @@ export default function Assignments() {
    */
   const handleCreateAssignment = useCallback(async (newAssignmentData: Assignment) => {
     try {
-      const res = await fetch("/api/assignments", {
+      const res = await toast.promise(fetch("/api/assignments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -180,7 +181,11 @@ export default function Assignments() {
           members: newAssignmentData.members ?? [],
         }),
       })
-
+      , {
+        loading: 'Creating assignment',
+        success: 'Assignment created!',
+        error: 'Error when creating assignment',
+      });
       console.log('LOOK HERE', res)
 
       if (!res.ok) throw new Error("Failed to create assignment")
@@ -206,10 +211,14 @@ const handleAddTask = useCallback(
 
     try {
       // 2) Send to your create-task endpoint
-      const res = await fetch(`/api/assignments/${assignmentId}/tasks`, {
+      const res = await toast.promise(fetch(`/api/assignments/${assignmentId}/tasks`, {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
         body:    JSON.stringify(payload),
+      })      , {
+        loading: 'Adding task to assignment',
+        success: 'Task created!',
+        error: 'Error when creating Task',
       });
 
       if (!res.ok) {
@@ -245,11 +254,14 @@ const handleAddTask = useCallback(
       );
 
       // 5) If this assignment is currently open, merge there too
-      setSelectedAssignmentData(prev =>
-        prev && prev.id === assignmentId
-          ? { ...prev, tasks: [...prev.tasks, newTask] }
-          : prev
-      );
+      if (selectedAssignmentData){
+        setSelectedAssignmentData({...selectedAssignmentData,tasks: [...selectedAssignmentData.tasks, newTask]})
+      }
+      // setSelectedAssignmentData(prev =>
+      //   prev && prev.id === assignmentId
+      //     ? { ...prev, tasks: [...prev.tasks, newTask] }
+      //     : prev
+      // );
     } catch (err: any) {
       console.error("handleAddTask caught error:", err);
       // optionally surface to UI:
@@ -279,11 +291,15 @@ const handleAddTask = useCallback(
           id: assignID, // ensure ID is preserved
         }
 
-        const res = await fetch(`/api/assignments/${assignID}`, {
+        const res = await toast.promise(fetch(`/api/assignments/${assignID}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(updatedAssignment),
-        })
+        }),    {
+          loading: 'Updating assignment',
+          success: 'Assignment updated!',
+          error: 'Error when creating assignment',
+        });
 
         if (!res.ok) throw new Error("Failed to update assignment")
 
@@ -301,6 +317,19 @@ const handleAddTask = useCallback(
     [assignments, selectedAssignmentData],
   )
 
+
+  const handleDeleteAssignment = useCallback(
+    async (assignID: string) => {
+      // DO DB SHIT HERE
+
+      // REMOVE ASSIGNMENT FROM VIEW AND CLOSE PANEL
+      handleCloseModal()
+      setSelectedAssignmentData(null)
+      setAssignments(assignments.filter((assignment => assignment.id !== assignID)))
+
+    },[assignments,selectedAssignmentData]
+     
+      )
   const updateTask = useCallback(
     (taskId: string, updates: Partial<Task>) => {
       if (!selectedAssignmentData) {
@@ -539,6 +568,7 @@ const handleAddTask = useCallback(
             onTaskUpdate={updateTask}
             onTaskDelete={deleteTask}
             onAssignmentUpdate={handleUpdateAssignment}
+            onAssignmentDelete={handleDeleteAssignment}
             onTaskAdd={(text, dueDate) =>
               handleAddTask(selectedAssignmentData.id, { text, dueDate })
             }
@@ -552,6 +582,8 @@ const handleAddTask = useCallback(
           onSave={handleCreateAssignment}
           assignment={null}
         />
+              <Toaster />
+
       </div>
     </>
   )

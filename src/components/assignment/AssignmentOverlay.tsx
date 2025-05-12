@@ -17,6 +17,7 @@ interface AssignmentOverlayProps {
   onClose: () => void
   onTaskDelete: (taskId: string) => void
   onTaskUpdate: (taskId: string, updates: Partial<Task>) => void
+  onAssignmentDelete:(assignmentId: string) => void
   onAssignmentUpdate: (assignmentId: string, updates: Partial<Assignment>) => void
   onTaskAdd: (text: string, dueDate?: string) => Promise<void>
 }
@@ -27,6 +28,7 @@ export default function AssignmentOverlay({
   onClose,
   onTaskDelete,
   onTaskUpdate,
+  onAssignmentDelete,
   onAssignmentUpdate,
   onTaskAdd,
 }: AssignmentOverlayProps) {
@@ -74,6 +76,11 @@ export default function AssignmentOverlay({
     onAssignmentUpdate(assignment.id, { ...editted })
   }
 
+  const handleDeleteAssignment = () =>{
+    // GET confirmation that user wants to delete the assignment
+    onAssignmentDelete(assignment.id)
+  }
+
   if (!isOpen || !assignment) return null
 
   return (
@@ -85,6 +92,7 @@ export default function AssignmentOverlay({
           onClose={onClose}
           onMinimise={handleCloseExpanded}
           onAssignmentUpdate={onAssignmentUpdate}
+          onAssignmentDelete={handleDeleteAssignment}
           onTaskDelete={onTaskDelete}
           onTaskUpdate={onTaskUpdate}
           openTaskForm={handleAddAssignmentTask}

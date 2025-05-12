@@ -18,6 +18,7 @@ import {
   Edit,
   Flag,
   Minimize2,
+  Trash,
 } from "lucide-react";
 import "./ExpandedAssignmentView.css";
 import TaskCard from "../task/TaskCard";
@@ -49,6 +50,8 @@ interface ExpandedAssignmentViewProps {
     assignmentId: string,
     updates: Partial<Assignment>
   ) => void;
+  onAssignmentDelete: (
+    assignmentId: string  ) => void;
 }
 
 const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
@@ -60,6 +63,7 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
   onTaskUpdate,
   openTaskForm,
   onAssignmentUpdate,
+  onAssignmentDelete
 }) => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [progress, setProgress] = useState(0);
@@ -601,6 +605,7 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
           className="expandedViewHeader"
           style={{ backgroundColor: bgColor || "#DD992B" }}
         >
+          
           <button className="backButton" onClick={onMinimise}>
             <Minimize2 size={24} />
           </button>
@@ -612,10 +617,10 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
                 <Calendar size={16} />
                 <span>Due: {formatDate(assignment.deadline)}</span>
               </div>
-              <div className="metaItem">
+              {/* <div className="metaItem">
                 <Paperclip size={16} />
                 <span>{assignment.files?.length || 0} files</span>
-              </div>
+              </div> */}
               <div className="metaItem">
                 <UserIcon size={16} />
                 <span>{assignment.members?.length || 0} members</span>
@@ -629,7 +634,15 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
                 </span>
               </div>
               
-              {/* Add to Calendar Button */}
+              {/* assignment actions */}
+              <div
+                              style={{ 
+                                display: 'flex', 
+                                flexDirection:'row',
+                                alignItems: 'end', 
+                              }}
+              
+              >
               <button 
                 className="createEventButton"
                 onClick={() => setIsEventFormOpen(true)}
@@ -650,9 +663,31 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
                 <Calendar size={16} />
                 <span>Add Event</span>
               </button>
+
+              <button 
+                className="DeleteButton"
+                onClick={() => onAssignmentDelete(assignment.id)}
+                style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '6px', 
+                  background: '#800000', 
+                  color: 'white',
+                  border: 'white',
+                  borderRadius: '4px',
+                  padding: '6px 12px',
+                  fontSize: '0.9rem',
+                  cursor: 'pointer',
+                  marginLeft: '8px'
+                }}
+              >
+                <Trash  size={16} />
+                <span>Delete Assignment</span>
+              </button>
+              
+              </div>
             </div>
           </div>
-          <ProgressCircle percentage={progress} />
 
           <button className="closeButton" onClick={onClose}>
             <X size={24} />
@@ -699,14 +734,14 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
               <p className="descriptionText">{assignment.description}</p>
             )}
           </div>
-          <div className="filesSection">
+          {/* <div className="filesSection">
             <FilesLinksSection
               showFiles={showFiles}
               setShowFiles={setShowFiles}
               files={assignment.files}
               links={assignment.links}
             />
-          </div>
+          </div> */}
           <div className="toolbarContainer">
 
           <ViewToggle

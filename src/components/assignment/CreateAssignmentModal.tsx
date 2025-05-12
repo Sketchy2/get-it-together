@@ -210,7 +210,7 @@ const CreateAssignmentModal: React.FC<CreateAssignmentModalProps> = ({ isOpen, o
         )}
       </FormItem>
 
-      <FormItem icon={<Upload size={16} />} label={"Attach Files & Links"} htmlFor="files">
+      {/* <FormItem icon={<Upload size={16} />} label={"Attach Files & Links"} htmlFor="files">
         <div className="fileUploadContainer">
           <input type="file" id="files" onChange={handleFileChange} multiple className="fileInput" />
           <label htmlFor="files" className="fileUploadButton">
@@ -298,7 +298,7 @@ const CreateAssignmentModal: React.FC<CreateAssignmentModalProps> = ({ isOpen, o
             </div>
           )}
         </div>
-      </FormItem>
+      </FormItem> */}
     </Form>
 
   )
