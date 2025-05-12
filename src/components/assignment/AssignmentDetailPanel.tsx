@@ -326,7 +326,7 @@ const taskStatusChange = (taskId:string,newStatus:TaskStatus)=>{
             <p className="descriptionText">{description}</p>
           )} */}
         </div>
-
+{/* 
         <div className="detailsSection">
           <FilesLinksSection 
           showFiles={showFiles} 
@@ -335,7 +335,7 @@ const taskStatusChange = (taskId:string,newStatus:TaskStatus)=>{
           links={links}
           
           />
-        </div>
+        </div> */}
 
         <div className="detailsSection">
           <div className="sectionHeader">

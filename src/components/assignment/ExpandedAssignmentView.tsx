@@ -612,10 +612,10 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
                 <Calendar size={16} />
                 <span>Due: {formatDate(assignment.deadline)}</span>
               </div>
-              <div className="metaItem">
+              {/* <div className="metaItem">
                 <Paperclip size={16} />
                 <span>{assignment.files?.length || 0} files</span>
-              </div>
+              </div> */}
               <div className="metaItem">
                 <UserIcon size={16} />
                 <span>{assignment.members?.length || 0} members</span>
@@ -699,14 +699,14 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
               <p className="descriptionText">{assignment.description}</p>
             )}
           </div>
-          <div className="filesSection">
+          {/* <div className="filesSection">
             <FilesLinksSection
               showFiles={showFiles}
               setShowFiles={setShowFiles}
               files={assignment.files}
               links={assignment.links}
             />
-          </div>
+          </div> */}
           <div className="toolbarContainer">
 
           <ViewToggle
