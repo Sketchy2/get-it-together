@@ -13,7 +13,7 @@ const AssignmentRow: React.FC<AssignmentRowProps> = ({ title, color, children })
     <div className="rowContainer">
       <div className="rowHeader" style={{ backgroundColor: color }}>
         <div className="verticalTitleContainer">
-          <ChevronRightIcon size={20} className="rotatedIcon" />
+          {/* <ChevronRightIcon size={20} className="rotatedIcon" /> */}
           <h2 className="verticalTitle">{title}</h2>
         </div>
       </div>

@@ -472,7 +472,12 @@ const handleAddTask = useCallback(
           isOpen={isCreateModalOpen}
           onClose={() => setIsCreateModalOpen(false)}
           onSave={handleCreateAssignment}
-          assignment={null} /></>
+          assignment={null} />
+          
+
+          <Toaster />
+
+          </>
     )
   }
 
