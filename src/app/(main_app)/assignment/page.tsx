@@ -253,11 +253,14 @@ const handleAddTask = useCallback(
       );
 
       // 5) If this assignment is currently open, merge there too
-      setSelectedAssignmentData(prev =>
-        prev && prev.id === assignmentId
-          ? { ...prev, tasks: [...prev.tasks, newTask] }
-          : prev
-      );
+      if (selectedAssignmentData){
+        setSelectedAssignmentData({...selectedAssignmentData,tasks: [...selectedAssignmentData.tasks, newTask]})
+      }
+      // setSelectedAssignmentData(prev =>
+      //   prev && prev.id === assignmentId
+      //     ? { ...prev, tasks: [...prev.tasks, newTask] }
+      //     : prev
+      // );
     } catch (err: any) {
       console.error("handleAddTask caught error:", err);
       // optionally surface to UI:
