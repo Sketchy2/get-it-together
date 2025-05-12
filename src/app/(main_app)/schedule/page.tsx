@@ -213,6 +213,7 @@ export default function SchedulePage() {
           view={view}
           onView={(newView: any) => setView(newView as CalendarViewType)}
           date={date}
+          popup={true}
           onNavigate={setDate}
           onSelectEvent={handleSelectEvent}
           onSelectSlot={handleSelectSlot}
