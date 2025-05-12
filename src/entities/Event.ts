@@ -33,7 +33,7 @@ export class Event {
   @JoinColumn({ name: "userId" })
   user: UserEntity
 
-  @Column()
+  @Column({ nullable: true })
   userId: string
 
   @ManyToOne(() => Assignment, { nullable: true })

@@ -177,6 +177,7 @@ export default function Assignments() {
           status: "Not Started", 
           progress: 0,
           finalGrade: null,
+          members: newAssignmentData.members ?? [],
         }),
       })
 

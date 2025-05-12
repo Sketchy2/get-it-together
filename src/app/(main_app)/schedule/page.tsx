@@ -86,7 +86,7 @@ export default function SchedulePage() {
     const loadUserAssignments = async () => {
       if (!userId) return
       try {
-        const res = await fetch(`/api/user?userId=${userId}`)
+        const res = await fetch(`/api/user/assignment?userId=${userId}`)
         if (!res.ok) throw new Error("Failed to fetch assignments")
         const data = await res.json()
         setAssignments(data)

@@ -22,7 +22,6 @@ interface CreateAssignmentModalProps {
 const CreateAssignmentModal: React.FC<CreateAssignmentModalProps> = ({ isOpen, onClose, onSave ,assignment}) => {
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
-  const [deadline, setDueDate] = useState("")
   const [weighting, setWeight] = useState(100) // Default to 100% for the total assignment 
   const [members, setMembers] = useState<string[]>([]) // have so accepts 
   const [newMember, setNewMember] = useState("") //TODO: figure out how members will be handled in forms
@@ -30,6 +29,7 @@ const CreateAssignmentModal: React.FC<CreateAssignmentModalProps> = ({ isOpen, o
   const [links, setLinks] = useState<AssignmentLink[]>([])
   const [newLink, setNewLink] = useState<AssignmentLink>({ url: "", title: "" })
   const [showLinkForm, setShowLinkForm] = useState(false)
+  const [rawDeadline, setRawDeadline] = useState<string>("");
 
 
   // prefill information if possible
@@ -37,7 +37,7 @@ const CreateAssignmentModal: React.FC<CreateAssignmentModalProps> = ({ isOpen, o
       if (isOpen && assignment) {
         setTitle(assignment.title)
         setDescription(assignment.description||"")
-        setDueDate(assignment.deadline||"")
+        setRawDeadline( assignment.deadline.slice(0,10) )
         setWeight(assignment.weighting||100)
         // setMembers([assignment.members?.[0]?.id]||[]) //TODO: CHANGE SO ACCEPTS USERS
         // setFiles(assignment.files||[]) // TODO: Adjust file type to match db reqs
@@ -64,15 +64,18 @@ const CreateAssignmentModal: React.FC<CreateAssignmentModalProps> = ({ isOpen, o
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
+    const isoDeadline = rawDeadline
+    ? new Date(rawDeadline + "T00:00:00.000Z").toISOString()
+    : null
+
     // Calculate days remaining
     const today = new Date()
-    const due = new Date(deadline)
 
     const newAssignment = {
       id: `assignment-${Date.now()}`, // assignment id == prefill if needed
       title,
       createdAt: today.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-      deadline: due.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+      deadline: isoDeadline,
       weighting,
       description,
       members, // TODO: ENSURE create assignment API can accept emails
@@ -81,7 +84,7 @@ const CreateAssignmentModal: React.FC<CreateAssignmentModalProps> = ({ isOpen, o
       links: links,
       todos: [],
     }
-
+    console.log("New Assignment:", newAssignment)
     onSave(newAssignment)
     resetForm()
   }
@@ -89,7 +92,7 @@ const CreateAssignmentModal: React.FC<CreateAssignmentModalProps> = ({ isOpen, o
   const resetForm = () => {
     setTitle("")
     setDescription("")
-    setDueDate("")
+    setRawDeadline("")
     setWeight(100)
     setMembers([])
     setNewMember("")
@@ -154,7 +157,13 @@ const CreateAssignmentModal: React.FC<CreateAssignmentModalProps> = ({ isOpen, o
 
       <FormRow>
         <FormItem icon={<Calendar size={16} />} label={"Due Date"}  htmlFor="deadline">
-          <input type="date" id="deadline" value={deadline} onChange={(e) => setDueDate(e.target.value)} required />
+        <input
+          type="date"
+          id="deadline"
+          value={rawDeadline}
+          onChange={e => setRawDeadline(e.target.value)}
+          required
+        />
         </FormItem>
 
         <FormItem icon={<Percent size={16} />} label={"Total weighting (%)"} htmlFor="weighting">

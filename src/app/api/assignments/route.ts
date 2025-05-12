@@ -5,6 +5,7 @@ import { typeormOptions } from "@/typeorm-datasource";
 import { Assignment } from "@/entities/Assignments";
 import { UserEntity } from "@/entities/auth-entities";
 import { AssignmentAssignee } from "@/entities/AssignmentAssignee";
+import { assignUserToAssignment } from "@/lib/assignAssignment";
 
 /**
  * Helper: create a fresh connection
@@ -51,17 +52,16 @@ export async function GET() {
     await ds.destroy();
   }
 }
-
-import { AssignmentAssignee } from "@/entities/AssignmentAssignee";
-
 export async function POST(req: NextRequest) {
   const session = await auth();
   const email = session?.user?.email;
   if (!email) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  console.log("executing add assignments")
 
-  const { title, description, weighting, deadline, progress, status, finalGrade } = await req.json();
+  const { title, description, weighting, deadline, progress, status, finalGrade, members } = await req.json();
+
   if (!title || !status) {
     return NextResponse.json({ error: "Title and Status are required" }, { status: 400 });
   }
@@ -69,8 +69,7 @@ export async function POST(req: NextRequest) {
   const ds = await getDataSource();
   try {
     const assignmentRepo = ds.getRepository(Assignment);
-    const assigneeRepo   = ds.getRepository(AssignmentAssignee);
-    const userRepo       = ds.getRepository(UserEntity);
+    const userRepo = ds.getRepository(UserEntity);
 
     // Find the creator by email
     const creator = await userRepo.findOne({ where: { email } });
@@ -91,13 +90,23 @@ export async function POST(req: NextRequest) {
     });
     const saved = await assignmentRepo.save(assignment);
 
-    // Assign the creator by email
-    const creatorAssignee = assigneeRepo.create({
-      assignment: saved,
-      user:       creator,
-    });
-    await assigneeRepo.save(creatorAssignee);
+    // Use shared function to assign the creator
+    await assignUserToAssignment(ds, saved.id, creator.id);
 
+    // Assign all other members
+    console.log("Members to assign:", members);
+    if (Array.isArray(members)) {
+      const userRepo = ds.getRepository(UserEntity)
+      for (const email of members) {
+        console.log("Assigning member:", email);
+        const member = await userRepo.findOne({ where: { email } });
+        console.log("Found member:", member);
+        if (member) {
+          await assignUserToAssignment(ds, saved.id, member.id);
+        }
+      }
+    }
+    
     return NextResponse.json(saved, { status: 201 });
   } catch (err) {
     console.error(err);
