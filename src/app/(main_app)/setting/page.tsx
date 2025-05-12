@@ -5,6 +5,7 @@ import ProfileHeader from "@/components/profile/ProfileHeader"
 import ProfileStats from "@/components/profile/ProfileStats"
 import ProfileDetails from "@/components/profile/ProfileDetails"
 import EditProfileModal from "@/components/profile/EditProfileModal"
+import SignOut from "@/components/auth/SignOut"
 import "./profile.css"
 
 export default function ProfilePage() {

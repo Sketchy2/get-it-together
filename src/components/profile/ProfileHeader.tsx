@@ -3,6 +3,7 @@
 import { Edit, Camera } from "lucide-react"
 import Image from "next/image"
 import "./ProfileHeader.css"
+import SignOut from "../auth/SignOut"
 
 interface ProfileHeaderProps {
   name: string
@@ -38,6 +39,8 @@ export default function ProfileHeader({ name, avatar, department, university, on
           <Edit size={16} />
           <span>Edit Profile</span>
         </button>
+                    <SignOut />
+        
       </div>
 
       <div className="profileHeaderBackground"></div>
