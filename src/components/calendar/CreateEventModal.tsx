@@ -9,7 +9,7 @@ import type { Assignment } from "@/types/assignment"
 import "./CreateEventModal.css"
 
 interface CalendarEvent {
-  id: string
+  id?: string
   title: string
   start: Date
   end: Date
@@ -20,7 +20,9 @@ interface CalendarEvent {
   location?: string
   color?: string
   eventType?: "assignment" | "meeting" | "task" | "presentation" | "other"
+  userId?: string
 }
+
 
 
 // Define event colors by type
@@ -38,10 +40,11 @@ interface CreateEventModalProps {
   onClose: () => void
   onSave: (newEvent: CalendarEvent) => void
   assignments: Assignment[]
+  userId: string | null
 }
 
-export default function CreateEventModal({ isOpen, slotInfo, onClose, onSave, assignments }: CreateEventModalProps) {
-
+export default function CreateEventModal({ isOpen, slotInfo, onClose, onSave, assignments, userId }: CreateEventModalProps) {
+  console.log(assignments)
   const [newEvent, setNewEvent] = useState<Omit<CalendarEvent, "id">>({
     title: "",
     start: slotInfo.start,
@@ -150,7 +153,10 @@ export default function CreateEventModal({ isOpen, slotInfo, onClose, onSave, as
       return
     }
 
-    onSave(newEvent as CalendarEvent)
+    onSave({
+      ...newEvent,
+      userId, // ✅ include it
+    } as CalendarEvent)
   }
 
   return (

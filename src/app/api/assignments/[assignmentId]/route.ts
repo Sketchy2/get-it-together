@@ -15,45 +15,6 @@ async function getDataSource() {
   return dataSource;
 }
 
-/**
- * GET /api/assignments/[assignmentId]
- * Fetch assignment by ID (with assignees and tasks)
- */
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { assignmentId: string } }
-) {
-  try {
-    const session = await auth();
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const assignmentId = parseInt(params.assignmentId);
-    if (isNaN(assignmentId)) {
-      return NextResponse.json({ error: "Invalid Assignment ID" }, { status: 400 });
-    }
-
-    const dataSource = await getDataSource();
-    const repo = dataSource.getRepository(Assignment);
-
-    const assignment = await repo.findOne({
-      where: { id: assignmentId },
-      relations: ["assignees", "tasks"],
-    });
-
-    await dataSource.destroy();
-
-    if (!assignment) {
-      return NextResponse.json({ error: "Assignment not found" }, { status: 404 });
-    }
-
-    return NextResponse.json(assignment);
-  } catch (err) {
-    console.error(err);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
-  }
-}
 
 //Update assignment by ID
 // PUT /api/assignments/[assignmentId]
@@ -130,5 +91,30 @@ export async function PUT(
       return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
   }
-  
-  
+
+export async function GET(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const userId = searchParams.get("userId");
+
+    if (!userId) {
+      return NextResponse.json({ error: "Missing userId parameter" }, { status: 400 });
+    }
+
+    const dataSource = await getDataSource();
+    const repo = dataSource.getRepository(Assignment);
+
+    const assignments = await repo
+      .createQueryBuilder("assignment")
+      .leftJoinAndSelect("assignment.assignees", "assignee")
+      .leftJoinAndSelect("assignee.user", "user")
+      .where("user.id = :userId", { userId })
+      .getMany();
+
+    await dataSource.destroy();
+    return NextResponse.json(assignments);
+  } catch (err) {
+    console.error("GET /api/assignments/user error:", err);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
+}

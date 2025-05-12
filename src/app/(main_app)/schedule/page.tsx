@@ -81,6 +81,22 @@ export default function SchedulePage() {
     }
     loadEvents()
   }, [userId])
+
+  useEffect(() => {
+    const loadUserAssignments = async () => {
+      if (!userId) return
+      try {
+        const res = await fetch(`/api/user?userId=${userId}`)
+        if (!res.ok) throw new Error("Failed to fetch assignments")
+        const data = await res.json()
+        setAssignments(data)
+      } catch (err) {
+        console.error("Failed to load user assignments", err)
+      }
+    }
+    loadUserAssignments()
+  }, [userId])
+  
   
 
   const filteredEvents = useMemo(() => {
@@ -208,7 +224,20 @@ export default function SchedulePage() {
 
       {selectedEvent && <EventModal isOpen={isEventModalOpen} event={selectedEvent} onClose={() => { setIsEventModalOpen(false); setSelectedEvent(null) }} onUpdate={handleUpdateEvent} onDelete={handleDeleteEvent} assignments={assignments} />}
 
-      {slotInfo && <CreateEventModal isOpen={isCreateModalOpen} slotInfo={slotInfo} onClose={() => { setIsCreateModalOpen(false); setSlotInfo(null) }} onSave={handleCreateEvent} assignments={assignments} />}
+      {slotInfo && (
+        <CreateEventModal
+          isOpen={isCreateModalOpen}
+          slotInfo={slotInfo}
+          onClose={() => {
+            setIsCreateModalOpen(false)
+            setSlotInfo(null)
+          }}
+          onSave={handleCreateEvent}
+          assignments={assignments}
+          userId={userId}
+        />
+      )}
+
     </div>
   )
 }

@@ -44,19 +44,15 @@ export async function GET() {
   }
 }
 
-/**
- * POST /api/assignments
- * Create a new assignment
- */
+import { AssignmentAssignee } from "@/entities/AssignmentAssignee";
+
 export async function POST(req: NextRequest) {
   try {
-    // Authenticate the user
     const session = await auth();
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Parse input from the request body
     const { title, description, weighting, deadline, progress, status, finalGrade } = await req.json();
 
     if (!title || !status) {
@@ -66,15 +62,14 @@ export async function POST(req: NextRequest) {
     const dataSource = await getDataSource();
     const assignmentRepo = dataSource.getRepository(Assignment);
     const userRepo = dataSource.getRepository(UserEntity);
+    const assigneeRepo = dataSource.getRepository(AssignmentAssignee);
 
-    // Fetch the current user from the database
     const user = await userRepo.findOneBy({ id: session.user.id as any });
     if (!user) {
       await dataSource.destroy();
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Create and save the new assignment updated to use the correct user type
     const assignment = assignmentRepo.create({
       title,
       description: description || null,
@@ -87,11 +82,19 @@ export async function POST(req: NextRequest) {
     });
 
     const savedAssignment = await assignmentRepo.save(assignment);
-    await dataSource.destroy();
 
+    // 🔁 Add creator as an assignee
+    const assignee = assigneeRepo.create({
+      assignment: savedAssignment,
+      user,
+    });
+    await assigneeRepo.save(assignee);
+
+    await dataSource.destroy();
     return NextResponse.json(savedAssignment, { status: 201 });
   } catch (err) {
     console.error(err);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
+
