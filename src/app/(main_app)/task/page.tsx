@@ -446,7 +446,6 @@ export default function TasksPage() {
           onSave={handleCreateTask}
           members={[]}
           maxWeight={100}
-          currentWeight={0}
           task={null} /></>
         )
     

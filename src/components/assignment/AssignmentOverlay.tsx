@@ -47,7 +47,7 @@ export default function AssignmentOverlay({
   const handleCloseExpanded = () => {
     setIsExpanded(false)
   }
-
+  console.log("Selected Assignment members: ", assignment.members)
   // Called when user submits the CreateTaskModal
   const handleCreateTask = async (text: string, dueDate?: string) => {
     console.log("About to create task:", { text, dueDate })
@@ -145,12 +145,8 @@ export default function AssignmentOverlay({
           handleCreateTask(taskData.title, taskData.deadline)
         }
         members={assignment.members || []}
+        assignmentId ={assignment.id}
         maxWeight={assignment.weighting || 100}
-        currentWeight={
-          assignment.tasks
-            ? assignment.tasks.reduce((sum, t) => sum + (t.weighting ?? 1), 0)
-            : 0
-        }
         task={isEditTask}
       />
 

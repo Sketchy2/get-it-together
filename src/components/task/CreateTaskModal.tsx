@@ -15,8 +15,8 @@ interface CreateTaskModalProps {
   onClose: () => void
   onSave: (task: any) => void
   members: Member[]
+  assignmentId: string
   maxWeight: number
-  currentWeight: number
   task: Task | null
 }
 
@@ -25,23 +25,18 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
   onClose,
   onSave,
   members,
-  maxWeight,
-  currentWeight,
   task,
 }) => {
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
-  const [assignee, setAssignee] = useState("") //look into multiple assignees
+  const [assignee, setAssignee] = useState("")
   const [deadline, setDeadline] = useState("")
-  const [weighting, setWeight] = useState(1)
   const [status, setStatus] = useState<TaskStatus>("To-Do")
   const [priority, setPriority] = useState<"low" | "medium" | "high">("medium")
   const [assignments, setAssignments] = useState<{ id: string; title: string }[]>([])
   const [assignmentId, setAssignmentId] = useState("")
 
-  // Calculate remaining weighting
-  const remainingWeight = maxWeight - currentWeight
-
+  console.log("members in this selected: " + members)
   useEffect(() => {
     const fetchAssignments = async () => {
       try {
@@ -64,7 +59,6 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
       setDescription(task.description || "")
       setAssignee(task.assignee?.[0]?.id || "")
       setDeadline(task.deadline || "")
-      setWeight(task.weighting || 1)
       setStatus(task.status || "To-Do")
       setPriority(task.priority || "medium")
     }
@@ -86,7 +80,6 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
       assignee: assignee ? [{ id: assignee, name: assignee }] : undefined,
       deadline: deadline || undefined,
       status,
-      weighting,
       priority,
       createdAt: new Date().toISOString(),
       assignmentId,
@@ -101,7 +94,6 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
     setDescription("")
     setAssignee("")
     setDeadline("")
-    setWeight(1)
     setStatus("To-Do")
     setPriority("medium")
     setAssignmentId("")
@@ -127,7 +119,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
       onClose={handleClose}
       formTitle={task ? "Edit Task" : "Create New Task"}
       formSubmitLabel={task ? "Edit Task" : "Create Task"}
-      disabledCondition={!title || remainingWeight <= 0}
+      disabledCondition={!title || !assignmentId}
     >
       <FormItem label="Task Title" htmlFor="taskTitle">
         <input
@@ -169,8 +161,8 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
           <select id="taskAssignee" value={assignee} onChange={(e) => setAssignee(e.target.value)}>
             <option value="">Unassigned</option>
             {members.map((member, index) => (
-              <option key={index} value={member.name}>
-                {member.name}
+              <option key={index} value={member.email}>
+                {member.email}
               </option>
             ))}
           </select>

@@ -9,7 +9,6 @@ type Task = {
     assignee?: User[]
     deadline?: string
     status: TaskStatus
-    weighting?: number
     createdAt?: string
     priority?: "low" | "medium" | "high" 
 }

@@ -22,29 +22,97 @@ async function getDataSource() {
  * GET /api/assignments
  * Fetch all assignments (with assignees and tasks)
  */
-export async function GET() {
+// export async function GET() {
+//   const session = await auth();
+//   const email = session?.user?.email;
+//   if (!email) {
+//     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+//   }
+
+//   const ds = await getDataSource();
+//   try {
+//     const assignments = await ds
+//       .getRepository(Assignment)
+//       .createQueryBuilder("assignment")
+//       // join in your assignees
+//       .leftJoinAndSelect("assignment.assignees", "assignee")
+//       // join the user on each assignee
+//       .leftJoinAndSelect("assignee.user", "user")
+//       // join any other relations you need
+//       .leftJoinAndSelect("assignment.tasks", "task")
+//       // filter by the logged-in user’s email
+//       .where("user.email = :email", { email })
+//       .getMany();
+
+//     return NextResponse.json(assignments);
+//   } catch (err) {
+//     console.error(err);
+//     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+//   } finally {
+//     await ds.destroy();
+//   }
+// }
+
+// src/app/api/assignments/route.ts
+
+export async function GET(req: NextRequest) {
   const session = await auth();
-  const email = session?.user?.email;
+  const email   = session?.user?.email;
   if (!email) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const ds = await getDataSource();
   try {
-    const assignments = await ds
-      .getRepository(Assignment)
-      .createQueryBuilder("assignment")
-      // join in your assignees
-      .leftJoinAndSelect("assignment.assignees", "assignee")
-      // join the user on each assignee
-      .leftJoinAndSelect("assignee.user", "user")
-      // join any other relations you need
-      .leftJoinAndSelect("assignment.tasks", "task")
-      // filter by the logged-in user’s email
-      .where("user.email = :email", { email })
-      .getMany();
+    // 1) Build your query: filter down to assignments this user is on,
+    //    then load *all* assignees (and their users), tasks, files & links.
+    const qb = ds.getRepository(Assignment).createQueryBuilder("assignment");
+    qb.innerJoin(
+      "assignment.assignees",
+      "filterAssignee"
+    ).innerJoin(
+      "filterAssignee.user",
+      "filterUser",
+      "filterUser.email = :email",
+      { email }
+    );
+    qb.leftJoinAndSelect("assignment.assignees", "assignee")
+      .leftJoinAndSelect("assignee.user",        "user")
+      .leftJoinAndSelect("assignment.tasks",     "task")
 
-    return NextResponse.json(assignments);
+    const raw = await qb.getMany();
+
+    // 2) Map it into exactly the shape your front-end `Assignment` type expects:
+    const formatted = raw.map((a) => ({
+      id:          a.id.toString(),
+      title:       a.title,
+      description: a.description ?? "",
+      deadline:    a.deadline    ? a.deadline.toISOString()    : "",
+      weighting:   a.weighting   ?? 0,
+      status:      a.status,
+      progress:    a.progress,
+      finalGrade:  a.finalGrade  ?? null,
+
+      // pull out just the raw User objects
+      members: a.assignees.map((asst) => ({
+        id:    asst.user.id,
+        name:  asst.user.name,
+        email: asst.user.email ?? "",
+      })),
+
+      tasks: a.tasks.map((t) => ({
+        id:           t.id.toString(),
+        title:        t.title,
+        description:  t.description ?? "",
+        dueDate:      t.deadline   ? t.deadline.toISOString()   : "",
+        status:       t.status,
+        priority:     t.priority,
+        createdAt:    t.createdAt.toISOString(),
+        assignmentId: a.id.toString(),
+      })),
+    }));
+
+    return NextResponse.json(formatted);
   } catch (err) {
     console.error(err);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
@@ -52,6 +120,8 @@ export async function GET() {
     await ds.destroy();
   }
 }
+
+
 export async function POST(req: NextRequest) {
   const session = await auth();
   const email = session?.user?.email;

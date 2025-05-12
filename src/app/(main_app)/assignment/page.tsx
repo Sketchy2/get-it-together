@@ -71,17 +71,19 @@ export default function Assignments() {
 
   useEffect(() => {
     const fetchAssignments = async () => {
+      setIsLoading(true)
       try {
-        setIsLoading(true)
         const res = await fetch("/api/assignments")
         if (!res.ok) throw new Error("Failed to fetch assignments")
-
-        const data = await res.json()
+        // now the API returns exactly Assignment[], so just cast it:
+        const data = (await res.json()) as Assignment[]
+        console.log("Fetched assignments:", data)
         setAssignments(data)
+        console.log("Assignments fetched:", data)
         setError(null)
       } catch (err) {
         console.error(err)
-        setError("Failed to load assignments. Please try again.")
+        setError("Failed to load assignments")
       } finally {
         setIsLoading(false)
       }
@@ -129,8 +131,6 @@ export default function Assignments() {
    */
   const handleListClick = useCallback(
     (id: string) => {
-      console.log("waddup")
-
       if (viewMode.label == "List") {
         setExpandedAssignment((prevId) => (prevId === id ? null : id))
         setSelectedAssignmentData(assignments.find((as) => as.id == id) || selectedAssignmentData)
@@ -199,7 +199,6 @@ export default function Assignments() {
     }
   }, [])
 
-  // Inside your Assignments.tsx (or overlay component)
 const handleAddTask = useCallback(
   async (assignmentId: string, taskData: { text: string; dueDate?: string }) => {
     // 1) Build payload matching your POST handler
