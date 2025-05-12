@@ -11,14 +11,6 @@ interface CalendarEventProps {
 }
 
 export default function CalendarEvent({ event }: CalendarEventProps) {
-  const formatTime = (date: Date) => {
-    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-  }
-
-  const getTimeRange = () => {
-    return `${formatTime(event.start)} - ${formatTime(event.end)}`
-  }
-
   return (
     <div className="calendarEvent">
       <div className="eventTitle">{event.title}</div>
@@ -28,10 +20,6 @@ export default function CalendarEvent({ event }: CalendarEventProps) {
           <span>{event.location}</span>
         </div>
       )}
-      <div className="eventTime">
-        <Clock size={12} />
-        <span>{getTimeRange()}</span>
-      </div>
     </div>
   )
 }
