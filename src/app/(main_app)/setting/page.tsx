@@ -27,63 +27,64 @@ export default function ProfilePage() {
     if (!session?.user?.id) return
 
     const fetchUserProfile = async () => {
-  setIsLoading(true)
-  try {
-    if (!session?.user?.id) {
-      throw new Error("User session or ID is not available")
+      setIsLoading(true)
+      try {
+        if (!session?.user?.id) {
+          throw new Error("User session or ID is not available")
+        }
+
+        // Set profile using session data
+        setProfile({
+          name: session.user.name || "",
+          email: session.user.email || "",
+        })
+
+        // Now safe to call because session.user.id is guaranteed
+        await fetchUserStats(session.user.id)
+      } catch (err) {
+        console.error("Error fetching user profile:", err)
+        setError("Failed to load profile data. Please try again.")
+      } finally {
+        setIsLoading(false)
+      }
     }
-
-    // Set profile using session data
-    setProfile({
-      name: session.user.name || "",
-      email: session.user.email || ""
-    })
-
-    // Now safe to call because session.user.id is guaranteed
-    await fetchUserStats(session.user.id)
-  } catch (err) {
-    console.error("Error fetching user profile:", err)
-    setError("Failed to load profile data. Please try again.")
-  } finally {
-    setIsLoading(false)
-  }
-}
-
 
     fetchUserProfile()
   }, [session])
 
-  // Fetch user statistics
+  // Fetch user statistics - using the same approach as in task and assignment pages
   const fetchUserStats = async (userId: string) => {
     try {
-      // Fetch assignments for stats
+      // Fetch assignments using the same approach as in assignment page
       const assignmentsResponse = await fetch(`/api/user/assignment?userId=${userId}`)
       if (!assignmentsResponse.ok) {
         throw new Error("Failed to fetch assignments")
       }
       const assignments = await assignmentsResponse.json()
 
-      // Fetch tasks for stats
-      const tasksResponse = await fetch(`/api/tasks?userId=${userId}`)
-      if (!tasksResponse.ok) {
-        throw new Error("Failed to fetch tasks")
-      }
-      const tasks = await tasksResponse.json()
+      console.log("Fetched assignments:", assignments)
 
-      console.log("Fetched tasks:", tasks) // Debug log
+      // Extract tasks from assignments - this is how the task page gets tasks
+      let allTasks: any[] = []
+      assignments.forEach((assignment: any) => {
+        if (assignment.tasks && Array.isArray(assignment.tasks)) {
+          allTasks = [...allTasks, ...assignment.tasks]
+        }
+      })
 
-      // Calculate statistics
+      console.log("Extracted tasks from assignments:", allTasks)
+
+      // Calculate assignment statistics
       const completedAssignments = assignments.filter((a: any) => {
-        // An assignment is considered complete if all its tasks are completed
         if (!a.tasks || a.tasks.length === 0) return false
         return a.tasks.every((t: any) => t.status === "Completed")
       }).length
 
       const activeAssignments = assignments.length - completedAssignments
 
-      // Make sure we're counting actual tasks from the API response
-      const completedTasks = Array.isArray(tasks) ? tasks.filter((t: any) => t.status === "Completed").length : 0
-      const activeTasks = Array.isArray(tasks) ? tasks.length - completedTasks : 0
+      // Calculate task statistics using the extracted tasks
+      const completedTasks = allTasks.filter((task) => task.status === "Completed").length
+      const activeTasks = allTasks.length - completedTasks
 
       // Calculate upcoming deadlines (assignments due in the next 7 days)
       const now = new Date()
