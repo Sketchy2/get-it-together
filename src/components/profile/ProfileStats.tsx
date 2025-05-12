@@ -1,15 +1,20 @@
 import { CheckCircle, Clock, AlertTriangle } from "lucide-react"
 import "./ProfileStats.css"
 
-export default function ProfileStats() {
-  // This would typically come from an API or context
-  const stats = {
-    completedAssignments: 12,
-    activeAssignments: 5,
-    completedTasks: 48,
-    activeTasks: 15,
-    upcomingDeadlines: 3,
+interface ProfileStatsProps {
+  stats: {
+    completedAssignments: number
+    activeAssignments: number
+    completedTasks: number
+    activeTasks: number
+    upcomingDeadlines: number
   }
+}
+
+export default function ProfileStats({ stats }: ProfileStatsProps) {
+  // Calculate overall completion percentage
+  const totalTasks = stats.completedTasks + stats.activeTasks
+  const completionPercentage = totalTasks > 0 ? Math.round((stats.completedTasks / totalTasks) * 100) : 0
 
   return (
     <div className="profileStatsContainer">
@@ -84,10 +89,10 @@ export default function ProfileStats() {
         <div className="progressSection">
           <div className="progressTitle">
             <span>Overall Completion</span>
-            <span className="progressPercentage">78%</span>
+            <span className="progressPercentage">{completionPercentage}%</span>
           </div>
           <div className="progressBar">
-            <div className="progressFill" style={{ width: "78%" }}></div>
+            <div className="progressFill" style={{ width: `${completionPercentage}%` }}></div>
           </div>
         </div>
       </div>

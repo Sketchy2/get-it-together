@@ -1,6 +1,6 @@
 "use client"
 
-import { Edit, Camera } from "lucide-react"
+import { Edit } from "lucide-react"
 import Image from "next/image"
 import "./ProfileHeader.css"
 import SignOut from "../auth/SignOut"
@@ -20,27 +20,25 @@ export default function ProfileHeader({ name, avatar, department, university, on
         <div className="avatarContainer">
           <div className="avatarWrapper">
             <Image src={avatar || "/placeholder.svg"} alt={name} width={120} height={120} className="avatar" />
-            <button className="changeAvatarButton">
-              <Camera size={16} />
-            </button>
           </div>
         </div>
 
         <div className="profileInfo">
           <h1 className="profileName">{name}</h1>
-          <div className="profileMeta">
-            <span className="profileDepartment">{department}</span>
-            <span className="profileDivider">•</span>
-            <span className="profileUniversity">{university}</span>
-          </div>
+          {(department || university) && (
+            <div className="profileMeta">
+              {department && <span className="profileDepartment">{department}</span>}
+              {department && university && <span className="profileDivider">•</span>}
+              {university && <span className="profileUniversity">{university}</span>}
+            </div>
+          )}
         </div>
 
         <button className="editProfileButton" onClick={onEditClick}>
           <Edit size={16} />
           <span>Edit Profile</span>
         </button>
-                    <SignOut />
-        
+        <SignOut />
       </div>
 
       <div className="profileHeaderBackground"></div>

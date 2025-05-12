@@ -1,7 +1,9 @@
 "use client"
 
+import type React from "react"
+
 import { useState } from "react"
-import { X, User, Mail, BookOpen, School, BadgeIcon as IdCard, Save } from "lucide-react"
+import { X, User, Mail, Save } from "lucide-react"
 import "./EditProfileModal.css"
 
 interface EditProfileModalProps {
@@ -27,10 +29,6 @@ export default function EditProfileModal({ isOpen, onClose, onSave, profile }: E
   const [formData, setFormData] = useState({
     name: profile.name,
     email: profile.email,
-    bio: profile.bio,
-    department: profile.department,
-    university: profile.university,
-    studentId: profile.studentId,
     preferences: {
       emailNotifications: profile.preferences.emailNotifications,
       darkMode: profile.preferences.darkMode,
@@ -48,22 +46,19 @@ export default function EditProfileModal({ isOpen, onClose, onSave, profile }: E
     }))
   }
 
-  const handlePreferenceChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value, type } = e.target;
-    const checked = (e.target as HTMLInputElement).checked;
-    const val = type === "checkbox" ? checked : value;
-  
+  const handlePreferenceChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target
+    const checked = (e.target as HTMLInputElement).checked
+    const val = type === "checkbox" ? checked : value
+
     setFormData((prev) => ({
       ...prev,
       preferences: {
         ...prev.preferences,
-        [name]: type === "number" ? parseInt(val as string) : val,
+        [name]: type === "number" ? Number.parseInt(val as string) : val,
       },
-    }));
-  };
-  
+    }))
+  }
 
   const handleSubmit = (e: { preventDefault: () => void }) => {
     e.preventDefault()
@@ -113,69 +108,7 @@ export default function EditProfileModal({ isOpen, onClose, onSave, profile }: E
                 onChange={handleChange}
                 className="formInput"
                 required
-              />
-            </div>
-
-            <div className="formGroup">
-              <label htmlFor="bio" className="formLabel">
-                <span>Bio</span>
-              </label>
-              <textarea
-                id="bio"
-                name="bio"
-                value={formData.bio}
-                onChange={handleChange}
-                className="formTextarea"
-                rows={4}
-              />
-            </div>
-          </div>
-
-          <div className="formSection">
-            <h3 className="formSectionTitle">Academic Information</h3>
-
-            <div className="formGroup">
-              <label htmlFor="university" className="formLabel">
-                <School size={16} />
-                <span>University</span>
-              </label>
-              <input
-                type="text"
-                id="university"
-                name="university"
-                value={formData.university}
-                onChange={handleChange}
-                className="formInput"
-              />
-            </div>
-
-            <div className="formGroup">
-              <label htmlFor="department" className="formLabel">
-                <BookOpen size={16} />
-                <span>Department</span>
-              </label>
-              <input
-                type="text"
-                id="department"
-                name="department"
-                value={formData.department}
-                onChange={handleChange}
-                className="formInput"
-              />
-            </div>
-
-            <div className="formGroup">
-              <label htmlFor="studentId" className="formLabel">
-                <IdCard size={16} />
-                <span>Student ID</span>
-              </label>
-              <input
-                type="text"
-                id="studentId"
-                name="studentId"
-                value={formData.studentId}
-                onChange={handleChange}
-                className="formInput"
+                disabled
               />
             </div>
           </div>
