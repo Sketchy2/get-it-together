@@ -24,50 +24,7 @@ import TaskGroup from "@/components/task/TaskGroup"
 import AssignmentOverlay from "@/components/assignment/AssignmentOverlay"
 import "./dashboard.css"
 import "react-big-calendar/lib/css/react-big-calendar.css"
-
-// Setup localizer for react-big-calendar
-const locales = {
-  "en-US": enUS,
-}
-
-const localizer = dateFnsLocalizer({
-  format,
-  parse,
-  startOfWeek,
-  getDay,
-  locales,
-})
-
-// Define event type
-interface EventType {
-  id: string
-  title: string
-  start: Date
-  end: Date
-  allDay?: boolean
-  assignmentId?: string
-  assignmentTitle?: string
-  description?: string
-  location?: string
-  color?: string
-  eventType?: "assignment" | "meeting" | "task" | "presentation" | "other"
-}
-
-// Define event colors by type
-const EVENT_COLORS = {
-  assignment: "#E74C3C", // Red for assignment due
-  meeting: "#3498DB", // Blue for meetings
-  task: "#2ECC71", // Green for task due
-  presentation: "#F39C12", // Orange for presentations
-  other: "#9B59B6", // Purple for others
-}
-
-// Define task status colors
-const TASK_STATUS_COLORS = {
-  "To-Do": "#DD992B", // Yellow for To-Do
-  "In Progress": "#3498DB", // Blue for In Progress
-  Completed: "#2ECC71", // Green for Completed
-}
+import { type EventType, EVENT_COLORS } from "@/types/event"
 
 // Update the CustomWeekView component to use the passed navigation functions
 const CustomWeekView = ({ date, events, onSelectEvent, onPrevWeek, onNextWeek }: any) => {
@@ -174,82 +131,6 @@ const AssignmentListItem = ({
   )
 }
 
-// Custom TaskItem component to override the default styling
-const CustomTaskItem = ({
-  task,
-  onStatusChange,
-}: {
-  task: Task & { assignmentTitle: string; assignmentDeadline: string }
-  onStatusChange: (taskId: string, newStatus: TaskStatus) => void
-}) => {
-  // Get the appropriate color for the task status
-  const statusColor = TASK_STATUS_COLORS[task.status as keyof typeof TASK_STATUS_COLORS] || "#ffffff"
-
-  return (
-    <div className="custom-task-item">
-      <div className="task-header">
-        <span className="task-title">{task.title}</span>
-        <span
-          className={`task-status task-status-${task.status.toLowerCase().replace(/\s+/g, "")}`}
-          style={{ color: statusColor }}
-        >
-          {task.status}
-        </span>
-      </div>
-      <div className="task-assignment">From: {task.assignmentTitle}</div>
-      <div className="task-actions">
-        {task.status !== "Completed" && (
-          <button onClick={() => onStatusChange(task.id, "Completed")} className="task-complete-btn">
-            Mark Complete
-          </button>
-        )}
-        {task.status === "To-Do" && (
-          <button onClick={() => onStatusChange(task.id, "In Progress")} className="task-progress-btn">
-            Start
-          </button>
-        )}
-        {task.status === "In Progress" && (
-          <button onClick={() => onStatusChange(task.id, "To-Do")} className="task-todo-btn">
-            Back to To-Do
-          </button>
-        )}
-      </div>
-    </div>
-  )
-}
-
-// Custom TaskGroup component to apply status colors
-const CustomTaskGroup = ({
-  title,
-  tasks,
-  onStatusChange,
-}: {
-  title: string
-  tasks: (Task & { assignmentTitle: string; assignmentDeadline: string })[]
-  onStatusChange: (taskId: string, newStatus: TaskStatus) => void
-}) => {
-  // Get the appropriate color for the task status
-  const statusColor = TASK_STATUS_COLORS[title as keyof typeof TASK_STATUS_COLORS] || "#ffffff"
-
-  return (
-    <div className="custom-task-group">
-      <div className="task-group-header" style={{ borderBottomColor: statusColor }}>
-        <h3 style={{ color: statusColor }}>
-          {title} ({tasks.length})
-        </h3>
-      </div>
-      <div className="task-group-content">
-        {tasks.map((task) => (
-          <div key={task.id} className="task-item">
-            <div className="task-title">{task.title}</div>
-            <div className="task-assignment">From: {task.assignmentTitle}</div>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
 // Update the Dashboard component to use AssignmentListItem
 export default function Dashboard() {
   // State for data
@@ -267,244 +148,60 @@ export default function Dashboard() {
   const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null)
   const [isAssignmentOverlayOpen, setIsAssignmentOverlayOpen] = useState(false)
 
-  // Sample data generator function (would be replaced with API calls in production)
-  const getSampleData = useCallback((): { assignments: Assignment[]; events: EventType[] } => {
-    const now = new Date()
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  // Add a useEffect to fetch the user session
+  const [userId, setUserId] = useState<string | null>(null)
 
-    const yesterday = new Date(today)
-    yesterday.setDate(yesterday.getDate() - 1)
+  // Add this useEffect at the beginning to get the user session
+  useEffect(() => {
+    const getSession = async () => {
+      try {
+        const res = await fetch("/api/auth/session")
+        const session = await res.json()
 
-    const tomorrow = new Date(today)
-    tomorrow.setDate(tomorrow.getDate() + 1)
-
-    const nextWeek = new Date(today)
-    nextWeek.setDate(nextWeek.getDate() + 7)
-
-    const lastWeek = new Date(today)
-    lastWeek.setDate(lastWeek.getDate() - 7)
-
-    // Get Saturday and Sunday for this week
-    const saturday = new Date(today)
-    while (!isSaturday(saturday)) {
-      saturday.setDate(saturday.getDate() + 1)
-    }
-
-    const sunday = new Date(today)
-    while (!isSunday(sunday)) {
-      sunday.setDate(sunday.getDate() + 1)
-    }
-
-    // Sample assignments
-    const assignments: Assignment[] = [
-      {
-        id: "a1",
-        title: "Research Paper on Climate Change",
-        description: "A comprehensive analysis of climate change factors and their global impact.",
-        createdAt: lastWeek.toISOString(),
-        deadline: nextWeek.toISOString(),
-        weighting: 40,
-        members: [{ id: "m1", name: "John Doe" }],
-        tasks: [
-          {
-            id: "t1",
-            title: "Literature Review",
-            description: "Review existing research papers",
-            status: "In Progress",
-            priority: "high",
-            deadline: tomorrow.toISOString(),
-          },
-          {
-            id: "t2",
-            title: "Data Collection",
-            description: "Gather climate data from reliable sources",
-            status: "To-Do",
-            priority: "medium",
-            deadline: nextWeek.toISOString(),
-          },
-        ],
-        files: [],
-        links: [],
-      },
-      {
-        id: "a2",
-        title: "Literature Review",
-        description: "Review of major works in the field with critical analysis.",
-        createdAt: lastWeek.toISOString(),
-        deadline: tomorrow.toISOString(),
-        weighting: 30,
-        members: [{ id: "m1", name: "John Doe" }],
-        tasks: [
-          {
-            id: "t3",
-            title: "Outline Structure",
-            description: "Create outline for the review",
-            status: "Completed",
-            priority: "high",
-            deadline: yesterday.toISOString(),
-          },
-        ],
-        files: [],
-        links: [],
-      },
-      {
-        id: "a3",
-        title: "Group Presentation",
-        description: "Prepare slides and talking points for the final presentation.",
-        createdAt: lastWeek.toISOString(),
-        deadline: yesterday.toISOString(),
-        weighting: 25,
-        members: [{ id: "m1", name: "John Doe" }],
-        tasks: [
-          {
-            id: "t4",
-            title: "Create Slides",
-            description: "Design presentation slides",
-            status: "In Progress",
-            priority: "medium",
-            deadline: yesterday.toISOString(),
-          },
-          {
-            id: "t5",
-            title: "Practice Presentation",
-            description: "Rehearse the presentation",
-            status: "To-Do",
-            priority: "high",
-            deadline: today.toISOString(),
-          },
-        ],
-        files: [],
-        links: [],
-      },
-      {
-        id: "a4",
-        title: "Group Presentation",
-        description: "Prepare slides and talking points for the final presentation.",
-        createdAt: lastWeek.toISOString(),
-        deadline: yesterday.toISOString(),
-        weighting: 25,
-        members: [{ id: "m1", name: "John Doe" }],
-        tasks: [
-          {
-            id: "t4",
-            title: "Create Slides",
-            description: "Design presentation slides",
-            status: "In Progress",
-            priority: "medium",
-            deadline: yesterday.toISOString(),
-          },
-          {
-            id: "t5",
-            title: "Practice Presentation",
-            description: "Rehearse the presentation",
-            status: "To-Do",
-            priority: "high",
-            deadline: today.toISOString(),
-          },
-        ],
-        files: [],
-        links: [],
+        if (session?.user?.id) {
+          setUserId(session.user.id)
+        } else {
+          console.warn("Session exists but user ID is missing")
+        }
+      } catch (error) {
+        console.error("Error fetching session:", error)
       }
-    ]
+    }
 
-    // Sample events
-    const events: EventType[] = [
-      {
-        id: "e1",
-        title: "Team Meeting",
-        start: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 10, 0),
-        end: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 11, 30),
-        assignmentId: "a1",
-        assignmentTitle: "Research Paper on Climate Change",
-        description: "Discuss research methodology and divide tasks",
-        location: "Zoom",
-        eventType: "meeting",
-        color: EVENT_COLORS.meeting,
-      },
-      {
-        id: "e2",
-        title: "Literature Review Due",
-        start: new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate(), 14, 0),
-        end: new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate(), 16, 0),
-        assignmentId: "a2",
-        assignmentTitle: "Literature Review",
-        description: "Final submission deadline",
-        location: "Online Portal",
-        eventType: "assignment",
-        color: EVENT_COLORS.assignment,
-      },
-      {
-        id: "e3",
-        title: "Group Presentation",
-        start: new Date(nextWeek.getFullYear(), nextWeek.getMonth(), nextWeek.getDate(), 13, 0),
-        end: new Date(nextWeek.getFullYear(), nextWeek.getMonth(), nextWeek.getDate(), 15, 0),
-        assignmentId: "a3",
-        assignmentTitle: "Group Presentation",
-        description: "Final presentation to the class",
-        location: "Room 302",
-        eventType: "presentation",
-        color: EVENT_COLORS.presentation,
-      },
-      {
-        id: "e4",
-        title: "Data Collection Task Due",
-        start: new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate(), 9, 0),
-        end: new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate(), 12, 0),
-        assignmentId: "a1",
-        assignmentTitle: "Research Paper on Climate Change",
-        description: "Complete data collection phase",
-        location: "Lab",
-        eventType: "task",
-        color: EVENT_COLORS.task,
-      },
-      {
-        id: "e5",
-        title: "Study Session",
-        start: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 15, 0),
-        end: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 17, 0),
-        description: "Group study session for upcoming exam",
-        location: "Library",
-        eventType: "other",
-        color: EVENT_COLORS.other,
-      },
-      // Add weekend events
-      {
-        id: "e6",
-        title: "Weekend Study Group",
-        start: new Date(saturday.getFullYear(), saturday.getMonth(), saturday.getDate(), 11, 0),
-        end: new Date(saturday.getFullYear(), saturday.getMonth(), saturday.getDate(), 14, 0),
-        description: "Group study session for upcoming exam",
-        location: "Coffee Shop",
-        eventType: "other",
-        color: EVENT_COLORS.other,
-      },
-      {
-        id: "e7",
-        title: "Research Planning",
-        start: new Date(sunday.getFullYear(), sunday.getMonth(), sunday.getDate(), 13, 0),
-        end: new Date(sunday.getFullYear(), sunday.getMonth(), sunday.getDate(), 15, 0),
-        assignmentId: "a1",
-        assignmentTitle: "Research Paper on Climate Change",
-        description: "Plan research approach and methodology",
-        location: "Home",
-        eventType: "meeting",
-        color: EVENT_COLORS.meeting,
-      },
-    ]
-
-    return { assignments, events }
+    getSession()
   }, [])
 
-  // Load data on component mount
+  // Load data from backend APIs
   useEffect(() => {
-    setIsLoading(true)
+    const fetchDashboardData = async () => {
+      if (!userId) return
 
-    // Simulate API call with timeout
-    const timer = setTimeout(() => {
+      setIsLoading(true)
       try {
-        const { assignments, events } = getSampleData()
-        setAssignments(assignments)
-        setEvents(events)
+        // Fetch assignments - using the same endpoint as the assignments page
+        const assignmentsRes = await fetch("/api/assignments")
+        if (!assignmentsRes.ok) {
+          throw new Error("Failed to fetch assignments")
+        }
+        const assignmentsData = await assignmentsRes.json()
+        setAssignments(assignmentsData)
+
+        // Fetch events - using the same endpoint as the calendar page with userId
+        const eventsRes = await fetch(`/api/events?userId=${userId}`)
+        if (!eventsRes.ok) {
+          throw new Error("Failed to fetch events")
+        }
+        const eventsData = await eventsRes.json()
+
+        // Format events for calendar - same as in schedule page
+        const formattedEvents = eventsData.map((event: any) => ({
+          ...event,
+          start: new Date(event.start),
+          end: new Date(event.end),
+          color: event.color || EVENT_COLORS[event.eventType as keyof typeof EVENT_COLORS] || EVENT_COLORS.other,
+        }))
+
+        setEvents(formattedEvents)
         setError(null)
       } catch (err) {
         console.error("Error loading dashboard data:", err)
@@ -512,10 +209,10 @@ export default function Dashboard() {
       } finally {
         setIsLoading(false)
       }
-    }, 1000)
+    }
 
-    return () => clearTimeout(timer)
-  }, [getSampleData])
+    fetchDashboardData()
+  }, [userId])
 
   // Extract all tasks from assignments
   const allTasks = useMemo(() => {
@@ -558,43 +255,55 @@ export default function Dashboard() {
     return Object.values(groupedTasks).some((tasks) => tasks.length > 0)
   }, [groupedTasks])
 
-  // Handle task status change
+  // Handle task status change with backend integration - same as in task page
   const handleTaskStatusChange = useCallback(
     async (taskId: string, newStatus: TaskStatus) => {
-      // Find the task and its assignment
-      let foundAssignment: Assignment | undefined
-      let foundTask: Task | undefined
+      try {
+        // Find the task and its assignment
+        let foundAssignment: Assignment | undefined
+        let foundTask: Task | undefined
 
-      for (const assignment of assignments) {
-        const task = assignment.tasks.find((t) => t.id === taskId)
-        if (task) {
-          foundAssignment = assignment
-          foundTask = task
-          break
-        }
-      }
-
-      if (!foundAssignment || !foundTask) return
-
-      // Update the task status in state
-      setAssignments((prev) =>
-        prev.map((assignment) => {
-          if (assignment.id === foundAssignment?.id) {
-            return {
-              ...assignment,
-              tasks: assignment.tasks.map((task) => (task.id === taskId ? { ...task, status: newStatus } : task)),
-            }
+        for (const assignment of assignments) {
+          const task = assignment.tasks.find((t) => t.id === taskId)
+          if (task) {
+            foundAssignment = assignment
+            foundTask = task
+            break
           }
-          return assignment
-        }),
-      )
+        }
 
-      // In a real app, you would make an API call here
-      // await fetch(`/api/tasks/${taskId}`, {
-      //   method: 'PUT',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ status: newStatus })
-      // });
+        if (!foundAssignment || !foundTask) return
+
+        // Optimistically update the UI
+        setAssignments((prev) =>
+          prev.map((assignment) => {
+            if (assignment.id === foundAssignment?.id) {
+              return {
+                ...assignment,
+                tasks: assignment.tasks.map((task) => (task.id === taskId ? { ...task, status: newStatus } : task)),
+              }
+            }
+            return assignment
+          }),
+        )
+
+        // Make the API call to update the task - same as in task page
+        const updateData = {
+          status: newStatus,
+        }
+
+        const response = await fetch(`/api/tasks/${taskId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updateData),
+        })
+
+        if (!response.ok) {
+          throw new Error("Failed to update task status")
+        }
+      } catch (error) {
+        console.error("Error updating task status:", error)
+      }
     },
     [assignments],
   )
@@ -605,18 +314,53 @@ export default function Dashboard() {
     setIsEventModalOpen(true)
   }, [])
 
-  // Handle updating event
-  const handleUpdateEvent = useCallback((updatedEvent: EventType) => {
-    setEvents((prev) => prev.map((event) => (event.id === updatedEvent.id ? updatedEvent : event)))
-    setIsEventModalOpen(false)
-    setSelectedEvent(null)
+  // Handle updating event with backend integration - same as in calendar page
+  const handleUpdateEvent = useCallback(async (updatedEvent: EventType) => {
+    try {
+      const response = await fetch("/api/events", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedEvent),
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to update event")
+      }
+
+      const savedEvent = await response.json()
+
+      setEvents((prev) =>
+        prev.map((event) =>
+          event.id === savedEvent.id
+            ? { ...savedEvent, start: new Date(savedEvent.start), end: new Date(savedEvent.end) }
+            : event,
+        ),
+      )
+
+      setIsEventModalOpen(false)
+      setSelectedEvent(null)
+    } catch (error) {
+      console.error("Error updating event:", error)
+    }
   }, [])
 
-  // Handle deleting event
-  const handleDeleteEvent = useCallback((eventId: string) => {
-    setEvents((prev) => prev.filter((event) => event.id !== eventId))
-    setIsEventModalOpen(false)
-    setSelectedEvent(null)
+  // Handle deleting event with backend integration - same as in calendar page
+  const handleDeleteEvent = useCallback(async (eventId: string) => {
+    try {
+      const response = await fetch(`/api/events?id=${eventId}`, {
+        method: "DELETE",
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to delete event")
+      }
+
+      setEvents((prev) => prev.filter((event) => event.id !== eventId))
+      setIsEventModalOpen(false)
+      setSelectedEvent(null)
+    } catch (error) {
+      console.error("Error deleting event:", error)
+    }
   }, [])
 
   // Handle assignment selection for overlay
@@ -625,32 +369,221 @@ export default function Dashboard() {
     setIsAssignmentOverlayOpen(true)
   }, [])
 
-  // Handle assignment update
-  const handleAssignmentUpdate = useCallback((assignmentId: string, updates: Partial<Assignment>) => {
-    setAssignments((prev) =>
-      prev.map((assignment) => (assignment.id === assignmentId ? { ...assignment, ...updates } : assignment)),
-    )
-  }, [])
+  // Handle assignment update with backend integration - same as in assignment page
+  const handleAssignmentUpdate = useCallback(
+    async (assignmentId: string, updates: Partial<Assignment>) => {
+      try {
+        // Find the base assignment using assignID - same as in assignment page
+        const base = assignments.find((a) => a.id === assignmentId)
+        if (!base) throw new Error("Assignment not found")
 
-  // Handle task deletion
-  const handleTaskDelete = useCallback((taskId: string) => {
-    setAssignments((prev) =>
-      prev.map((assignment) => ({
-        ...assignment,
-        tasks: assignment.tasks.filter((task) => task.id !== taskId),
-      })),
-    )
-  }, [])
+        const updatedAssignment = {
+          ...base,
+          ...updates,
+          id: assignmentId, // ensure ID is preserved
+        }
 
-  // Handle task update
-  const handleTaskUpdate = useCallback((taskId: string, updates: Partial<Task>) => {
-    setAssignments((prev) =>
-      prev.map((assignment) => ({
-        ...assignment,
-        tasks: assignment.tasks.map((task) => (task.id === taskId ? { ...task, ...updates } : task)),
-      })),
-    )
-  }, [])
+        const response = await fetch(`/api/assignments/${assignmentId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updatedAssignment),
+        })
+
+        if (!response.ok) {
+          throw new Error("Failed to update assignment")
+        }
+
+        const updated = await response.json()
+
+        setAssignments((prev) => prev.map((assignment) => (assignment.id === updated.id ? updated : assignment)))
+
+        if (selectedAssignment?.id === updated.id) {
+          setSelectedAssignment(updated)
+        }
+      } catch (error) {
+        console.error("Error updating assignment:", error)
+      }
+    },
+    [assignments, selectedAssignment],
+  )
+
+  // Handle task deletion - same as in assignment page
+  const handleTaskDelete = useCallback(
+    async (taskId: string) => {
+      try {
+        // Find the assignment containing this task
+        let foundAssignment: Assignment | undefined
+
+        for (const assignment of assignments) {
+          const taskExists = assignment.tasks.some((t) => t.id === taskId)
+          if (taskExists) {
+            foundAssignment = assignment
+            break
+          }
+        }
+
+        if (!foundAssignment) return
+
+        // Update the UI first (optimistic update)
+        setAssignments((prev) =>
+          prev.map((assignment) => {
+            if (assignment.id === foundAssignment?.id) {
+              return {
+                ...assignment,
+                tasks: assignment.tasks.filter((task) => task.id !== taskId),
+              }
+            }
+            return assignment
+          }),
+        )
+
+        // Then make the API call
+        const response = await fetch(`/api/tasks/${taskId}`, {
+          method: "DELETE",
+        })
+
+        if (!response.ok) {
+          throw new Error("Failed to delete task")
+        }
+      } catch (error) {
+        console.error("Error deleting task:", error)
+      }
+    },
+    [assignments],
+  )
+
+  // Handle task update - same as in assignment page
+  const handleTaskUpdate = useCallback(
+    (taskId: string, updates: Partial<Task>) => {
+      if (!selectedAssignment) {
+        return
+      }
+
+      // Find the task in the assignments
+      let foundAssignment: Assignment | undefined
+
+      for (const assignment of assignments) {
+        const taskExists = assignment.tasks.some((t) => t.id === taskId)
+        if (taskExists) {
+          foundAssignment = assignment
+          break
+        }
+      }
+
+      if (!foundAssignment) return
+
+      // Update the task in the UI
+      setAssignments((prev) =>
+        prev.map((assignment) => {
+          if (assignment.id === foundAssignment?.id) {
+            return {
+              ...assignment,
+              tasks: assignment.tasks.map((task) => (task.id === taskId ? { ...task, ...updates } : task)),
+            }
+          }
+          return assignment
+        }),
+      )
+
+      // Update the selected assignment if needed
+      if (selectedAssignment.id === foundAssignment.id) {
+        setSelectedAssignment({
+          ...selectedAssignment,
+          tasks: selectedAssignment.tasks.map((task) => (task.id === taskId ? { ...task, ...updates } : task)),
+        })
+      }
+
+      // Make the API call
+      fetch(`/api/tasks/${taskId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates),
+      }).catch((error) => {
+        console.error("Error updating task:", error)
+      })
+    },
+    [assignments, selectedAssignment],
+  )
+
+  // Handle task creation - same as in assignment page
+  const handleTaskAdd = useCallback(
+    async (text: string, dueDate?: string) => {
+      if (!selectedAssignment) return
+
+      try {
+        // Build payload matching the POST handler
+        const payload = {
+          title: text,
+          description: null,
+          dueDate: dueDate,
+        }
+
+        // Send to the create-task endpoint
+        const res = await fetch(`/api/assignments/${selectedAssignment.id}/tasks`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        })
+
+        if (!res.ok) {
+          let errorBody: any
+          try {
+            errorBody = await res.json()
+          } catch {
+            errorBody = await res.text()
+          }
+          console.error(`Create task failed (status ${res.status}):`, errorBody)
+          throw new Error(
+            typeof errorBody === "object" ? errorBody.error || JSON.stringify(errorBody) : errorBody || "Unknown error",
+          )
+        }
+
+        // Parse the newly created Task
+        const newTask = await res.json()
+
+        // Merge into the assignments list
+        setAssignments((prev) =>
+          prev.map((a) => (a.id === selectedAssignment.id ? { ...a, tasks: [...a.tasks, newTask] } : a)),
+        )
+
+        // Update the selected assignment
+        setSelectedAssignment({
+          ...selectedAssignment,
+          tasks: [...selectedAssignment.tasks, newTask],
+        })
+      } catch (error) {
+        console.error("Error creating task:", error)
+      }
+    },
+    [selectedAssignment],
+  )
+
+  // Handle assignment deletion - same as in assignment page
+  const handleAssignmentDelete = useCallback(
+    async (assignmentId: string) => {
+      try {
+        const response = await fetch(`/api/assignments/${assignmentId}`, {
+          method: "DELETE",
+        })
+
+        if (!response.ok) {
+          throw new Error("Failed to delete assignment")
+        }
+
+        // Remove assignment from state
+        setAssignments((prev) => prev.filter((a) => a.id !== assignmentId))
+
+        // Close overlay if open
+        if (selectedAssignment?.id === assignmentId) {
+          setIsAssignmentOverlayOpen(false)
+          setSelectedAssignment(null)
+        }
+      } catch (error) {
+        console.error("Error deleting assignment:", error)
+      }
+    },
+    [selectedAssignment],
+  )
 
   // Update the goToPreviousWeek and goToNextWeek functions to pass to CustomWeekView
   const goToPreviousWeek = useCallback(() => {
@@ -721,22 +654,33 @@ export default function Dashboard() {
             </div>
             <div className="section-content">
               <div className="assignment-card-list">
-                {assignments.map((assignment) => {
-                  const late = isAssignmentLate(assignment.deadline)
-                  const daysRemaining = getDaysRemaining(assignment.deadline)
-                  const progress = calculateProgress(assignment)
+                {
+                  assignments ? (
+                    assignments.map((assignment) => {
+                      const late = isAssignmentLate(assignment.deadline);
+                      const daysRemaining = getDaysRemaining(assignment.deadline);
+                      const progress = calculateProgress(assignment);
 
-                  return (
-                    <AssignmentListItem
-                      key={assignment.id}
-                      assignment={assignment}
-                      progress={progress}
-                      daysRemaining={daysRemaining}
-                      isLate={late}
-                      onClick={() => handleSelectAssignment(assignment)}
-                    />
+                      return (
+                        <AssignmentListItem
+                          key={assignment.id}
+                          assignment={assignment}
+                          progress={progress}
+                          daysRemaining={daysRemaining}
+                          isLate={late}
+                          onClick={() => handleSelectAssignment(assignment)}
+                        />
+                      );
+                    })
+                  ) : (
+                    <div className="empty-tasks-message">
+                      <div>
+                        <ClipboardList size={48} strokeWidth={1} className="mb-4 mx-auto opacity-50" />
+                        <p>No assignments available</p>
+                      </div>
+                    </div>
                   )
-                })}
+                }
               </div>
             </div>
           </div>
@@ -760,6 +704,7 @@ export default function Dashboard() {
                         tasks={tasks}
                         viewMode="list"
                         onStatusChange={handleTaskStatusChange}
+                        onTaskDelete={handleTaskDelete}
                       />
                     ),
                 )
@@ -825,6 +770,8 @@ export default function Dashboard() {
           onTaskDelete={handleTaskDelete}
           onTaskUpdate={handleTaskUpdate}
           onAssignmentUpdate={handleAssignmentUpdate}
+          onAssignmentDelete={handleAssignmentDelete}
+          onTaskAdd={handleTaskAdd}
         />
       )}
     </div>

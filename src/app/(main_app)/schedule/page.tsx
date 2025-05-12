@@ -6,7 +6,7 @@ import { Calendar as BigCalendar, dateFnsLocalizer } from "react-big-calendar"
 import { format, parse, startOfWeek, getDay } from "date-fns"
 import { enUS } from "date-fns/locale"
 import type { Assignment } from "@/types/assignment"
-import { EventType } from "@/types/event"
+import { EventType, EVENT_COLORS } from "@/types/event"
 import EventModal from "@/components/calendar/EventModal"
 import CreateEventModal from "@/components/calendar/CreateEventModal"
 import CalendarToolbar from "@/components/calendar/CalendarToolBar"
@@ -18,14 +18,6 @@ const locales = { "en-US": enUS }
 const localizer = dateFnsLocalizer({ format, parse, startOfWeek, getDay, locales })
 
 type CalendarViewType = "month" | "week" | "day" | "agenda"
-
-const EVENT_COLORS = {
-  assignment: "#E74C3C",
-  meeting: "#3498DB",
-  task: "#2ECC71",
-  presentation: "#F39C12",
-  other: "#9B59B6",
-}
 
 export default function SchedulePage() {
   const [assignments, setAssignments] = useState<Assignment[]>([])
