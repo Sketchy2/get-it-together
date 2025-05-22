@@ -18,7 +18,7 @@ import { SortDirection, SortOption } from "@/types/auxilary"
 import SortMenu from "../common/SortMenu"
 import TaskCard from "../task/TaskCard"
 import { Task, TaskStatus } from "@/types/task"
-import {AssignmentLink, FileAttachment, User} from "@/types/assignment"
+import {User} from "@/types/assignment"
 import { formatDate, isLate, useOnClickOutside } from "@/utils/utils"
 import {  calculateProgress, getCardBgColor } from "@/utils/assignmentUtils"
 import FilesLinksSection from "./FilesLinksSection"
@@ -32,8 +32,6 @@ interface AssignmentDetailsProps {
   deadline: string
   weighting: number
   description: string
-  files?: FileAttachment[]
-  links?: AssignmentLink[]
   tasks: Task[]
   members?: User[] 
 
@@ -56,8 +54,6 @@ const AssignmentDetailPanel: React.FC<AssignmentDetailsProps> = ({
   weighting,
   members,
   tasks,
-  files = [],
-  links = [],
 
   onClose,
   onTaskDelete,
@@ -80,16 +76,19 @@ const AssignmentDetailPanel: React.FC<AssignmentDetailsProps> = ({
   const bgColor: string = getCardBgColor(tasks,deadline)
   
   const [isEditing, setIsEditing] = useState(false)
-  const [editedDescription, setEditedDescription] = useState(description)
-  const [showFiles, setShowFiles] = useState(false)
   const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false)
   const [isSortMenuOpen, setIsSortMenuOpen] = useState(false)
   const [sortBy, setSortBy] = useState<SortOption>(sortOptions[0])
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc")
 
-const taskStatusChange = (taskId:string,newStatus:TaskStatus)=>{
+const taskStatusChange = (newStatus:TaskStatus)=>{
+  const taskId = tasks.find((task) => task.status === newStatus)?.id
+  if (!taskId) return;
+  // Call the onTaskUpdate function with the taskId and new status
   onTaskUpdate(taskId,{status:newStatus})
 }
+
+
 
   const handleSortChange = (sortType: SortOption) => {
     if (sortBy.key === sortType.key) {
@@ -365,7 +364,16 @@ const taskStatusChange = (taskId:string,newStatus:TaskStatus)=>{
           <div className="todoList">
             {filteredAndSortedTodos.length > 0 ? (
               filteredAndSortedTodos.map((task) =>
-                <TaskCard key={task.id} task={task} onDelete={onTaskDelete} onEdit={()=>openTaskForm(task)} onStatusChange={taskStatusChange} />)
+                <TaskCard
+                  key={task.id}
+                  task={task}
+                  onDelete={onTaskDelete}
+                  onEdit={() => openTaskForm(task)}
+                  onStatusChange={(newStatus) =>
+                    onTaskUpdate(task.id, { status: newStatus })
+                  }
+                />
+              )
               
   
             ) : (

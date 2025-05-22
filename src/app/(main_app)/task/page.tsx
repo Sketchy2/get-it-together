@@ -215,41 +215,6 @@ export default function TasksPage() {
     [assignments],
   )
 
-  // const updateTask = useCallback(
-  //   (taskId: string, updates: Partial<Task>) => {
-  //     if (!selectedAssignmentData) {
-  //       return
-  //     }
-
-  //     setSelectedAssignmentData((prevData) => {
-  //       if (!prevData) return null
-
-  //       const taskExists = prevData.tasks.some((t) => t.id === taskId)
-  //       if (!taskExists) return prevData
-
-  //       //NOTE: Can probs just update the task itself with partials, rather than update via updating assignment lol
-  //       const updatedTasks: Task[] = prevData.tasks.map((t) =>
-  //         t.id === taskId
-  //           ? {
-  //               ...t,
-  //               ...updates,
-  //             }
-  //           : t,
-  //       )
-
-  //       const updatedAssignment: Assignment = {
-  //         ...prevData,
-  //         tasks: updatedTasks,
-  //       }
-
-  //       setAssignments((prev) => prev.map((a) => (a.id === updatedAssignment.id ? updatedAssignment : a)))
-
-  //       return updatedAssignment
-  //     })
-  //   },
-  //   [selectedAssignmentData],
-  // )
-
   const deleteTask = useCallback(
     async (taskId: string) => {
 

@@ -47,19 +47,25 @@ export default function AssignmentOverlay({
   const handleCloseExpanded = () => {
     setIsExpanded(false)
   }
-  // Called when user submits the CreateTaskModal
-  const handleCreateTask = async (text: string, dueDate?: string) => {
-    console.log("About to create task:", { text, dueDate })
+
+  const handleSaveTask = async (title: string, deadline?: string) => {
     try {
-      await onTaskAdd(text, dueDate)
-      setModalError(null)
-      setIsCreateTaskModalOpen(false)
-      setIsEditTask(null)
+      if (isEditTask) {
+        // EDIT
+        await onTaskUpdate(isEditTask.id, { title, deadline });
+      } else {
+        // NEW
+        await onTaskAdd(title, deadline);
+      }
+      setModalError(null);
+      setIsCreateTaskModalOpen(false);
+      setIsEditTask(null);
     } catch (err: any) {
-      console.error("Add task error:", err)
-      setModalError(err.message || "Failed to create task")
+      console.error(err);
+      setModalError(err.message || "Failed to save task");
     }
-  }
+  };
+
 
   // Open the task-creation modal, optionally pre-populating for edit
   const handleAddAssignmentTask = (taskEdited?: Task) => {
@@ -139,10 +145,7 @@ export default function AssignmentOverlay({
           setIsEditTask(null)
           setModalError(null)
         }}
-        onSave={(taskData) =>
-          // Use title and deadline from modal, not text/dueDate
-          handleCreateTask(taskData.title, taskData.deadline)
-        }
+        onSave={(taskData) => handleSaveTask(taskData.title, taskData.deadline)}
         assignmentId ={assignment.id}
         maxWeight={assignment.weighting || 100}
         task={isEditTask}

@@ -101,6 +101,8 @@ export async function DELETE(
   req: NextRequest,
   { params }: { params: { taskId: string } }
 ) {
+      console.log("Attempting to delete"
+    )
   try {
     const session = await auth();
     if (!session?.user) {

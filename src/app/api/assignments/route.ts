@@ -124,11 +124,10 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const session = await auth();
-  const email = session?.user?.email;
-  if (!email) {
+  const userid = session?.user?.id;
+  if (!userid) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  console.log("executing add assignments")
 
   const { title, description, weighting, deadline, progress, status, finalGrade, members } = await req.json();
 
@@ -141,9 +140,10 @@ export async function POST(req: NextRequest) {
     const assignmentRepo = ds.getRepository(Assignment);
     const userRepo = ds.getRepository(UserEntity);
 
-    // Find the creator by email
-    const creator = await userRepo.findOne({ where: { email } });
-    if (!creator) {
+    // Find the userEntity by userid
+    const userEntity = await userRepo.findOne({ where: { id: userid } });
+
+    if (!userEntity) {
       return NextResponse.json({ error: "Creator not found" }, { status: 404 });
     }
 
@@ -156,12 +156,13 @@ export async function POST(req: NextRequest) {
       progress:      progress      ?? 0,
       status,
       finalGrade:    finalGrade    ?? null,
-      createdByUser: creator,
+      createdByUser: userEntity,
     });
+
     const saved = await assignmentRepo.save(assignment);
 
     // Use shared function to assign the creator
-    await assignUserToAssignment(ds, saved.id, creator.id);
+    await assignUserToAssignment(ds, saved.id, userEntity.id);
 
     // Assign all other members
     console.log("Members to assign:", members);

@@ -172,8 +172,11 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
     setIsEventFormOpen(false);
   };
 
-  const taskStatusChange = (taskId: string, newStatus: TaskStatus) => {
-    onTaskUpdate(taskId, { status: newStatus });
+  const taskStatusChange = (newStatus: TaskStatus) => {
+    const taskId = tasks.find((task) => task.status === newStatus)?.id
+    if (!taskId) return;
+    // Call the onTaskUpdate function with the taskId and new status
+    onTaskUpdate(taskId,{status:newStatus})
   };
 
   const handleDragEnd = (result: any) => {
@@ -536,10 +539,10 @@ const ExpandedAssignmentView: React.FC<ExpandedAssignmentViewProps> = ({
         return (
           <TaskKanbanColumn
             key={member.id}
-            title={member.name}
+            title={member.email}
             droppableId={member.id}
             items={tasks}
-            headerContent={<div className="memberAvatar">{member.name[0]}</div>}
+            headerContent={<div className="memberAvatar">{member.email[0]}</div>}
             footerContent={
               <div className="memberTaskStats">
                 {["To-Do", "In Progress", "Completed"].map((status) => (

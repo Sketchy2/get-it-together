@@ -5,7 +5,7 @@ import type React from "react"
 import { useEffect, useState } from "react"
 import { X, Upload, Plus, User, Calendar, Percent, FileText, Link } from "lucide-react"
 import "./CreateAssignmentModal.css"
-import { Assignment, AssignmentLink } from "@/types/assignment"
+import { Assignment } from "@/types/assignment"
 import FormItem from "../common/FormItem"
 import Form from "../common/Form"
 import FormRow from "../common/FormRow"
@@ -26,8 +26,6 @@ const CreateAssignmentModal: React.FC<CreateAssignmentModalProps> = ({ isOpen, o
   const [members, setMembers] = useState<string[]>([]) // have so accepts 
   const [newMember, setNewMember] = useState("") //TODO: figure out how members will be handled in forms
   const [files, setFiles] = useState<File[]>([])
-  const [links, setLinks] = useState<AssignmentLink[]>([])
-  const [newLink, setNewLink] = useState<AssignmentLink>({ url: "", title: "" })
   const [showLinkForm, setShowLinkForm] = useState(false)
   const [rawDeadline, setRawDeadline] = useState<string>("");
 
@@ -41,25 +39,10 @@ const CreateAssignmentModal: React.FC<CreateAssignmentModalProps> = ({ isOpen, o
         setWeight(assignment.weighting||100)
         // setMembers([assignment.members?.[0]?.id]||[]) //TODO: CHANGE SO ACCEPTS USERS
         // setFiles(assignment.files||[]) // TODO: Adjust file type to match db reqs
-        setLinks([])
       }
     }, [isOpen, assignment])
 
   if (!isOpen) return null
-
-  const handleAddLink = () => {
-    if (newLink.url && newLink.title) {
-      setLinks([...links, newLink])
-      setNewLink({ url: "", title: "" })
-      setShowLinkForm(false)
-    }
-  }
-
-  const handleRemoveLink = (index: number) => {
-    const updatedLinks = [...links]
-    updatedLinks.splice(index, 1)
-    setLinks(updatedLinks)
-  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -70,9 +53,9 @@ const CreateAssignmentModal: React.FC<CreateAssignmentModalProps> = ({ isOpen, o
 
     // Calculate days remaining
     const today = new Date()
-
+    const isEdit = Boolean(assignment);
     const newAssignment = {
-      id: `assignment-${Date.now()}`, // assignment id == prefill if needed
+      id:     isEdit ? assignment!.id : `assignment-${Date.now()}`,
       title,
       createdAt: today.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
       deadline: isoDeadline,
@@ -80,8 +63,6 @@ const CreateAssignmentModal: React.FC<CreateAssignmentModalProps> = ({ isOpen, o
       description,
       members, // TODO: ENSURE create assignment API can accept emails
               // TODO: ensure that
-      files: files.map((file) => file.name),
-      links: links,
       todos: [],
     }
     console.log("New Assignment:", newAssignment)
@@ -97,8 +78,6 @@ const CreateAssignmentModal: React.FC<CreateAssignmentModalProps> = ({ isOpen, o
     setMembers([])
     setNewMember("")
     setFiles([])
-    setLinks([])
-    setNewLink({ url: "", title: "" })
     setShowLinkForm(false)
   }
 
@@ -111,17 +90,6 @@ const CreateAssignmentModal: React.FC<CreateAssignmentModalProps> = ({ isOpen, o
 
   const handleRemoveMember = (email: string) => {
     setMembers(members.filter((member) => member !== email))
-  }
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const newFiles = Array.from(e.target.files)
-      setFiles([...files, ...newFiles])
-    }
-  }
-
-  const handleRemoveFile = (fileName: string) => {
-    setFiles(files.filter((file) => file.name !== fileName))
   }
 
   return (

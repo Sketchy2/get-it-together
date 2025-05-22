@@ -253,14 +253,18 @@ const handleAddTask = useCallback(
       );
 
       // 5) If this assignment is currently open, merge there too
-      if (selectedAssignmentData){
-        setSelectedAssignmentData({...selectedAssignmentData,tasks: [...selectedAssignmentData.tasks, newTask]})
-      }
-      // setSelectedAssignmentData(prev =>
-      //   prev && prev.id === assignmentId
-      //     ? { ...prev, tasks: [...prev.tasks, newTask] }
-      //     : prev
-      // );
+      // if (selectedAssignmentData){
+      //   setSelectedAssignmentData({...selectedAssignmentData,tasks: [...selectedAssignmentData.tasks, newTask]})
+      // }
+      setSelectedAssignmentData((prev) => {
+        if (!prev || prev.id !== assignmentId) return prev;
+
+        return {
+          ...prev,
+          tasks: [...(prev.tasks ?? []), newTask],
+        };
+      });
+
     } catch (err: any) {
       console.error("handleAddTask caught error:", err);
       // optionally surface to UI:
@@ -330,91 +334,91 @@ const handleAddTask = useCallback(
      
       )
   const updateTask = useCallback(
-    (taskId: string, updates: Partial<Task>) => {
-      if (!selectedAssignmentData) {
-        return
+  async (taskId: string, updates: Partial<Task>) => {
+    if (!selectedAssignmentData) return;
+
+    try {
+      // 1. Send the update to your backend
+      const res = await fetch(`/api/tasks/${taskId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates),
+      });
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(errText || `Status ${res.status}`);
       }
 
-      setSelectedAssignmentData((prevData) => {
-        if (!prevData) return null
+      // 2. Get the saved task back
+      const updatedTask: Task = await res.json();
 
-        const taskExists = prevData.tasks.some((t) => t.id === taskId)
-        if (!taskExists) return prevData
+      // 3. Merge it into both pieces of state
+      setSelectedAssignmentData((prev) => {
+        if (!prev) return null;
+        const updatedTasks = prev.tasks.map((t) =>
+          t.id === taskId ? updatedTask : t
+        );
+        const updatedAssignment = { ...prev, tasks: updatedTasks };
+        setAssignments((all) =>
+          all.map((a) => (a.id === updatedAssignment.id ? updatedAssignment : a))
+        );
+        return updatedAssignment;
+      });
+    } catch (err: any) {
+      console.error("Failed to save task:", err);
+      setError("Couldn’t save changes to the task.");
+    }
+  },
+  [selectedAssignmentData]
+);
 
-        //NOTE: Can probs just update the task itself with partials, rather than update via updating assignment lol
-        const updatedTasks: Task[] = prevData.tasks.map((t) =>
-          t.id === taskId
-            ? {
-                ...t,
-                ...updates,
-              }
-            : t,
-        )
 
-        const updatedAssignment: Assignment = {
-          ...prevData,
-          tasks: updatedTasks,
-        }
-
-        setAssignments((prev) => prev.map((a) => (a.id === updatedAssignment.id ? updatedAssignment : a)))
-
-        return updatedAssignment
-      })
-    },
-    [selectedAssignmentData],
-  )
 
   // TODO: use handleUpdateAssignment to simply update the tasks existing in the assignment
   const deleteTask = useCallback(
-    (taskId: string) => {
-      if (!selectedAssignmentData) {
-        return
-      }
+  async (taskId: string) => {
+    if (!selectedAssignmentData) return;
 
+    console.log("Attempting to delete task");
+
+    try {
+      const res = await toast.promise(
+        fetch(`/api/tasks/${taskId}`, {
+          method: "DELETE",
+        }),
+        {
+          loading: "Deleting task...",
+          success: "Task deleted!",
+          error: "Failed to delete task",
+        }
+      );
+
+      if (!res.ok) throw new Error("Task delete failed");
+
+      // Update state after successful deletion
       setSelectedAssignmentData((prevData) => {
-        if (!prevData) return null
+        if (!prevData) return null;
 
-        const taskExists = prevData.tasks.some((t) => t.id === taskId)
-        if (!taskExists) return prevData
-
-        const updatedTasks = selectedAssignmentData.tasks.filter((t) => t.id !== taskId)
+        const updatedTasks = prevData.tasks.filter((t) => t.id !== taskId);
 
         const updatedAssignment: Assignment = {
           ...prevData,
           tasks: updatedTasks,
-        }
+        };
 
-        setAssignments((prev) => prev.map((a) => (a.id === updatedAssignment.id ? updatedAssignment : a)))
+        setAssignments((prev) =>
+          prev.map((a) => (a.id === updatedAssignment.id ? updatedAssignment : a))
+        );
 
-        return updatedAssignment
-      })
-    },
-    [selectedAssignmentData],
-  )
-
-  // OLD FUNCTION | KEEPING JUST INCASE
-  // const handleUpdateAssignment = useCallback(async (updatedAssignment: Assignment) => {
-  //   try {
-  //     const res = await fetch(`/api/assignments/${updatedAssignment.id}`, {
-  //       method: "PUT",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify(updatedAssignment),
-  //     });
-
-  //     if (!res.ok) throw new Error("Failed to update assignment");
-
-  //     const updated = await res.json();
-
-  //     setAssignments((prev) =>
-  //       prev.map((assignment) => assignment.id === updated.id ? updated : assignment)
-  //     );
-  //     if (selectedAssignmentData?.id === updated.id) {
-  //       setSelectedAssignmentData(updated);
-  //     }
-  //   } catch (err) {
-  //     console.error(err);
-  //   }
-  // }, [selectedAssignmentData]);
+        return updatedAssignment;
+      });
+    } catch (err) {
+      console.error("Error deleting task:", err);
+      setError("Could not delete task.");
+    }
+  },
+  [selectedAssignmentData]
+);
 
   // Rows data for rendering
   const rows = useMemo(
