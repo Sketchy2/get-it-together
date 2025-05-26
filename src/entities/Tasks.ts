@@ -50,8 +50,11 @@ export class Task {
   @ManyToOne(() => UserEntity, (user) => user.id)
   createdByUser!: Relation<UserEntity>;
 
-  @ManyToOne(() => Assignment, (assignment) => assignment.tasks)
+  @ManyToOne(() => Assignment, (assignment) => assignment.tasks, {
+    onDelete: "CASCADE",
+  })
   assignment!: Relation<Assignment>;
+
 
   @OneToMany(() => TaskAssignee, (taskAssignee) => taskAssignee.task)
   assignees: TaskAssignee[];

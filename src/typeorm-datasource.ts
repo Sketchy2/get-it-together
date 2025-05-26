@@ -24,7 +24,7 @@ export const typeormOptions = {
   ssl: true,
   timeTravelQueries: false,
   extra: { options: routingId },
-  synchronize: true,
+  synchronize: false,
   logging: ["query", "error"] as const,
   entities: [
     UserEntity,

@@ -322,17 +322,35 @@ const handleAddTask = useCallback(
 
 
   const handleDeleteAssignment = useCallback(
-    async (assignID: string) => {
-      // DO DB SHIT HERE
+  async (assignID: string) => {
+    try {
+      const res = await toast.promise(
+        fetch(`/api/assignments/${assignID}`, {
+          method: "DELETE",
+        }),
+        {
+          loading: "Deleting assignment...",
+          success: "Assignment deleted!",
+          error: "Failed to delete assignment",
+        }
+      );
 
-      // REMOVE ASSIGNMENT FROM VIEW AND CLOSE PANEL
-      handleCloseModal()
-      setSelectedAssignmentData(null)
-      setAssignments(assignments.filter((assignment => assignment.id !== assignID)))
+      if (!res.ok) throw new Error("Failed to delete assignment");
 
-    },[assignments,selectedAssignmentData]
-     
-      )
+      // Cleanup state
+      handleCloseModal();
+      setSelectedAssignmentData(null);
+      setAssignments(prev =>
+        prev.filter((assignment) => assignment.id !== assignID)
+      );
+    } catch (err) {
+      console.error("Error deleting assignment:", err);
+      setError("Could not delete assignment.");
+    }
+  },
+  [assignments]
+);
+
   const updateTask = useCallback(
   async (taskId: string, updates: Partial<Task>) => {
     if (!selectedAssignmentData) return;

@@ -16,8 +16,11 @@ import {
     @PrimaryGeneratedColumn()
     id: number;
   
-    @ManyToOne(() => Assignment, (assignment) => assignment.assignees)
-    assignment!: Relation<Assignment>;
+  @ManyToOne(() => Assignment, (assignment) => assignment.assignees, {
+    onDelete: "CASCADE"
+  })
+  assignment!: Relation<Assignment>;
+
   
     @ManyToOne(() => UserEntity, { onDelete: "CASCADE" })
     user: Relation<UserEntity>;

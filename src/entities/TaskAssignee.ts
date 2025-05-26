@@ -11,6 +11,7 @@ export class TaskAssignee {
   @ManyToOne(() => Task, (task) => task.assignees, { onDelete: "CASCADE" })
   task: Relation<Task>;
 
+  
   @ManyToOne(() => UserEntity, (UserEntity) => UserEntity.taskAssignees, { onDelete: "CASCADE" })
   user: Relation<UserEntity>;
 }
